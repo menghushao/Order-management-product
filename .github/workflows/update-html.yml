@@ -1,0 +1,25 @@
+name: Update HTML from Issue
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  update-file:
+    runs-on: ubuntu-latest
+    if: startsWith(github.event.issue.title, '📝 html update:')
+    steps:
+      - name: Get repo
+        uses: actions/checkout@v3
+
+      - name: Update index.html
+        run: |
+          echo "${{ github.event.issue.body }}" | base64 --decode > index.html
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "auto-update via issue trigger"
+          git push
