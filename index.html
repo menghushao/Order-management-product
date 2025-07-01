@@ -2,12 +2,13 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
-  <title>固定結構 Excel Grid</title>
+  <title>Excel-like Grid</title>
   <style>
     body { font-family: sans-serif; padding: 20px; }
     table { border-collapse: collapse; }
     th, td {
-      border: 1px solid #ccc; min-width: 60px; height: 24px; text-align: center;
+      border: 1px solid #ccc;
+      min-width: 60px; height: 24px; text-align: center;
     }
     th { background: #eee; position: sticky; top: 0; z-index: 2; }
     th:first-child, td:first-child {
@@ -19,11 +20,11 @@
 </head>
 <body>
 
-<h3>表格資料庫（106 × 50）</h3>
+<h3>Excel Grid（106 × 50）</h3>
 <button onclick="save()">💾 儲存（覆蓋 index.html）</button>
 <table id="grid">
-  <thead><tr id="theadRow"><th></th></tr></thead>
-  <tbody id="tbody"></tbody>
+  <thead><tr><th></th></tr></thead>
+  <tbody></tbody>
 </table>
 
 <script>
@@ -33,10 +34,10 @@ const repo = 'Order-management';
 const path = 'index.html';
 const branch = 'main';
 
-const theadRow = document.getElementById('theadRow');
-const tbody = document.getElementById('tbody');
+const thead = document.querySelector('#grid thead tr');
+const tbody = document.querySelector('#grid tbody');
 
-// 產生表頭
+// 產生欄位標籤
 for (let c = 0; c < COLS; c++) {
   let label = '', n = c;
   while (n >= 0) {
@@ -45,10 +46,10 @@ for (let c = 0; c < COLS; c++) {
   }
   const th = document.createElement('th');
   th.textContent = label;
-  theadRow.appendChild(th);
+  thead.appendChild(th);
 }
 
-// 建立固定表格內容
+// 產生內容列
 for (let r = 0; r < ROWS; r++) {
   const tr = document.createElement('tr');
   const rowTh = document.createElement('th');
@@ -62,64 +63,42 @@ for (let r = 0; r < ROWS; r++) {
   tbody.appendChild(tr);
 }
 
-// 儲存功能（僅取格子資料填入靜態頁面）
+// 儲存按鈕事件
 async function save() {
-  const token = prompt("請輸入 GitHub Token（僅限當次）");
+  const token = prompt("請輸入 GitHub Token（不會儲存）");
   if (!token) return;
 
-  const values = [...tbody.rows].map(tr =>
-    [...tr.cells].slice(1).map(td => td.textContent.trim())
-  );
+  const html = document.documentElement.outerHTML;
+  const content = btoa(unescape(encodeURIComponent(html)));
 
-  // 產出 JS 初始化片段
-  const dataScript = `<script>const gridData = ${JSON.stringify(values)};<\/script>`;
-
-  // 建立更新後的 HTML 內容（保留整體樣式與程式碼）
-  const doc = document.documentElement.cloneNode(true);
-  doc.querySelector('script')?.remove(); // 移除舊資料腳本
-  const newScript = document.createElement('script');
-  newScript.innerHTML = `const gridData = ${JSON.stringify(values)};` +
-    `for(let r=0;r<${ROWS};r++)for(let c=0;c<${COLS};c++)tbody.rows[r].cells[c+1].textContent=gridData[r][c];`;
-  doc.body.appendChild(newScript);
-
-  const html = '<!DOCTYPE html>\n' + doc.outerHTML;
-  const encoded = btoa(unescape(encodeURIComponent(html)));
-
-  // 取得 SHA 並 PUT 更新
-  const url = `https://api.github.com/repos/${user}/${repo}/contents/${path}`;
-  const res = await fetch(`${url}?ref=${branch}`, {
+  const getURL = `https://api.github.com/repos/${user}/${repo}/contents/${path}?ref=${branch}`;
+  const res = await fetch(getURL, {
     headers: { Authorization: `Bearer ${token}` }
   });
-  const { sha } = await res.json();
+  const info = await res.json();
+  const sha = info.sha;
 
-  const update = await fetch(url, {
+  const putURL = `https://api.github.com/repos/${user}/${repo}/contents/${path}`;
+  const update = await fetch(putURL, {
     method: 'PUT',
     headers: {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      message: '更新格子內容（固定 106x50）',
-      content: encoded,
+      message: '更新 index.html',
+      content: content,
       sha,
       branch
     })
   });
 
-  alert(update.ok ? '✅ 已儲存！' : '❌ 儲存失敗');
-}
-</script>
-
-<!-- 儲存過的表格資料將自動寫入此 script 區塊 -->
-<script>
-if (typeof gridData !== 'undefined') {
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
-      tbody.rows[r].cells[c + 1].textContent = gridData[r][c];
-    }
+  if (update.ok) {
+    alert('✅ 儲存完成，已更新 index.html');
+  } else {
+    alert('❌ 儲存失敗');
   }
 }
 </script>
-
 </body>
 </html>
