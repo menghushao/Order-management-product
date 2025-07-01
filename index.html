@@ -1,118 +1,111 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <title>å®å¨å²å­è¡¨æ ¼å° GitHub</title>
+  <meta charset="UTF-8">
+  <title>Excel Grid 106x50</title>
   <style>
-    table { border-collapse: collapse; margin-bottom: 1em; }
-    td { border: 1px solid #999; padding: 2px; }
-    input { width: 100px; border: none; padding: 5px; }
-    textarea { width: 100%; height: 300px; font-family: monospace; }
+    body { font-family: sans-serif; padding: 20px; background: #f9f9f9; }
+    table { border-collapse: collapse; }
+    th, td {
+      border: 1px solid #ccc;
+      min-width: 60px;
+      height: 24px;
+      text-align: center;
+    }
+    th { background: #eee; position: sticky; top: 0; z-index: 2; }
+    th:first-child, td:first-child { position: sticky; left: 0; background: #f3f3f3; z-index: 1; }
+    td[contenteditable="true"]:focus { outline: 2px solid #0078D7; }
+    #saveBtn { margin: 10px 0; padding: 8px 16px; }
   </style>
 </head>
 <body>
-  <h2>è¼¸å¥è³æè¡¨æ ¼ï¼10Ã29ï¼</h2>
-  <table id="inputTable"><tbody></tbody></table>
 
-  <button onclick="exportTable()">ð é è¦½è¡¨æ ¼ç¢¼</button>
-  <button onclick="saveToGitHub()">ð¾ å²å­å° GitHub</button>
+<button id="saveBtn">儲存至 GitHub</button>
+<table id="grid">
+  <thead><tr><th></th></tr></thead>
+  <tbody></tbody>
+</table>
 
-  <h3>è¼¸åº HTML è¡¨æ ¼ç¢¼</h3>
-  <textarea id="outputArea" readonly></textarea>
+<script>
+const COLS = 50, ROWS = 106;
+const table = document.getElementById('grid');
+const theadRow = table.querySelector('thead tr');
+for (let c = 0; c < COLS; c++) {
+  let label = '';
+  let n = c;
+  while (n >= 0) {
+    label = String.fromCharCode(n % 26 + 65) + label;
+    n = Math.floor(n / 26) - 1;
+  }
+  const th = document.createElement('th');
+  th.textContent = label;
+  theadRow.appendChild(th);
+}
+const tbody = table.querySelector('tbody');
+for (let r = 0; r < ROWS; r++) {
+  const tr = document.createElement('tr');
+  const rowTh = document.createElement('th');
+  rowTh.textContent = r + 1;
+  tr.appendChild(rowTh);
+  for (let c = 0; c < COLS; c++) {
+    const td = document.createElement('td');
+    td.contentEditable = true;
+    td.dataset.row = r;
+    td.dataset.col = c;
+    tr.appendChild(td);
+  }
+  tbody.appendChild(tr);
+}
 
-  <script>
-    const rows = 10, cols = 29;
-    const tbody = document.getElementById('inputTable').querySelector('tbody');
+function getTableData() {
+  const data = [];
+  tbody.querySelectorAll('tr').forEach(tr => {
+    const row = [];
+    tr.querySelectorAll('td').forEach(td => {
+      row.push(td.textContent.trim());
+    });
+    data.push(row);
+  });
+  return data;
+}
 
-    for (let r = 0; r < rows; r++) {
-      const tr = document.createElement('tr');
-      for (let c = 0; c < cols; c++) {
-        const td = document.createElement('td');
-        const input = document.createElement('input');
-        input.type = 'text';
-        td.appendChild(input);
-        tr.appendChild(td);
-      }
-      tbody.appendChild(tr);
-    }
+function toCSV(data) {
+  return data.map(r =>
+    r.map(v => `"${v.replace(/"/g, '""')}"`).join(',')
+  ).join('\n');
+}
 
-    function exportTable() {
-      const table = document.createElement('table');
-      table.border = 1;
-      [...tbody.rows].forEach(tr => {
-        const newTr = document.createElement('tr');
-        [...tr.cells].forEach(td => {
-          const val = td.querySelector('input').value.trim();
-          const newTd = document.createElement('td');
-          newTd.textContent = val;
-          newTr.appendChild(newTd);
-        });
-        table.appendChild(newTr);
-      });
-      document.getElementById('outputArea').value = table.outerHTML;
-      return table.outerHTML;
-    }
+document.getElementById('saveBtn').onclick = async () => {
+  const repo = '你的使用者名/你的repo名';
+  const path = 'data.csv';
+  const token = '你的 GitHub Token';
+  const branch = 'main';
+  const url = `https://api.github.com/repos/${repo}/contents/${path}`;
+  const content = btoa(unescape(encodeURIComponent(toCSV(getTableData()))));
+  const res = await fetch(url + `?ref=${branch}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  const json = await res.json();
+  const sha = json.sha;
 
-    async function saveToGitHub() {
-      const token = prompt("è«è¼¸å¥ä½ ç GitHub Tokenï¼ä¸æå²å­ï¼ï¼");
-      if (!token) return alert("â æªè¼¸å¥éé°");
+  await fetch(url, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      message: 'update data',
+      content,
+      sha,
+      branch
+    })
+  });
 
-      const settings = {
-        owner: "menghushao",
-        repo: "Order-management",
-        branch: "main",
-        path: "index.html"
-      };
+  alert('✅ 已儲存至 GitHub');
+};
 
-      const tableHTML = exportTable();
-      const apiURL = `https://api.github.com/repos/${settings.owner}/${settings.repo}/contents/${settings.path}`;
-
-      try {
-        const getResp = await fetch(`${apiURL}?ref=${settings.branch}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/vnd.github+json'
-          }
-        });
-        const getData = await getResp.json();
-        const sha = getData.sha;
-        const originHTML = atob(getData.content.replace(/\n/g, ''));
-
-        const replaced = originHTML.replace(
-          /<!-- START-TABLE -->
-<table border="1"><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td>這個屌</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></table>
-<!-- END-TABLE -->/,
-          `<!-- START-TABLE -->\n${tableHTML}\n<!-- END-TABLE -->`
-        );
-
-        const payload = {
-          message: "å®å¨æ´æ°è¡¨æ ¼",
-          content: btoa(unescape(encodeURIComponent(replaced))),
-          sha,
-          branch: settings.branch
-        };
-
-        const putResp = await fetch(apiURL, {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/vnd.github+json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
-        });
-
-        const result = await putResp.json();
-        if (result.content) {
-          alert("â è¡¨æ ¼å·²å®å¨æ´æ°ä¸ GitHubï¼");
-        } else {
-          alert("â å²å­å¤±æï¼" + (result.message || "è«æ¥ç console"));
-        }
-      } catch (err) {
-        alert("ð« å·è¡é¯èª¤ï¼è«é console æ¥çç´°ç¯");
-        console.error(err);
-      }
-    }
-  </script>
+window.getExcelGridData = getTableData;
+</script>
 </body>
 </html>
