@@ -1,15 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <title>表格資料庫（106 × 50）</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    table { border-collapse: collapse; }
+    th, td {
+      border: 1px solid #ccc;
+      min-width: 60px; height: 24px; text-align: center;
+    }
+    th { background: #eee; position: sticky; top: 0; z-index: 2; }
+    th:first-child, td:first-child {
+      position: sticky; left: 0; background: #f3f3f3; z-index: 1;
+    }
+    td:focus { outline: 2px solid #0078D7; }
+    button { margin: 10px 0; padding: 8px 16px; }
+  </style>
+</head>
+<body>
+
+<h3>表格資料庫（106 × 50）</h3>
+<button onclick="save()">💾 儲存（覆蓋 index.html）</button>
+<table id="grid">
+  <thead><tr id="theadRow"><th></th></tr></thead>
+  <tbody id="tbody"></tbody>
+</table>
+
+<script>
+const ROWS = 106, COLS = 50;
+const user = 'menghushao';
+const repo = 'Order-management';
+const path = 'index.html';
+const branch = 'main';
+
+const theadRow = document.getElementById('theadRow');
+const tbody = document.getElementById('tbody');
+
+// 產生表頭
+for (let c = 0; c < COLS; c++) {
+  let label = '', n = c;
+  while (n >= 0) {
+    label = String.fromCharCode(n % 26 + 65) + label;
+    n = Math.floor(n / 26) - 1;
+  }
+  const th = document.createElement('th');
+  th.textContent = label;
+  theadRow.appendChild(th);
+}
+
+// 建立固定表格內容
+for (let r = 0; r < ROWS; r++) {
+  const tr = document.createElement('tr');
+  const rowTh = document.createElement('th');
+  rowTh.textContent = r + 1;
+  tr.appendChild(rowTh);
+  for (let c = 0; c < COLS; c++) {
+    const td = document.createElement('td');
+    td.contentEditable = true;
+    tr.appendChild(td);
+  }
+  tbody.appendChild(tr);
+}
+
 async function save() {
   const token = prompt("請輸入 GitHub Token（僅當次使用）");
   if (!token) return;
 
-  const data = [...tbody.rows].map(tr =>
+  const values = [...tbody.rows].map(tr =>
     [...tr.cells].slice(1).map(td => td.textContent.trim())
   );
 
-  // 重新產生腳本片段
-  const newScriptContent = `
-<script>
-const gridData = ${JSON.stringify(data)};
+  const rawHTML = document.documentElement.outerHTML;
+  const pattern = /<script>\s*const gridData = .*?<\/script>/s;
+  const newScript = `<script>
+const gridData = ${JSON.stringify(values)};
 const ROWS = 106, COLS = 50;
 const tbody = document.getElementById("tbody");
 for (let r = 0; r < ROWS; r++) {
@@ -19,44 +84,52 @@ for (let r = 0; r < ROWS; r++) {
 }
 <\/script>`;
 
-  // 取得原始碼並替換舊 script 塊
-  let raw = document.documentElement.outerHTML;
-  raw = raw.replace(/<script>[^<]*gridData[^<]*<\/script>/s, newScriptContent);
-
-  const encoded = btoa(unescape(encodeURIComponent(raw)));
-
+  const updatedHTML = rawHTML.replace(pattern, newScript);
+  const encoded = btoa(unescape(encodeURIComponent(updatedHTML)));
   const url = `https://api.github.com/repos/${user}/${repo}/contents/${path}`;
-  let sha = null;
 
   try {
     const shaRes = await fetch(`${url}?ref=${branch}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
-    const shaData = await shaRes.json();
-    sha = shaData.sha;
+    const { sha } = await shaRes.json();
+
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: '📝 更新格子內容',
+        content: encoded,
+        sha,
+        branch
+      })
+    });
+
+    if (res.ok) {
+      alert('✅ 儲存成功，資料已更新！');
+    } else {
+      const err = await res.text();
+      alert('❌ 儲存失敗：' + err);
+    }
+
   } catch (e) {
-    alert("❌ 取得檔案失敗：" + e.message);
-    return;
-  }
-
-  const res = await fetch(url, {
-    method: 'PUT',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      message: '覆蓋 index.html（更新表格資料）',
-      content: encoded,
-      sha,
-      branch
-    })
-  });
-
-  if (res.ok) {
-    alert('✅ 儲存成功，頁面已更新！');
-  } else {
-    const err = await res.text();
-    alert('❌ 儲存失敗：' + err);
+    alert('❌ 發生錯誤：' + e.message);
   }
 }
+</script>
+
+<!-- 初始資料區塊：每次存檔會自動更新這裡 -->
+<script>
+const gridData = Array.from({length: 106}, () => Array(50).fill(""));
+for (let r = 0; r < ROWS; r++) {
+  for (let c = 0; c < COLS; c++) {
+    tbody.rows[r].cells[c + 1].textContent = gridData[r][c];
+  }
+}
+</script>
+
+</body>
+</html>
