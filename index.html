@@ -21,6 +21,14 @@
   <textarea id="outputArea" readonly></textarea>
 
   <script>
+    // GitHub 儲存設定
+    const settings = {
+      owner: "menghushao", // 你的 GitHub 帳號
+      repo: "Order-management", // 儲存庫名稱
+      branch: "main", // 分支
+      path: "index.html" // 要覆蓋的檔案（會整份覆蓋）
+    };
+
     const rows = 10, cols = 29;
     const tbody = document.getElementById('inputTable').querySelector('tbody');
 
@@ -54,48 +62,51 @@
     }
 
     async function saveToGitHub() {
-      const htmlContent = exportTable();
-      const settings = {
-        token: prompt("請輸入你的 GitHub Token："),
-        owner: "你的帳號名",
-        repo: "你的Repo名稱",
-        branch: "main",
-        path: "data/order-table.html"
-      };
+      const token = prompt("請輸入你的 GitHub Token：");
+      if (!token) return alert("⚠️ 請輸入有效 Token");
+
+      const contentToPush = exportTable();
       const apiURL = `https://api.github.com/repos/${settings.owner}/${settings.repo}/contents/${settings.path}`;
 
-      const getResp = await fetch(`${apiURL}?ref=${settings.branch}`, {
-        headers: {
-          Authorization: `Bearer ${settings.token}`,
-          Accept: 'application/vnd.github+json'
+      try {
+        // 先取得目前檔案 SHA
+        const getResp = await fetch(`${apiURL}?ref=${settings.branch}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/vnd.github+json'
+          }
+        });
+        const getData = await getResp.json();
+        const sha = getData.sha;
+
+        // 組成 payload 並推送
+        const payload = {
+          message: "Update via Web Editor",
+          content: btoa(unescape(encodeURIComponent(contentToPush))), // base64 encode
+          sha,
+          branch: settings.branch
+        };
+
+        const putResp = await fetch(apiURL, {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/vnd.github+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await putResp.json();
+        if (result.content) {
+          alert("✅ 成功更新 index.html！");
+        } else {
+          alert("⚠️ 儲存失敗：" + (result.message || "不明錯誤"));
+          console.error(result);
         }
-      });
-      const getData = await getResp.json();
-      const sha = getData.sha;
-
-      const payload = {
-        message: "Update via Web Editor",
-        content: btoa(unescape(encodeURIComponent(htmlContent))),
-        sha,
-        branch: settings.branch
-      };
-
-      const putResp = await fetch(apiURL, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${settings.token}`,
-          Accept: 'application/vnd.github+json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      const result = await putResp.json();
-      if (result.content) {
-        alert("✅ 成功更新 GitHub 檔案！");
-      } else {
-        alert("⚠️ 發生錯誤：" + (result.message || "請檢查權限與設定"));
-        console.error(result);
+      } catch (err) {
+        alert("❌ 發生例外錯誤");
+        console.error(err);
       }
     }
   </script>
