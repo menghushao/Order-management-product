@@ -3432,5 +3432,58 @@ body { margin-left: 0.7in; margin-right: 0.7in; margin-top: 0.75in; margin-botto
           </tr>
         </tbody>
     </table>
+<script>
+  (function () {
+    const table = document.querySelector('table');
+    const rows = table.querySelectorAll('tbody tr');
+    const orderData = [];
+
+    let currentCategory = null;
+
+    rows.forEach(row => {
+      const cells = Array.from(row.querySelectorAll('td'));
+      if (cells.length >= 4) {
+        // 抓取分類：rowspan 儲存格
+        if (cells[0].hasAttribute('rowspan')) {
+          currentCategory = cells[0].textContent.trim();
+        }
+
+        const item = {
+          分類: currentCategory,
+          名稱: cells[1]?.textContent.trim() || "",
+          簡稱: cells[2]?.textContent.trim() || "",
+          成本: parseFloat(cells[3]?.textContent.trim()) || 0,
+          附屬: cells.slice(4, 14).map(td => td.textContent.trim()),
+          售價: {}
+        };
+
+        // 售價從第 14 欄開始（含現金、LINE Pay…）
+        const channelNames = Array.from(table.querySelectorAll('tr'))[1]
+          ?.querySelectorAll('td')
+          ?? [];
+
+        for (let i = 14; i < cells.length - 1; i++) {
+          const name = channelNames[i - 14]?.textContent.trim() || `通路${i - 13}`;
+          const value = cells[i]?.textContent.trim();
+          if (value) {
+            const num = parseFloat(value);
+            if (!isNaN(num)) item.售價[name] = num;
+          }
+        }
+
+        if (item.名稱) orderData.push(item);
+      }
+    });
+
+    window.orderData = orderData;
+
+    // 開放 postMessage 接收方抓資料
+    window.addEventListener("message", e => {
+      if (e.data === "getOrderData") {
+        e.source.postMessage({ type: "orderData", data: window.orderData }, e.origin);
+      }
+    });
+  })();
+</script>
   </body>
 </html>
