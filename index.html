@@ -2,25 +2,26 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
-  <title>Excel Grid</title>
+  <title>Excel-like Grid</title>
   <style>
     body { font-family: sans-serif; padding: 20px; }
     table { border-collapse: collapse; }
     th, td {
-      border: 1px solid #ccc; min-width: 60px; height: 24px; text-align: center;
+      border: 1px solid #ccc;
+      min-width: 60px; height: 24px; text-align: center;
     }
     th { background: #eee; position: sticky; top: 0; z-index: 2; }
     th:first-child, td:first-child {
       position: sticky; left: 0; background: #f3f3f3; z-index: 1;
     }
     td:focus { outline: 2px solid #0078D7; }
-    #saveBtn { margin: 10px 0; padding: 8px 16px; }
+    button { margin: 10px 0; padding: 8px 16px; }
   </style>
 </head>
 <body>
 
-<h2>Excel Grid 50 × 106</h2>
-<button id="saveBtn">💾 儲存</button>
+<h3>Excel Grid（106 × 50）</h3>
+<button onclick="save()">💾 儲存（覆蓋 index.html）</button>
 <table id="grid">
   <thead><tr><th></th></tr></thead>
   <tbody></tbody>
@@ -28,10 +29,15 @@
 
 <script>
 const ROWS = 106, COLS = 50;
-const user = 'menghushao', repo = 'Order-management';
+const user = 'menghushao';
+const repo = 'Order-management';
+const path = 'index.html';
+const branch = 'main';
+
 const thead = document.querySelector('#grid thead tr');
 const tbody = document.querySelector('#grid tbody');
 
+// 產生欄位標籤
 for (let c = 0; c < COLS; c++) {
   let label = '', n = c;
   while (n >= 0) {
@@ -43,6 +49,7 @@ for (let c = 0; c < COLS; c++) {
   thead.appendChild(th);
 }
 
+// 產生內容列
 for (let r = 0; r < ROWS; r++) {
   const tr = document.createElement('tr');
   const rowTh = document.createElement('th');
@@ -56,34 +63,42 @@ for (let r = 0; r < ROWS; r++) {
   tbody.appendChild(tr);
 }
 
-function getHTML() {
-  return document.documentElement.outerHTML;
-}
-
-document.getElementById('saveBtn').onclick = async () => {
-  const html = getHTML();
-  const b64 = btoa(unescape(encodeURIComponent(html)));
-  const token = prompt("請輸入你的 GitHub Token（僅在本地執行）");
+// 儲存按鈕事件
+async function save() {
+  const token = prompt("請輸入 GitHub Token（不會儲存）");
   if (!token) return;
 
-  const res = await fetch(`https://api.github.com/repos/${user}/${repo}/issues`, {
-    method: 'POST',
+  const html = document.documentElement.outerHTML;
+  const content = btoa(unescape(encodeURIComponent(html)));
+
+  const getURL = `https://api.github.com/repos/${user}/${repo}/contents/${path}?ref=${branch}`;
+  const res = await fetch(getURL, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  const info = await res.json();
+  const sha = info.sha;
+
+  const putURL = `https://api.github.com/repos/${user}/${repo}/contents/${path}`;
+  const update = await fetch(putURL, {
+    method: 'PUT',
     headers: {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      title: `📝 html update: ${new Date().toISOString()}`,
-      body: b64
+      message: '更新 index.html',
+      content: content,
+      sha,
+      branch
     })
   });
 
-  if (res.ok) {
-    alert('✅ 已送出儲存請求（幾秒後自動更新 index.html）');
+  if (update.ok) {
+    alert('✅ 儲存完成，已更新 index.html');
   } else {
-    alert('❌ 發送失敗：' + res.status);
+    alert('❌ 儲存失敗');
   }
-};
+}
 </script>
 </body>
 </html>
