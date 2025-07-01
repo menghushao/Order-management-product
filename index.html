@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <title>Excel Grid 106x50</title>
+  <meta charset="UTF-8" />
+  <title>Excel Grid</title>
   <style>
     body { font-family: sans-serif; padding: 20px; background: #f9f9f9; }
     table { border-collapse: collapse; }
@@ -28,11 +28,15 @@
 
 <script>
 const COLS = 50, ROWS = 106;
-const table = document.getElementById('grid');
-const theadRow = table.querySelector('thead tr');
+const repo = '你的帳號/你的儲存庫';
+const path = 'data.csv';
+const token = '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';
+const branch = 'main';
+
+// 產生標頭 A~AX
+const theadRow = document.querySelector('#grid thead tr');
 for (let c = 0; c < COLS; c++) {
-  let label = '';
-  let n = c;
+  let label = '', n = c;
   while (n >= 0) {
     label = String.fromCharCode(n % 26 + 65) + label;
     n = Math.floor(n / 26) - 1;
@@ -41,7 +45,9 @@ for (let c = 0; c < COLS; c++) {
   th.textContent = label;
   theadRow.appendChild(th);
 }
-const tbody = table.querySelector('tbody');
+
+// 產生列資料
+const tbody = document.querySelector('#grid tbody');
 for (let r = 0; r < ROWS; r++) {
   const tr = document.createElement('tr');
   const rowTh = document.createElement('th');
@@ -58,51 +64,49 @@ for (let r = 0; r < ROWS; r++) {
 }
 
 function getTableData() {
-  const data = [];
-  tbody.querySelectorAll('tr').forEach(tr => {
-    const row = [];
-    tr.querySelectorAll('td').forEach(td => {
-      row.push(td.textContent.trim());
-    });
-    data.push(row);
-  });
-  return data;
+  return [...tbody.querySelectorAll('tr')].map(tr =>
+    [...tr.querySelectorAll('td')].map(td =>
+      td.textContent.trim()
+    )
+  );
 }
 
 function toCSV(data) {
-  return data.map(r =>
-    r.map(v => `"${v.replace(/"/g, '""')}"`).join(',')
+  return data.map(row =>
+    row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',')
   ).join('\n');
 }
 
 document.getElementById('saveBtn').onclick = async () => {
-  const repo = '你的使用者名/你的repo名';
-  const path = 'data.csv';
-  const token = '你的 GitHub Token';
-  const branch = 'main';
   const url = `https://api.github.com/repos/${repo}/contents/${path}`;
   const content = btoa(unescape(encodeURIComponent(toCSV(getTableData()))));
-  const res = await fetch(url + `?ref=${branch}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  const json = await res.json();
-  const sha = json.sha;
 
-  await fetch(url, {
-    method: 'PUT',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      message: 'update data',
-      content,
-      sha,
-      branch
-    })
-  });
+  try {
+    const shaRes = await fetch(`${url}?ref=${branch}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const json = await shaRes.json();
+    const sha = json.sha;
 
-  alert('✅ 已儲存至 GitHub');
+    const saveRes = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'update data.csv',
+        content,
+        sha,
+        branch
+      })
+    });
+
+    if (saveRes.ok) alert('✅ 儲存完成');
+    else alert('❌ 儲存失敗');
+  } catch (err) {
+    alert('❌ 發生錯誤：' + err.message);
+  }
 };
 
 window.getExcelGridData = getTableData;
