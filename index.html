@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>安全儲存表格到 GitHub</title>
+  <title>å®å¨å²å­è¡¨æ ¼å° GitHub</title>
   <style>
     table { border-collapse: collapse; margin-bottom: 1em; }
     td { border: 1px solid #999; padding: 2px; }
@@ -11,13 +11,13 @@
   </style>
 </head>
 <body>
-  <h2>輸入資料表格（10×29）</h2>
+  <h2>è¼¸å¥è³æè¡¨æ ¼ï¼10Ã29ï¼</h2>
   <table id="inputTable"><tbody></tbody></table>
 
-  <button onclick="exportTable()">📄 預覽表格碼</button>
-  <button onclick="saveToGitHub()">💾 儲存到 GitHub</button>
+  <button onclick="exportTable()">ð é è¦½è¡¨æ ¼ç¢¼</button>
+  <button onclick="saveToGitHub()">ð¾ å²å­å° GitHub</button>
 
-  <h3>輸出 HTML 表格碼</h3>
+  <h3>è¼¸åº HTML è¡¨æ ¼ç¢¼</h3>
   <textarea id="outputArea" readonly></textarea>
 
   <script>
@@ -54,8 +54,8 @@
     }
 
     async function saveToGitHub() {
-      const token = prompt("請輸入你的 GitHub Token（不會儲存）：");
-      if (!token) return alert("❗ 未輸入金鑰");
+      const token = prompt("è«è¼¸å¥ä½ ç GitHub Tokenï¼ä¸æå²å­ï¼ï¼");
+      if (!token) return alert("â æªè¼¸å¥éé°");
 
       const settings = {
         owner: "menghushao",
@@ -79,12 +79,14 @@
         const originHTML = atob(getData.content.replace(/\n/g, ''));
 
         const replaced = originHTML.replace(
-          /<!-- START-TABLE -->[\s\S]*?<!-- END-TABLE -->/,
+          /<!-- START-TABLE -->
+<table border="1"><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td>這個屌</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></table>
+<!-- END-TABLE -->/,
           `<!-- START-TABLE -->\n${tableHTML}\n<!-- END-TABLE -->`
         );
 
         const payload = {
-          message: "安全更新表格",
+          message: "å®å¨æ´æ°è¡¨æ ¼",
           content: btoa(unescape(encodeURIComponent(replaced))),
           sha,
           branch: settings.branch
@@ -102,12 +104,12 @@
 
         const result = await putResp.json();
         if (result.content) {
-          alert("✅ 表格已安全更新上 GitHub！");
+          alert("â è¡¨æ ¼å·²å®å¨æ´æ°ä¸ GitHubï¼");
         } else {
-          alert("❌ 儲存失敗：" + (result.message || "請查看 console"));
+          alert("â å²å­å¤±æï¼" + (result.message || "è«æ¥ç console"));
         }
       } catch (err) {
-        alert("🚫 執行錯誤，請開 console 查看細節");
+        alert("ð« å·è¡é¯èª¤ï¼è«é console æ¥çç´°ç¯");
         console.error(err);
       }
     }
