@@ -1,1 +1,116 @@
-<table border="1"><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>555</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></table>
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>安全儲存表格到 GitHub</title>
+  <style>
+    table { border-collapse: collapse; margin-bottom: 1em; }
+    td { border: 1px solid #999; padding: 2px; }
+    input { width: 100px; border: none; padding: 5px; }
+    textarea { width: 100%; height: 300px; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <h2>輸入資料表格（10×29）</h2>
+  <table id="inputTable"><tbody></tbody></table>
+
+  <button onclick="exportTable()">📄 預覽表格碼</button>
+  <button onclick="saveToGitHub()">💾 儲存到 GitHub</button>
+
+  <h3>輸出 HTML 表格碼</h3>
+  <textarea id="outputArea" readonly></textarea>
+
+  <script>
+    const rows = 10, cols = 29;
+    const tbody = document.getElementById('inputTable').querySelector('tbody');
+
+    for (let r = 0; r < rows; r++) {
+      const tr = document.createElement('tr');
+      for (let c = 0; c < cols; c++) {
+        const td = document.createElement('td');
+        const input = document.createElement('input');
+        input.type = 'text';
+        td.appendChild(input);
+        tr.appendChild(td);
+      }
+      tbody.appendChild(tr);
+    }
+
+    function exportTable() {
+      const table = document.createElement('table');
+      table.border = 1;
+      [...tbody.rows].forEach(tr => {
+        const newTr = document.createElement('tr');
+        [...tr.cells].forEach(td => {
+          const val = td.querySelector('input').value.trim();
+          const newTd = document.createElement('td');
+          newTd.textContent = val;
+          newTr.appendChild(newTd);
+        });
+        table.appendChild(newTr);
+      });
+      document.getElementById('outputArea').value = table.outerHTML;
+      return table.outerHTML;
+    }
+
+    async function saveToGitHub() {
+      const token = prompt("請輸入你的 GitHub Token（不會儲存）：");
+      if (!token) return alert("❗ 未輸入金鑰");
+
+      const settings = {
+        owner: "menghushao",
+        repo: "Order-management",
+        branch: "main",
+        path: "index.html"
+      };
+
+      const tableHTML = exportTable();
+      const apiURL = `https://api.github.com/repos/${settings.owner}/${settings.repo}/contents/${settings.path}`;
+
+      try {
+        const getResp = await fetch(`${apiURL}?ref=${settings.branch}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/vnd.github+json'
+          }
+        });
+        const getData = await getResp.json();
+        const sha = getData.sha;
+        const originHTML = atob(getData.content.replace(/\n/g, ''));
+
+        const replaced = originHTML.replace(
+          /<!-- START-TABLE -->[\s\S]*?<!-- END-TABLE -->/,
+          `<!-- START-TABLE -->\n${tableHTML}\n<!-- END-TABLE -->`
+        );
+
+        const payload = {
+          message: "安全更新表格",
+          content: btoa(unescape(encodeURIComponent(replaced))),
+          sha,
+          branch: settings.branch
+        };
+
+        const putResp = await fetch(apiURL, {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/vnd.github+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await putResp.json();
+        if (result.content) {
+          alert("✅ 表格已安全更新上 GitHub！");
+        } else {
+          alert("❌ 儲存失敗：" + (result.message || "請查看 console"));
+        }
+      } catch (err) {
+        alert("🚫 執行錯誤，請開 console 查看細節");
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
