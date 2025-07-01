@@ -4,37 +4,34 @@
   <meta charset="UTF-8" />
   <title>Excel Grid</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; background: #f9f9f9; }
+    body { font-family: sans-serif; padding: 20px; }
     table { border-collapse: collapse; }
     th, td {
-      border: 1px solid #ccc;
-      min-width: 60px;
-      height: 24px;
-      text-align: center;
+      border: 1px solid #ccc; min-width: 60px; height: 24px; text-align: center;
     }
     th { background: #eee; position: sticky; top: 0; z-index: 2; }
-    th:first-child, td:first-child { position: sticky; left: 0; background: #f3f3f3; z-index: 1; }
-    td[contenteditable="true"]:focus { outline: 2px solid #0078D7; }
+    th:first-child, td:first-child {
+      position: sticky; left: 0; background: #f3f3f3; z-index: 1;
+    }
+    td:focus { outline: 2px solid #0078D7; }
     #saveBtn { margin: 10px 0; padding: 8px 16px; }
   </style>
 </head>
 <body>
 
-<button id="saveBtn">儲存至 GitHub</button>
+<h2>Excel Grid 50 × 106</h2>
+<button id="saveBtn">💾 儲存</button>
 <table id="grid">
   <thead><tr><th></th></tr></thead>
   <tbody></tbody>
 </table>
 
 <script>
-const COLS = 50, ROWS = 106;
-const repo = '你的帳號/你的儲存庫';
-const path = 'data.csv';
-const token = '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';
-const branch = 'main';
+const ROWS = 106, COLS = 50;
+const user = 'menghushao', repo = 'Order-management';
+const thead = document.querySelector('#grid thead tr');
+const tbody = document.querySelector('#grid tbody');
 
-// 產生標頭 A~AX
-const theadRow = document.querySelector('#grid thead tr');
 for (let c = 0; c < COLS; c++) {
   let label = '', n = c;
   while (n >= 0) {
@@ -43,11 +40,9 @@ for (let c = 0; c < COLS; c++) {
   }
   const th = document.createElement('th');
   th.textContent = label;
-  theadRow.appendChild(th);
+  thead.appendChild(th);
 }
 
-// 產生列資料
-const tbody = document.querySelector('#grid tbody');
 for (let r = 0; r < ROWS; r++) {
   const tr = document.createElement('tr');
   const rowTh = document.createElement('th');
@@ -56,60 +51,39 @@ for (let r = 0; r < ROWS; r++) {
   for (let c = 0; c < COLS; c++) {
     const td = document.createElement('td');
     td.contentEditable = true;
-    td.dataset.row = r;
-    td.dataset.col = c;
     tr.appendChild(td);
   }
   tbody.appendChild(tr);
 }
 
-function getTableData() {
-  return [...tbody.querySelectorAll('tr')].map(tr =>
-    [...tr.querySelectorAll('td')].map(td =>
-      td.textContent.trim()
-    )
-  );
-}
-
-function toCSV(data) {
-  return data.map(row =>
-    row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',')
-  ).join('\n');
+function getHTML() {
+  return document.documentElement.outerHTML;
 }
 
 document.getElementById('saveBtn').onclick = async () => {
-  const url = `https://api.github.com/repos/${repo}/contents/${path}`;
-  const content = btoa(unescape(encodeURIComponent(toCSV(getTableData()))));
+  const html = getHTML();
+  const b64 = btoa(unescape(encodeURIComponent(html)));
+  const token = prompt("請輸入你的 GitHub Token（僅在本地執行）");
+  if (!token) return;
 
-  try {
-    const shaRes = await fetch(`${url}?ref=${branch}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    const json = await shaRes.json();
-    const sha = json.sha;
+  const res = await fetch(`https://api.github.com/repos/${user}/${repo}/issues`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      title: `📝 html update: ${new Date().toISOString()}`,
+      body: b64
+    })
+  });
 
-    const saveRes = await fetch(url, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        message: 'update data.csv',
-        content,
-        sha,
-        branch
-      })
-    });
-
-    if (saveRes.ok) alert('✅ 儲存完成');
-    else alert('❌ 儲存失敗');
-  } catch (err) {
-    alert('❌ 發生錯誤：' + err.message);
+  if (res.ok) {
+    alert('✅ 已送出儲存請求（幾秒後自動更新 index.html）');
+  } else {
+    alert('❌ 發送失敗：' + res.status);
   }
 };
-
-window.getExcelGridData = getTableData;
 </script>
 </body>
 </html>
