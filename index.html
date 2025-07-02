@@ -43,23 +43,37 @@
 <script>
   document.body.classList.add("locked");
 
-  const TOKEN_TAG = "entry-token";
+  const TAG = "entry-token";
   const now = Date.now();
-  const record = JSON.parse(localStorage.getItem(TOKEN_TAG) || "null");
+  const cached = JSON.parse(localStorage.getItem(TAG) || "null");
 
-  if (record && record.token && now < record.expiry) {
+  if (cached && cached.token && now < cached.expires) {
     document.body.classList.remove("locked");
   } else {
-    const token = prompt("🔐 請輸入金鑰（例如 GitHub Token）");
+    const token = prompt("🔐 請輸入 GitHub Token 以進入頁面");
+
     if (!token) {
       alert("❌ 未輸入金鑰，拒絕進入");
       location.href = "about:blank";
     } else {
-      localStorage.setItem(TOKEN_TAG, JSON.stringify({
-        token: token.trim(),
-        expiry: now + 24 * 60 * 60 * 1000
-      }));
-      document.body.classList.remove("locked");
+      fetch("https://api.github.com/user", {
+        headers: { Authorization: "Bearer " + token.trim() }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Invalid");
+        return res.json();
+      })
+      .then(user => {
+        localStorage.setItem(TAG, JSON.stringify({
+          token: token.trim(),
+          expires: now + 24 * 60 * 60 * 1000
+        }));
+        document.body.classList.remove("locked");
+      })
+      .catch(() => {
+        alert("❌ 金鑰無效，拒絕進入");
+        location.href = "about:blank";
+      });
     }
   }
 </script>
@@ -74,7 +88,7 @@
 
 <script>
 document.getElementById('logoutBtn').addEventListener('click', () => {
-  if (confirm("確定要登出金鑰並重新驗證？")) {
+  if (confirm("是否要登出金鑰並重新驗證？")) {
     localStorage.removeItem("entry-token");
     location.reload();
   }
@@ -146,7 +160,6 @@ tbody.addEventListener('mouseover', e => {
   theadRow.cells[colIndex].classList.add('hover-col');
   tbody.rows[rowIndex].cells[0].classList.add('hover-row');
 });
-
 tbody.addEventListener('mouseout', clearHighlight);
 function clearHighlight() {
   document.querySelectorAll('.hover-col, .hover-row').forEach(el =>
