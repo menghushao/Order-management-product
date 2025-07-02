@@ -26,11 +26,20 @@
     td.hover-row, th.hover-row { background-color: #fff4cc !important; }
 
     body.locked { display: none; }
+
+    #logoutBtn {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: #eee;
+      border: 1px solid #ccc;
+      padding: 4px 8px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
 
-<!-- 🔐 使用者輸入金鑰（不寫死）並暫存 24 小時 -->
 <script>
   document.body.classList.add("locked");
 
@@ -57,12 +66,21 @@
 
 <h3>表格資料庫（106 × 50）</h3>
 <button onclick="save()">💾 儲存（覆蓋 index.html）</button>
+<button id="logoutBtn">🔓 登出金鑰</button>
 <table id="grid">
   <thead><tr id="theadRow"><th></th></tr></thead>
   <tbody id="tbody"></tbody>
 </table>
 
-<!-- 🔰 gridData 初始 -->
+<script>
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  if (confirm("確定要登出金鑰並重新驗證？")) {
+    localStorage.removeItem("entry-token");
+    location.reload();
+  }
+});
+</script>
+
 <script>
 const gridData = Array.from({ length: 106 }, () => Array(50).fill(""));
 // @@gridData@@
@@ -78,7 +96,6 @@ const branch = 'main';
 const theadRow = document.getElementById('theadRow');
 const tbody = document.getElementById('tbody');
 
-// 建立表頭
 for (let c = 0; c < COLS; c++) {
   let label = '', n = c;
   while (n >= 0) {
@@ -90,7 +107,6 @@ for (let c = 0; c < COLS; c++) {
   theadRow.appendChild(th);
 }
 
-// 建立表格
 for (let r = 0; r < ROWS; r++) {
   const tr = document.createElement('tr');
   const rowTh = document.createElement('th');
@@ -104,7 +120,6 @@ for (let r = 0; r < ROWS; r++) {
   tbody.appendChild(tr);
 }
 
-// 讀取 gridData
 for (let r = 0; r < ROWS; r++) {
   for (let c = 0; c < COLS; c++) {
     const val = (gridData[r] && gridData[r][c]) || "";
@@ -112,7 +127,6 @@ for (let r = 0; r < ROWS; r++) {
   }
 }
 
-// 十字高亮
 tbody.addEventListener('mouseover', e => {
   if (e.target.tagName !== 'TD') return;
   const td = e.target;
@@ -132,6 +146,7 @@ tbody.addEventListener('mouseover', e => {
   theadRow.cells[colIndex].classList.add('hover-col');
   tbody.rows[rowIndex].cells[0].classList.add('hover-row');
 });
+
 tbody.addEventListener('mouseout', clearHighlight);
 function clearHighlight() {
   document.querySelectorAll('.hover-col, .hover-row').forEach(el =>
@@ -139,13 +154,11 @@ function clearHighlight() {
   );
 }
 
-// ✅ 離開前警告
 window.addEventListener("beforeunload", function (e) {
   e.preventDefault();
   e.returnValue = '';
 });
 
-// ✅ 儲存功能
 async function save() {
   const token = prompt("請輸入 GitHub Token");
   if (!token) return;
