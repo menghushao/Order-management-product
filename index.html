@@ -28,7 +28,15 @@
   </style>
 </head>
 <body>
-
+<script>
+  const correctKey = "abc123";
+  const userInput = prompt("🔐 請輸入金鑰進入本頁面");
+  if (userInput !== correctKey) {
+    alert("❌ 金鑰錯誤，拒絕進入");
+    document.body.innerHTML = "<h2 style='color:red;'>拒絕存取：金鑰錯誤</h2>";
+    throw new Error("Unauthorized access – page halted.");
+  }
+</script>
 <h3>表格資料庫（106 × 50）</h3>
 <button onclick="save()">💾 儲存（覆蓋 index.html）</button>
 <table id="grid">
