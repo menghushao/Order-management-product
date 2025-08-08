@@ -66,9 +66,9 @@
       })
       .then(user => {
         localStorage.setItem(TAG, JSON.stringify({
-          token: token.trim(),
-          expires: now + 24 * 60 * 60 * 1000
-        }));
+  token: token.trim()
+}));
+
         document.body.classList.remove("locked");
       })
       .catch(() => {
