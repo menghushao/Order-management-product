@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
-  <title>Excel Grid 106×50 — 資料庫 V1.00.02</title>
+  <title>Excel Grid 106×50 — 資料庫 V1.00.05</title>
   <style>
     body { font-family: sans-serif; padding: 20px; }
     table { border-collapse: collapse; }
@@ -79,7 +79,7 @@
   }
 </script>
 
-<h3>表格資料庫（106 × 50）V1.00.02</h3>
+<h3>表格資料庫（106 × 50）V1.00.05</h3>
 <button onclick="save()">💾 儲存（覆蓋 index.html + 加密 gridData.json）</button>
 <button id="logoutBtn">🔓 登出金鑰</button>
 <table id="grid">
@@ -169,77 +169,25 @@ window.addEventListener("beforeunload", function (e) {
   e.returnValue = '';
 });
 
-
 async function save() {
-  try {
-    // 讀取 Token（同時拿來當加解密密鑰）
-    let token = prompt("請輸入 GitHub Token（同時用於加/解密與上傳）");
-    if (!token) return;
-    token = token.trim();
+  const token = prompt("請再次輸入 GitHub Token 作為加密密鑰");
+  if (!token) return;
 
-    // 擷取表格資料
-    const values = Array.from({ length: ROWS }, (_, r) =>
-      Array.from({ length: COLS }, (_, c) =>
-        (tbody.rows[r]?.cells[c + 1]?.textContent || "").trim()
-      )
-    );
+  const values = Array.from({ length: ROWS }, (_, r) =>
+    Array.from({ length: COLS }, (_, c) =>
+      (tbody.rows[r]?.cells[c + 1]?.textContent || "").trim()
+    )
+  );
+    // 更新 index.html：把 gridData 塞回碼中
+  const updatedCode = `const gridData = ${JSON.stringify(values)};\n// @@gridData@@`;
+  const sourceURL = `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${path}`;
+  const original = await fetch(sourceURL).then(r => r.text());
+  const replaced = original.replace(/const gridData = .*?\/\/ @@gridData@@/s, updatedCode);
+  const base64 = btoa(unescape(encodeURIComponent(replaced)));
 
-    // ---- 產生加密 JSON（gridData.json） ----
-    const key = CryptoJS.enc.Utf8.parse(token.slice(0, 32).padEnd(32, '0'));
-    const iv = CryptoJS.lib.WordArray.random(16);
-    const encrypted = CryptoJS.AES.encrypt(JSON.stringify(values), key, {
-      iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7
-    });
-    const encObj = { ciphertext: encrypted.ciphertext.toString(CryptoJS.enc.Base64), iv: iv.toString(CryptoJS.enc.Hex) };
-    const encBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(encObj, null, 2))));
-
-    // ---- 產生明文 JSON（gridData.plain.json；E10~E106 清空） ----
-    const plain = values.map(r => Array.isArray(r) ? r.slice() : r);
-    for (let r = 9; r <= 105 && r < plain.length; r++) {
-      if (!plain[r]) continue;
-      if (plain[r].length < 5) plain[r].length = 5;
-      plain[r][4] = '';
-    }
-    const plainObj = { data: plain };
-    const plainBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(plainObj, null, 2))));
-    const plainPath = jsonPath.replace(/\.json$/i, '.plain.json');
-
-    // ---- GitHub API ----
-    async function getSha(p){
-      const url = `https://api.github.com/repos/${user}/${repo}/contents/${p}?ref=${branch}`;
-      const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-      if (r.status === 404) return null;
-      if (!r.ok) throw new Error(`讀取 SHA 失敗: ${r.status}`);
-      const j = await r.json();
-      return j.sha || null;
-    }
-    async function put(p, base64, msg){
-      const url = `https://api.github.com/repos/${user}/${repo}/contents/${p}`;
-      const body = { message: msg, branch, content: base64 };
-      const sha = await getSha(p).catch(()=>null);
-      if (sha) body.sha = sha;
-      const r = await fetch(url, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      if (!r.ok) {
-        const t = await r.text().catch(()=>'');
-        throw new Error(`上傳 ${p} 失敗：${r.status} ${t}`);
-      }
-    }
-
-    // 寫入：加密 + 明文
-    await put(jsonPath, encBase64, `🔐 update ${jsonPath}`);
-    await put(plainPath, plainBase64, `🧾 update ${plainPath} (E10~E106 blank)`);
-
-    alert('✅ 已儲存：加密與明文（E10~E106 已清空），且不再變更本 HTML 檔');
-  } catch (err) {
-    console.error(err);
-    alert('❌ 儲存失敗：' + err.message);
-  }
-}
-
+  const metaURL = `https://api.github.com/repos/${user}/${repo}/contents/${path}?ref=${branch}`;
+  const { sha } = await fetch(metaURL, {
+    headers: { Authorization: `Bearer ${token}` }
   }).then(r => r.json());
 
   const upload = await fetch(metaURL.replace('?ref=' + branch, ''), {
@@ -306,6 +254,161 @@ async function save() {
     alert("⚠️ index.html 更新成功，但 gridData.json 儲存失敗：" + err);
   }
 }
+</script>
+
+
+<script>
+// ===== V1.00.05: Hardcoded encrypted load/save =====
+(function(){
+  // Hardcoded source/targets
+  const owner = 'menghushao';
+  const repo = 'Order-management-product';
+  const branch = 'main';
+  const jsonPath = 'gridData.json';
+  const plainPath = 'gridData.plain.json';
+  const rawURL = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${jsonPath}`;
+
+  let sessionToken = null; // keep in-memory for this session
+
+  function askTokenIfNeeded(purpose){
+    if (sessionToken && sessionToken.trim()) return sessionToken.trim();
+    const t = prompt(`🔐 請輸入 GitHub Token（用於${purpose}；同時作為加/解密金鑰）`);
+    if (!t) throw new Error('未提供 Token');
+    sessionToken = t.trim();
+    return sessionToken;
+  }
+
+  function deriveKeyStr(token){
+    return token.slice(0,32).padEnd(32,'0');
+  }
+
+  function show(msg){
+    console.log('[DB 106x50]', msg);
+    const s = document.getElementById('status');
+    if (s){ s.style.display='block'; s.textContent = msg; }
+  }
+
+  async function loadEncrypted(){
+    try{
+      const token = askTokenIfNeeded('載入加密資料');
+      show('⏳ 下載並解密：' + rawURL);
+      const res = await fetch(rawURL, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`下載失敗：HTTP ${res.status}`);
+      const enc = await res.json();
+      if (!enc || !enc.ciphertext || !enc.iv) throw new Error('檔案格式錯誤：缺少 ciphertext/iv');
+
+      const key = CryptoJS.enc.Utf8.parse(deriveKeyStr(token));
+      const iv = CryptoJS.enc.Hex.parse(enc.iv);
+      const cipherWA = CryptoJS.enc.Base64.parse(enc.ciphertext);
+      const decrypted = CryptoJS.AES.decrypt({ ciphertext: cipherWA }, key, {
+        iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7
+      }).toString(CryptoJS.enc.Utf8);
+
+      const grid = JSON.parse(decrypted);
+      if (!Array.isArray(grid)) throw new Error('解密成功但資料型態不是 2D 陣列');
+
+      // fill table
+      const tbody = document.getElementById('tbody');
+      const ROWS = tbody.rows.length;
+      const COLS = tbody.rows[0].cells.length - 1;
+      for (let r=0; r<ROWS; r++){
+        for (let c=0; c<COLS; c++){
+          const v = (grid[r] && grid[r][c]) || '';
+          tbody.rows[r].cells[c+1].textContent = v;
+        }
+      }
+      show('✅ 已載入。');
+    }catch(err){
+      console.error(err);
+      show('❌ 載入失敗：' + err.message);
+      alert('載入失敗：' + err.message);
+    }
+  }
+
+  async function githubGetSha(path, token){
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`;
+    const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+    if (r.status === 404) return null;
+    if (!r.ok) throw new Error(`讀取 SHA 失敗: HTTP ${r.status}`);
+    const j = await r.json();
+    return j.sha || null;
+  }
+
+  async function githubPut(path, contentBase64, message, token){
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+    const body = { message, branch, content: contentBase64 };
+    const sha = await githubGetSha(path, token).catch(()=>null);
+    if (sha) body.sha = sha;
+    const r = await fetch(url, {
+      method:'PUT',
+      headers:{ Authorization:`Bearer ${token}`, 'Content-Type':'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!r.ok){
+      const t = await r.text().catch(()=>'');
+      throw new Error(`上傳 ${path} 失敗：HTTP ${r.status} ${t}`);
+    }
+  }
+
+  async function save(){
+    try{
+      const token = askTokenIfNeeded('上傳');
+      const keyStr = deriveKeyStr(token);
+      // read table
+      const tbody = document.getElementById('tbody');
+      const ROWS = tbody.rows.length;
+      const COLS = tbody.rows[0].cells.length - 1;
+      const values = Array.from({length: ROWS}, (_,r)=>
+        Array.from({length: COLS}, (_,c)=>(tbody.rows[r].cells[c+1].textContent||'').trim())
+      );
+
+      // encrypted
+      const key = CryptoJS.enc.Utf8.parse(keyStr);
+      const iv = CryptoJS.lib.WordArray.random(16);
+      const encrypted = CryptoJS.AES.encrypt(JSON.stringify(values), key, {
+        iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7
+      });
+      const encObj = { ciphertext: encrypted.ciphertext.toString(CryptoJS.enc.Base64), iv: iv.toString(CryptoJS.enc.Hex) };
+      const encBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(encObj, null, 2))));
+
+      // plaintext with E10..E106 blank
+      const plain = values.map(r => Array.isArray(r) ? r.slice() : r);
+      for (let r = 9; r <= 105 && r < plain.length; r++) {
+        if (!plain[r]) continue;
+        if (plain[r].length < 5) plain[r].length = 5;
+        plain[r][4] = '';
+      }
+      const plainObj = { data: plain };
+      const plainBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(plainObj, null, 2))));
+
+      // upload
+      await githubPut(jsonPath, encBase64, `🔐 update ${jsonPath}`, token);
+      await githubPut(plainPath, plainBase64, `🧾 update ${plainPath} (E10~E106 blank)`, token);
+      show('✅ 已儲存：加密與明文（E10~E106 已清空）。');
+      alert('✅ 已儲存：加密與明文（E10~E106 已清空）。');
+    }catch(err){
+      console.error(err);
+      show('❌ 儲存失敗：' + err.message);
+      alert('❌ 儲存失敗：' + err.message);
+    }
+  }
+
+  // Wire + auto-load
+  document.addEventListener('DOMContentLoaded', ()=>{
+    // ensure status placeholder exists
+    if (!document.getElementById('status')){
+      const div = document.createElement('div');
+      div.id = 'status';
+      div.style.cssText = 'margin:8px 0;padding:8px;border-radius:8px;background:#f6f7ff;color:#333;';
+      const h3 = document.querySelector('h3');
+      (h3 && h3.parentNode ? h3.parentNode : document.body).insertBefore(div, h3.nextSibling);
+    }
+    // hook save button if present
+    document.getElementById('saveBtn')?.addEventListener('click', save);
+    // auto
+    loadEncrypted();
+  });
+})();
 </script>
 
 </body>
