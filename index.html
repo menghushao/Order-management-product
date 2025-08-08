@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
-  <title>Excel Grid 106×50</title>
+  <title>Excel Grid 106×50 — 資料庫 V1.00.01</title>
   <style>
     body { font-family: sans-serif; padding: 20px; }
     table { border-collapse: collapse; }
@@ -79,7 +79,7 @@
   }
 </script>
 
-<h3>表格資料庫（106 × 50）</h3>
+<h3>表格資料庫（106 × 50）V1.00.01</h3>
 <button onclick="save()">💾 儲存（覆蓋 index.html + 加密 gridData.json）</button>
 <button id="logoutBtn">🔓 登出金鑰</button>
 <table id="grid">
@@ -259,6 +259,176 @@ async function save() {
     alert("⚠️ index.html 更新成功，但 gridData.json 儲存失敗：" + err);
   }
 }
+</script>
+
+
+<script>
+// ===== 資料庫 V1.00.01 override =====
+(function(){
+  const TAG = "entry-token";
+
+  function getTokenSync(){
+    try{
+      const cached = JSON.parse(localStorage.getItem(TAG) || "null");
+      if (cached && cached.token && (!cached.expires || Date.now() < cached.expires)) return cached.token.trim();
+    }catch(e){}
+    return null;
+  }
+
+  async function ensureToken(){
+    let t = getTokenSync();
+    if (t) return t;
+    t = prompt("🔐 請輸入 GitHub Token（亦作為加/解密金鑰）");
+    if (!t) throw new Error("未提供金鑰");
+    localStorage.setItem(TAG, JSON.stringify({ token: t.trim(), expires: Date.now() + 7*24*60*60*1000 }));
+    return t.trim();
+  }
+
+  function getGridBody(){
+    // 嘗試抓唯一的主表格 tbody
+    const grid = document.querySelector('table');
+    const tbody = grid && grid.tBodies && grid.tBodies[0];
+    if (!tbody) throw new Error("找不到資料表格 tbody");
+    return tbody;
+  }
+
+  function readGridValues(){
+    const tbody = getGridBody();
+    const rows = Array.from(tbody.rows);
+    const ROWS = rows.length;
+    const COLS = rows[0] ? rows[0].cells.length - 1 : 0; // 第一格是行號
+    const vals = [];
+    for (let r=0; r<ROWS; r++){
+      const row = rows[r];
+      const arr = [];
+      for (let c=0; c<COLS; c++){
+        const cell = row.cells[c+1];
+        arr[c] = (cell && cell.textContent || '').trim();
+      }
+      vals[r] = arr;
+    }
+    return vals;
+  }
+
+  function fillTable(grid){
+    const tbody = getGridBody();
+    const rows = Array.from(tbody.rows);
+    for (let r=0; r<rows.length; r++){
+      const row = rows[r];
+      const COLS = row.cells.length - 1;
+      for (let c=0; c<COLS; c++){
+        const val = (grid[r] && grid[r][c]) || '';
+        row.cells[c+1].textContent = val;
+      }
+    }
+  }
+
+  async function loadEncrypted(){
+    try{
+      // 需要全域 user/repo/branch/jsonPath
+      if (typeof user!=='string' || typeof repo!=='string' || typeof branch!=='string' || typeof jsonPath!=='string'){
+        alert("設定缺失：請確認 user/repo/branch/jsonPath 已設定");
+        return;
+      }
+      const token = await ensureToken();
+      const url = `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${jsonPath}`;
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`下載加密檔失敗：${res.status}`);
+      const enc = await res.json();
+      if (!enc || !enc.ciphertext || !enc.iv) throw new Error("加密檔格式錯誤");
+
+      const key = CryptoJS.enc.Utf8.parse(token.slice(0, 32).padEnd(32, '0'));
+      const iv = CryptoJS.enc.Hex.parse(enc.iv);
+      const cipherWA = CryptoJS.enc.Base64.parse(enc.ciphertext);
+      const decrypted = CryptoJS.AES.decrypt({ ciphertext: cipherWA }, key, {
+        iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7
+      }).toString(CryptoJS.enc.Utf8);
+      const grid = JSON.parse(decrypted);
+      if (!Array.isArray(grid)) throw new Error("解密成功但資料格式非陣列");
+      fillTable(grid);
+    }catch(err){
+      console.error(err);
+      alert("⚠️ 載入加密資料失敗：" + err.message);
+    }
+  }
+
+  // 覆寫 save：上傳加密與明文（E10~E106 空白）
+  async function githubGetSha({owner, repo, path, token, branch}){
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`;
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error(`GET contents 失敗：${res.status}`);
+    const j = await res.json();
+    return j.sha || null;
+  }
+  async function githubPut({owner, repo, path, token, branch, content, message}){
+    const sha = await githubGetSha({owner, repo, path, token, branch}).catch(()=>null);
+    const body = { message, branch, content: btoa(unescape(encodeURIComponent(content))) };
+    if (sha) body.sha = sha;
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+    const res = await fetch(url, {
+      method:'PUT',
+      headers:{ Authorization:`Bearer ${token}`, 'Accept':'application/vnd.github+json' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok){
+      const t = await res.text().catch(()=>'');
+      throw new Error(`PUT ${path} 失敗：${res.status} ${t}`);
+    }
+  }
+
+  window.save = async function save(){
+    try{
+      if (typeof user!=='string' || typeof repo!=='string' || typeof branch!=='string' || typeof jsonPath!=='string'){
+        alert("設定缺失：請確認 user/repo/branch/jsonPath 已設定");
+        return;
+      }
+      const token = await ensureToken();
+      const values = readGridValues();
+
+      // 加密
+      const key = CryptoJS.enc.Utf8.parse(token.slice(0, 32).padEnd(32, '0'));
+      const iv = CryptoJS.lib.WordArray.random(16);
+      const encrypted = CryptoJS.AES.encrypt(JSON.stringify(values), key, {
+        iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7
+      });
+      const encObj = { ciphertext: encrypted.ciphertext.toString(CryptoJS.enc.Base64), iv: iv.toString(CryptoJS.enc.Hex) };
+      const encContent = JSON.stringify(encObj, null, 2);
+
+      // 明文（E10~E106 留空）
+      const plain = values.map(r => Array.isArray(r) ? r.slice() : r);
+      for (let r = 9; r <= 105 && r < plain.length; r++) {
+        if (!plain[r]) continue;
+        if (plain[r].length < 5) plain[r].length = 5;
+        plain[r][4] = '';
+      }
+      const plainObj = { data: plain };
+      const plainContent = JSON.stringify(plainObj, null, 2);
+      const plainPath = jsonPath.replace(/\.json$/i, '.plain.json');
+
+      // 上傳
+      const meta = { owner: user, repo, branch };
+      await githubPut({ ...meta, path: jsonPath, token, content: encContent, message: `🔐 update ${jsonPath}` });
+      await githubPut({ ...meta, path: plainPath, token, content: plainContent, message: `🧾 update ${plainPath} (E10~E106 blank)` });
+
+      alert("✅ 已儲存：加密與明文（E10~E106 空白）");
+    }catch(err){
+      console.error(err);
+      alert("❌ 儲存失敗：" + err.message);
+    }
+  };
+
+  // 自動載入時機：進站已解鎖、或解鎖後
+  document.addEventListener('DOMContentLoaded', () => {
+    const token = getTokenSync();
+    if (token) loadEncrypted();
+    // 監聽 locked class 移除
+    const obs = new MutationObserver(() => {
+      if (!document.body.classList.contains('locked')) loadEncrypted();
+    });
+    obs.observe(document.body, { attributes:true, attributeFilter:['class'] });
+  });
+})();
 </script>
 
 </body>
