@@ -94,6 +94,30 @@
 }
 </style>
 
+
+<style>
+/* === v1.7.1: Cart collapsed by default, toggle to open === */
+.mh-cart{
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transform: translateY(0);
+  transition: opacity .2s ease, transform .22s ease, visibility 0s linear .22s;
+}
+.mh-cart.open{
+  opacity: 1; visibility: visible; pointer-events: auto;
+  transition: opacity .2s ease, transform .22s ease, visibility 0s;
+}
+@media (max-width:1023.98px){
+  /* Mobile slide-up */
+  .mh-cart{
+    bottom:0; left:0; right:0;
+    transform: translateY(100%);
+  }
+  .mh-cart.open{
+    transform: translateY(0);
+  }
+}
+</style>
+
 </head>
 <body>
 
@@ -596,6 +620,54 @@
       const raw = await res.json(); grid = normalize(raw); buildMaps(); fillType(); placeAll();
     }catch(err){ console.error(err); alert('載入菜單資料失敗：' + (err.message||'')); }
   })();
+})();
+</script>
+
+
+<script>
+// v1.7.1: toggle cart open/close + ensure placement on open (desktop)
+(function(){
+  const cartEl = document.getElementById('mh-cart');
+  const fab = document.getElementById('mh-fab');
+  const cartFab = document.getElementById('mh-cart-fab');
+  const placeAll = window.placeAll || function(){};
+
+  function toggleCart(forceOpen){
+    if (!cartEl) return;
+    if (typeof forceOpen === 'boolean'){
+      cartEl.classList.toggle('open', forceOpen);
+    }else{
+      cartEl.classList.toggle('open');
+    }
+    if (window.matchMedia('(min-width:1024px)').matches && cartEl.classList.contains('open')){
+      placeAll();
+    }
+  }
+
+  if (cartFab){
+    cartFab.addEventListener('click', ()=> toggleCart());
+  }
+  // Optional: 點餐時同時秀出購物車（可自行關閉）
+  if (fab){
+    fab.addEventListener('click', ()=> {
+      if (window.matchMedia('(min-width:1024px)').matches){
+        // 桌面：點餐時不自動開購物車，保留你原本習慣
+      }else{
+        // 手機：點餐不動購物車，由使用者按購物車 FAB 控制
+      }
+    });
+  }
+
+  // 當加入商品時，手機自動開購物車；桌面仍維持原樣（透過按鈕控制）
+  const _addCurrent = window.addCurrent;
+  if (typeof _addCurrent === 'function'){
+    window.addCurrent = function(){
+      _addCurrent();
+      if (window.matchMedia('(max-width:1023.98px)').matches){
+        toggleCart(true);
+      }
+    }
+  }
 })();
 </script>
 
