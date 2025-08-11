@@ -235,6 +235,12 @@
 }
 </style>
 
+
+<style>
+/* v1.7.15: hide 商品B by default; only show for '雞蛋糕' */
+#mh-b-wrap{ display: none; }
+</style>
+
 </head>
 <body>
 
@@ -367,10 +373,10 @@
   </div>
 
   <div class="mh-field"><label for="mh-when">取餐/送達時間（可留空）</label><input id="mh-when" type="datetime-local" class="mh-input"></div>
-  <div class="mh-field"><label for="mh-addr">外送地址（留空＝到店取餐）</label><input id="mh-addr" type="text" class="mh-input" placeholder="台北市信義區..."></div>
+  <div class="mh-field"><label for="mh-addr">外送地址（留空＝到店取餐）</label><input id="mh-addr" type="text" class="mh-input" placeholder="苗栗市..."></div>
   <div class="mh-row-2">
-    <div class="mh-field"><label for="mh-sign">招牌</label><input id="mh-sign" type="text" class="mh-input" placeholder="例如：OO便利商店"></div>
-    <div class="mh-field"><label for="mh-name">稱呼</label><input id="mh-name" type="text" class="mh-input" placeholder="王先生 / 小美"></div>
+    <div class="mh-field"><label for="mh-sign">招牌</label><input id="mh-sign" type="text" class="mh-input" placeholder="某某機關、單位"></div>
+    <div class="mh-field"><label for="mh-name">稱呼</label><input id="mh-name" type="text" class="mh-input" placeholder="某先生 / 小姐"></div>
   </div>
   <div class="mh-field"><label for="mh-phone">電話</label><input id="mh-phone" type="tel" class="mh-input" placeholder="0912-345678"></div>
 
@@ -717,19 +723,27 @@
       return `老闆你好，我要 ${itemsText}` + (who? ` ，${who}`:'') + (whenText? ` ，預計${whenText} 取餐`:'') + `，謝謝。`;
     }
   }
-  async function copyMessage(){
+  async function copyMessage(alertText){
     const msg = buildMessage();
-    try{ await navigator.clipboard.writeText(msg); alert('訂單內容已複製到剪貼簿，可直接貼上對話視窗。'); }
-    catch(e){ const ta=document.createElement('textarea'); ta.value=msg; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); alert('已嘗試複製到剪貼簿。'); }
+    try{
+      await navigator.clipboard.writeText(msg);
+      alert(alertText || '已複製訂單。');
+    }catch(e){
+      const ta=document.createElement('textarea'); ta.value=msg; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+      alert(alertText || '已複製訂單。');
+    }
   }
-  copyBtn.addEventListener('click', copyMessage);
-  sendBtn.addEventListener('click', async ()=>{ await copyMessage(); const [t,url]=channelSel.value.split('|'); window.open(url,'_blank'); });
-
-  // Init
+  copyBtn.addEventListener('click', ()=> copyMessage('已複製訂單。'));
+  sendBtn.addEventListener('click', async ()=>{
+    await copyMessage('已複製訂單，請稍後將自動開啟通訊軟體，貼上送出即可。');
+    const [t,url]=channelSel.value.split('|');
+    window.open(url,'_blank');
+  });
+// Init
   (async function init(){
     try{
       const res = await fetch(DATA_URL, {cache:'no-store'});
-      const raw = await res.json(); grid = normalize(raw); buildMaps(); fillType(); placeDesktop(); setSubmitLabel(); renderCart();
+      const raw = await res.json(); grid = normalize(raw); buildMaps(); fillType(); fillAB(''); placeDesktop(); setSubmitLabel(); renderCart();
     }catch(err){ console.error(err); alert('載入菜單資料失敗：' + (err.message||'')); }
   })();
 })();
