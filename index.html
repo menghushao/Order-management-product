@@ -118,6 +118,24 @@
 }
 </style>
 
+
+<style>
+/* === v1.7.2: cart toggle & desktop FAB + hide inline actions on desktop === */
+#mh-cart-fab{
+  z-index: 10003; /* above the cart drawer so it's clickable */
+}
+/* Add a small collapse button in cart header */
+#mh-cart .mh-close{
+  background:#fff; border:1px solid #d9cbbb; color:#533b2a; border-radius:10px; padding:6px 8px; cursor:pointer; font-size:12px;
+}
+/* Desktop should show inline actions? No, hide to avoid duplicates */
+@media (min-width:1024px){
+  .mh-actions-inline{ display:none !important; }
+  /* Show the cart FAB on desktop too and position via JS */
+  #mh-cart-fab{ display:inline-block; }
+}
+</style>
+
 </head>
 <body>
 
@@ -241,7 +259,7 @@
 <button id="mh-cart-fab" title="開啟購物車">🧺 購物車</button>
 
 <aside id="mh-cart" class="mh-cart" aria-label="購物車">
-  <h4>購物車 <small id="mh-cart-count" class="mh-badge">0</small></h4>
+  <h4>購物車 <small id="mh-cart-count" class="mh-badge">0</small><button id="mh-cart-close" class="mh-close">收合</button></h4>
   <div id="mh-cart-list" class="mh-cart-list"></div>
   <div id="mh-cart-empty" class="mh-cart-empty">尚無品項</div>
 
@@ -668,6 +686,48 @@
       }
     }
   }
+})();
+</script>
+
+
+<script>
+// === v1.7.2: cart close button + desktop cart FAB positioning ===
+(function(){
+  const cartEl = document.getElementById('mh-cart');
+  const cartFab = document.getElementById('mh-cart-fab');
+  const closeBtn = document.getElementById('mh-cart-close');
+  const menuRoot = document.querySelector('#menu-root, main .markdown-body, main, article, .content, .post, .wrap, .container');
+
+  function placeAtMenuEdge(el, extraTop){
+    const rect = menuRoot?.getBoundingClientRect?.();
+    if (rect && window.matchMedia('(min-width:1024px)').matches){
+      el.style.left = (rect.right + 12) + 'px';
+      if (typeof extraTop === 'number') el.style.top = extraTop + 'px';
+    }
+  }
+
+  function placeDesktopFab(){
+    if (!cartFab) return;
+    if (window.matchMedia('(min-width:1024px)').matches){
+      placeAtMenuEdge(cartFab, 14);
+    }
+  }
+
+  function toggleCart(force){
+    if (!cartEl) return;
+    if (typeof force === 'boolean'){
+      cartEl.classList.toggle('open', force);
+    }else{
+      cartEl.classList.toggle('open');
+    }
+  }
+
+  cartFab && cartFab.addEventListener('click', ()=> toggleCart());
+  closeBtn && closeBtn.addEventListener('click', ()=> toggleCart(false));
+
+  window.addEventListener('resize', placeDesktopFab);
+  window.addEventListener('scroll', placeDesktopFab);
+  placeDesktopFab();
 })();
 </script>
 
