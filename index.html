@@ -1,415 +1,283 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <title>Excel Grid 106×50 — 資料庫 V1.00.05</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>萌虎燒官網 + 點餐覆蓋層 v0.2.1</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    table { border-collapse: collapse; }
-    th, td {
-      border: 1px solid #ccc;
-      min-width: 60px;
-      height: 24px;
-      text-align: center;
+    :root {
+      --bg:#0b1020;
+      --panel:#121832;
+      --muted:#9aa4c3;
+      --text:#e7ecff;
+      --brand:#5b8cff;
+      --accent:#c9ff70;
+      --card:#0e1430;
+      --line:#1f2848;
     }
-    th { background: #eee; position: sticky; top: 0; z-index: 2; }
-    th:first-child, td:first-child {
-      position: sticky;
-      left: 0;
-      background: #f3f3f3;
-      z-index: 1;
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:#000}
+    .site-wrap{ position:fixed; inset:0; }
+    .site{ position:absolute; inset:0; width:100%; height:100%; border:0; background:#000; }
+    .overlay{
+      position:fixed; inset:0; pointer-events:none; z-index:50;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "Helvetica Neue", Arial;
+      color:var(--text);
     }
-    td:focus { outline: 2px solid #0078D7; }
-    button { margin: 10px 0; padding: 8px 16px; }
-
-    td.hover-col, th.hover-col { background-color: #e0f3ff !important; }
-    td.hover-row, th.hover-row { background-color: #fff4cc !important; }
-
-    body.locked { display: none; }
-
-    #logoutBtn {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      background: #eee;
-      border: 1px solid #ccc;
-      padding: 4px 8px;
-      cursor: pointer;
+    .stack{ position:absolute; right:14px; top:14px; display:grid; gap:10px; align-items:start; }
+    .fab, .panel, .cart { pointer-events:auto; }
+    .fab{
+      justify-self:end;
+      background: linear-gradient(180deg, #6b90ff, #3a62ff);
+      color:#fff; border:0; border-radius:999px;
+      padding:10px 14px; font-size:14px; cursor:pointer;
+      box-shadow: 0 6px 28px rgba(60,100,255,.35);
     }
+    .panel{
+      position:fixed; right:-420px; top:0; height:100vh; width:400px;
+      background: linear-gradient(180deg, rgba(16,22,45,.98), rgba(16,22,45,.94));
+      border-left:1px solid rgba(255,255,255,.06);
+      box-shadow:-10px 0 40px rgba(0,0,0,.4);
+      transition:right .22s ease;
+      display:grid; grid-template-rows:auto 1fr auto;
+      overflow:hidden;
+    }
+    .panel.open{ right:0; }
+    .panel-head{ padding:12px 14px; border-bottom:1px solid rgba(255,255,255,.06); display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .panel-body{ padding:12px 14px; overflow:auto; overscroll-behavior:contain; }
+    .panel-actions{ display:flex; gap:8px; padding:12px 14px; border-top:1px solid rgba(255,255,255,.06); }
+    .btn{ padding:10px 14px; border-radius:12px; border:1px solid #2a355e; background:#0f1533; color:#e7ecff; cursor:pointer; }
+    .btn.primary{ background: linear-gradient(180deg, #6b90ff, #3a62ff); border:none; }
+    .btn.ghost{ background:transparent; }
+    label{ font-size:12px; color:var(--muted); display:block; margin:0 0 4px; }
+    select, input[type="number"] { width:100%; padding:8px 10px; border-radius:10px; border:1px solid #2a355e; background:#0c122d; color:#e7ecff; font-size:14px; }
+    .row-2{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .row-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+    .cart{
+      position:fixed; right:14px; top:64px; width:320px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:16px; padding:12px; backdrop-filter: blur(6px) saturate(120%);
+      display:grid; gap:10px; max-height: 70vh; overflow:auto;
+    }
+    .cart h4{ margin:0; font-size:15px; display:flex; align-items:center; justify-content:space-between; gap:6px; }
+    .badge { font-size:12px; padding:2px 8px; border-radius:999px; background:rgba(91,140,255,.16); color:#bcd0ff; border:1px solid #2a3c7a; }
+    .cart-empty{ color:var(--muted); font-size:13px; }
+    .cart-list{ display:grid; gap:10px; }
+    .cart-item{ border:1px solid var(--line); border-radius:12px; padding:10px; background:var(--card); display:grid; gap:8px; }
+    .top{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .name{ font-size:14px; }
+    .meta{ color:var(--muted); font-size:12px; }
+    .del{ background:transparent; border:1px solid #3a4a86; color:#b7c7ff; border-radius:10px; padding:6px 8px; cursor:pointer; }
+    .hint{ font-size:12px; color:#a7b3da; }
+    .ver{ position:fixed; left:8px; bottom:6px; font-size:12px; color:#a7b3da; }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
 </head>
 <body>
+  <div class="site-wrap">
+    <iframe class="site" src="https://menghushao.github.io/home-page/#" title="萌虎燒官網"></iframe>
+  </div>
 
-<script>
-  document.body.classList.add("locked");
+  <div class="overlay" aria-hidden="true">
+    <div class="stack">
+      <button id="orderFab" class="fab" title="打開點餐面板">🛒 點餐</button>
+      <div id="cart" class="cart">
+        <h4>購物車 <small id="cartCount" class="badge">0</small></h4>
+        <div id="cartEmpty" class="cart-empty">尚無品項</div>
+        <div id="cartList" class="cart-list" style="display:none;"></div>
+        <div class="hint">面板開啟時，把滑鼠移到左側即可滾動下層官網。</div>
+      </div>
+    </div>
 
-  const TAG = "entry-token";
-  const now = Date.now();
-  const cached = JSON.parse(localStorage.getItem(TAG) || "null");
+    <section id="orderPanel" class="panel" aria-hidden="true">
+      <div class="panel-head">
+        <strong>建立訂單小卡</strong>
+        <button id="closeOrder" class="btn ghost">關閉</button>
+      </div>
+      <div class="panel-body">
+        <div class="field">
+          <label for="typeSel">品項</label>
+          <select id="typeSel"><option value="">請選擇</option></select>
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label for="qtyInput">數量</label>
+            <input id="qtyInput" type="number" min="1" step="1" value="1" />
+          </div>
+          <div class="field">
+            <label>&nbsp;</label>
+            <div class="hint">資料來源：gridData.plain.json</div>
+          </div>
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label for="itemA">商品A</label>
+            <select id="itemA"><option value="">商品A</option></select>
+          </div>
+          <div class="field">
+            <label for="itemB">商品B</label>
+            <select id="itemB"><option value="">商品B</option></select>
+          </div>
+        </div>
+        <div class="field">
+          <label>附項（最多 6）</label>
+          <div class="row-3">
+            <select class="acc"><option value="">附</option></select>
+            <select class="acc"><option value="">附</option></select>
+            <select class="acc"><option value="">附</option></select>
+            <select class="acc"><option value="">附</option></select>
+            <select class="acc"><option value="">附</option></select>
+            <select class="acc"><option value="">附</option></select>
+          </div>
+        </div>
+      </div>
+      <div class="panel-actions">
+        <button id="addToCartBtn" class="btn primary">加入購物車</button>
+        <button id="resetOrderBtn" class="btn">清空</button>
+      </div>
+    </section>
+  </div>
 
-  if (cached && cached.token && now < cached.expires) {
-    document.body.classList.remove("locked");
-  } else {
-    const token = prompt("🔐 請輸入 GitHub Token 以進入頁面");
+  <div class="ver">v0.2.1</div>
 
-    if (!token) {
-      alert("❌ 未輸入金鑰，拒絕進入");
-      location.href = "about:blank";
-    } else {
-      fetch("https://api.github.com/user", {
-        headers: { Authorization: "Bearer " + token.trim() }
-      })
-      .then(res => {
-        if (!res.ok) throw new Error("Invalid");
-        return res.json();
-      })
-      .then(user => {
-        localStorage.setItem(TAG, JSON.stringify({
-  token: token.trim()
-}));
+  <script>
+    const PLAIN_URL = "https://raw.githubusercontent.com/menghushao/Order-management-product/main/gridData.plain.json";
 
-        document.body.classList.remove("locked");
-      })
-      .catch(() => {
-        alert("❌ 金鑰無效，拒絕進入");
-        location.href = "about:blank";
+    let grid = [];
+    let rows = [];
+    let typeToItems = new Map();
+    let itemToAccs = new Map();
+    let cart = [];
+
+    const orderFab = document.getElementById('orderFab');
+    const orderPanel = document.getElementById('orderPanel');
+    const closeOrder = document.getElementById('closeOrder');
+    const typeSel = document.getElementById('typeSel');
+    const itemASel = document.getElementById('itemA');
+    const itemBSel = document.getElementById('itemB');
+    const accSelects = Array.from(document.querySelectorAll('.acc'));
+    const qtyInput = document.getElementById('qtyInput');
+    const addToCartBtn = document.getElementById('addToCartBtn');
+    const resetOrderBtn = document.getElementById('resetOrderBtn');
+    const cartList = document.getElementById('cartList');
+    const cartEmpty = document.getElementById('cartEmpty');
+    const cartCount = document.getElementById('cartCount');
+
+    function openPanel(){ orderPanel.classList.add('open'); orderPanel.setAttribute('aria-hidden','false'); }
+    function closePanel(){ orderPanel.classList.remove('open'); orderPanel.setAttribute('aria-hidden','true'); }
+    orderFab.addEventListener('click', openPanel);
+    closeOrder.addEventListener('click', closePanel);
+
+    function opt(label, value){ const o = document.createElement('option'); o.textContent = label; o.value = value ?? label; return o; }
+    function uniq(arr){ return [...new Set(arr.filter(Boolean))]; }
+    function is2DArray(x){ return Array.isArray(x) && x.every(r => Array.isArray(r)); }
+
+    function normalizePlainData(data){
+      // Accept shapes:
+      // 1) [[...], [...]]  ← array of arrays
+      // 2) { data: [[...]] }
+      // 3) { grid: [[...]] } or { values: [[...]] }
+      if (is2DArray(data)) return data;
+      if (data && is2DArray(data.data)) return data.data;
+      if (data && is2DArray(data.grid)) return data.grid;
+      if (data && is2DArray(data.values)) return data.values;
+      throw new Error('資料格式錯誤');
+    }
+
+    function buildMaps(){
+      rows = grid.slice(10, 106); // 0-based: 11..106 → 10..105; end index exclusive → 106
+      typeToItems = new Map();
+      itemToAccs = new Map();
+
+      for(const r of rows){
+        const type = (r?.[0] || '').trim();
+        const item = (r?.[1] || '').trim();
+        if(!type || !item) continue;
+        if(!typeToItems.has(type)) typeToItems.set(type, []);
+        typeToItems.get(type).push(item);
+
+        const accs = uniq((r.slice(5,15) || []).map(x => (x||'').trim()).filter(Boolean));
+        if(accs.length) itemToAccs.set(item, accs);
+      }
+      for(const [k,v] of typeToItems.entries()) typeToItems.set(k, uniq(v));
+    }
+
+    function fillTypeSelect(){
+      typeSel.innerHTML = ''; typeSel.append(opt('請選擇',''));
+      [...typeToItems.keys()].forEach(t => typeSel.append(opt(t,t)));
+    }
+    function fillItemAB(type){
+      const items = typeToItems.get(type) || [];
+      const build = (sel, title) => { sel.innerHTML=''; sel.append(opt(title,'')); items.forEach(i => sel.append(opt(i,i))); };
+      build(itemASel, '商品A'); build(itemBSel, '商品B');
+      updateAccessoryOptions();
+    }
+    function updateAccessoryOptions(){
+      const finalProduct = itemBSel.value || itemASel.value || '';
+      const options = uniq(itemToAccs.get(finalProduct) || []);
+      accSelects.forEach(sel => {
+        const keep = sel.value;
+        sel.innerHTML=''; sel.append(opt('附',''));
+        options.forEach(x => sel.append(opt(x,x)));
+        if(keep && options.includes(keep)) sel.value = keep;
       });
     }
-  }
-</script>
+    typeSel.addEventListener('change', e => fillItemAB(e.target.value));
+    itemASel.addEventListener('change', updateAccessoryOptions);
+    itemBSel.addEventListener('change', updateAccessoryOptions);
 
-<h3>表格資料庫（106 × 50）V1.00.05</h3>
-<button onclick="save()">💾 儲存（覆蓋 index.html + 加密 gridData.json）</button>
-<button id="logoutBtn">🔓 登出金鑰</button>
-<table id="grid">
-  <thead><tr id="theadRow"><th></th></tr></thead>
-  <tbody id="tbody"></tbody>
-</table>
-
-<script>
-document.getElementById('logoutBtn').addEventListener('click', () => {
-  if (confirm("是否要登出金鑰並重新驗證？")) {
-    localStorage.removeItem("entry-token");
-    location.reload();
-  }
-});
-</script>
-
-<script>
-const gridData = [["特價標籤>","雙餡","TEST","C","D","E","F","G","H","I","J","K","L","M","N","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["特價組合數","2","3","","","","","","","","","","","","","<","集","-","點","-","活","-","動","-","支","援","付","款","-",">","","","","","","","","","","","","","","","","","","","",""],["特價金額","35","50","","","","","","","","","","","","","是","否","是","是","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["特價支援支付方式","現金、LINEPAY、全支付","現金、LINEPAY、全支付","","","","","","","","","","","","","<","集","點","卡","、","滿","額","折","扣","支","援","付","款","-",">","","","","","","","","","","","","","","","","","","","",""],["特價參加滿額折扣","是","否","","","","","","","","","","","","","是","否","是","是","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["特價參加發點","是","否","","","","","","","","","","","","","<","-","支","-","-","付","-","-","方","-","-","式","-","-",">","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","現金","Ｕber Eats","LINEPAY","全支付","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","<","-","支","-","-","付","-","-","抽","-","-","成","-","-",">","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","1","0.69","0.97","0.978","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["品項","產品","簡稱","特價標","成本","附屬1","附屬2","附屬3","附屬4","附屬5","附屬6","附屬7","附屬8","附屬9","附屬10","<","-","通","-","-","路","-","-","售","-","-","價","-","-",">","常價幾個一份","常價參加滿額折扣","常價參加集點","品項排序","","","","","","","","","","","","","","","",""],["雞蛋糕","純雞蛋糕","純","","3.22","焦","","","","","","","","","","10","11.5","10","10","","","","","","","","","","","","2","是","是","雞蛋糕","","","","","","","","","","","","","","","",""],["餅乾","餅乾(3顆)","餅","","4.89","焦","","","","","","","","","","15","","15","15","","","","","","","","","","","","1","是","是","餅乾","","","","","","","","","","","","","","","",""],["雞蛋糕","巧克力","巧","","4.72","焦","","","","","","","","","","15","16.5","15","15","","","","","","","","","","","","2","是","是","飲品","","","","","","","","","","","","","","","",""],["雞蛋糕","奶油","奶","","3.26","焦","","","","","","","","","","15","16.5","15","15","","","","","","","","","","","","2","是","是","咖啡","","","","","","","","","","","","","","","",""],["雞蛋糕","鹹蛋黃","鹹","","7.06","焦","","","","","","","","","","15","16.5","15","15","","","","","","","","","","","","2","是","是","包裝","","","","","","","","","","","","","","","",""],["雞蛋糕","抹茶","抹","","4.95","焦","","","","","","","","","","15","16.5","15","15","","","","","","","","","","","","2","是","是","","","","","","","","","","","","","","","","",""],["雞蛋糕","紅豆","紅","","4.74","焦","","","","","","","","","","15","16.5","15","15","","","","","","","","","","","","2","是","是","","","","","","","","","","","","","","","","",""],["雞蛋糕","芝麻","芝","","3.68","焦","","","","","","","","","","15","16.5","15","15","","","","","","","","","","","","2","是","是","","","","","","","","","","","","","","","","",""],["雞蛋糕","蒜香","蒜","","3.93","焦","","","","","","","","","","15","16.5","15","15","","","","","","","","","","","","2","是","是","","","","","","","","","","","","","","","","",""],["雞蛋糕","梅子花生","花","","4.71","焦","","","","","","","","","","15","16.5","15","15","","","","","","","","","","","","2","是","是","","","","","","","","","","","","","","","","",""],["雞蛋糕","草莓","莓","","3.61","焦","","","","","","","","","","15","16.5","15","15","","","","","","","","","","","","2","是","是","","","","","","","","","","","","","","","","",""],["雞蛋糕","檬香","檬","","3.15","焦","","","","","","","","","","15","16.5","15","15","","","","","","","","","","","","2","是","是","","","","","","","","","","","","","","","","",""],["雞蛋糕","雙色乳酪","酪","雙餡","9.98","焦","","","","","","","","","","20","19","20","20","","","","","","","","","","","","2","是","是","","","","","","","","","","","","","","","","",""],["雞蛋糕","奶油鹹蛋","奶鹹","雙餡","5.69","焦","","","","","","","","","","20","19","20","20","","","","","","","","","","","","2","是","是","","","","","","","","","","","","","","","","",""],["雞蛋糕","巧克力花生","巧花","雙餡","5.25","焦","","","","","","","","","","20","19","20","20","","","","","","","","","","","","2","是","是","","","","","","","","","","","","","","","","",""],["雞蛋糕","巧克力芝麻","巧芝","雙餡","4.45","焦","","","","","","","","","","20","19","20","20","","","","","","","","","","","","2","是","是","","","","","","","","","","","","","","","","",""],["雞蛋糕","抹茶巧克力","抹巧","雙餡","5.31","焦","","","","","","","","","","20","19","20","20","","","","","","","","","","","","2","是","是","","","","","","","","","","","","","","","","",""],["雞蛋糕","抹茶紅豆","抹紅","雙餡","5.3","焦","","","","","","","","","","20","19","20","20","","","","","","","","","","","","2","是","是","","","","","","","","","","","","","","","","",""],["雞蛋糕","玉米濃湯","濃","雙餡","3.61","焦","","","","","","","","","","20","19","20","20","","","","","","","","","","","","2","是","是","","","","","","","","","","","","","","","","",""],["雞蛋糕","混巧","混巧","雙餡","5.5","奶","鹹","抹","紅","芝","蒜","花","莓","焦","","20","","20","20","","","","","","","","","","","","2","是","是","","","","","","","","","","","","","","","","",""],["雞蛋糕","混奶","混奶","雙餡","5.5","巧","鹹","抹","紅","芝","蒜","花","莓","焦","","20","","20","20","","","","","","","","","","","","2","是","是","","","","","","","","","","","","","","","","",""],["雞蛋糕","混鹹","混鹹","雙餡","5.5","巧","奶","抹","紅","芝","蒜","花","莓","焦","","20","","20","20","","","","","","","","","","","","2","是","是","","","","","","","","","","","","","","","","",""],["雞蛋糕","混抹","混抹","雙餡","5.5","巧","奶","鹹","紅","芝","蒜","花","莓","焦","","20","","20","20","","","","","","","","","","","","2","是","是","","","","","","","","","","","","","","","","",""],["雞蛋糕","混紅","混紅","雙餡","5.5","巧","奶","鹹","抹","芝","蒜","花","莓","焦","","20","","20","20","","","","","","","","","","","","2","是","是","","","","","","","","","","","","","","","","",""],["雞蛋糕","混芝","混芝","雙餡","5.5","巧","奶","鹹","抹","紅","蒜","花","莓","焦","","20","","20","20","","","","","","","","","","","","2","是","是","","","","","","","","","","","","","","","","",""],["雞蛋糕","混蒜","混蒜","雙餡","5.5","巧","奶","鹹","抹","紅","芝","花","莓","焦","","20","","20","20","","","","","","","","","","","","2","是","是","","","","","","","","","","","","","","","","",""],["雞蛋糕","混花","混花","雙餡","5.5","巧","奶","鹹","抹","紅","芝","花","莓","焦","","20","","20","20","","","","","","","","","","","","2","是","是","","","","","","","","","","","","","","","","",""],["雞蛋糕","混莓","混莓","雙餡","5.5","巧","奶","鹹","抹","紅","芝","蒜","花","焦","","20","","20","20","","","","","","","","","","","","2","是","是","","","","","","","","","","","","","","","","",""],["飲品","冬瓜茶外帶","冬外","","9.57","去冰","","","","","","","","","","25","30","25","25","","","","","","","","","","","","1","是","是","","","","","","","","","","","","","","","","",""],["飲品","冬瓜茶外帶自杯","冬外自","","9.75","","","","","","","","","","","15","","15","15","","","","","","","","","","","","1","是","是","","","","","","","","","","","","","","","","",""],["飲品","冬瓜茶內用","冬內","","1.68","去冰","","","","","","","","","","10","","10","10","","","","","","","","","","","","1","是","是","","","","","","","","","","","","","","","","",""],["飲品","冬瓜檸檬外帶","冬檸","","10","去冰","","","","","","","","","","30","35","30","30","","","","","","","","","","","","1","是","是","","","","","","","","","","","","","","","","",""],["飲品","冬瓜檸檬外帶自杯","冬檸外自","","10","","","","","","","","","","","20","","20","20","","","","","","","","","","","","1","是","是","","","","","","","","","","","","","","","","",""],["飲品","冬瓜檸檬內用","東檸內","","2.68","去冰","","","","","","","","","","15","","15","15","","","","","","","","","","","","1","是","是","","","","","","","","","","","","","","","","",""],["飲品","冬瓜鮮奶外帶","冬鮮外","","28.39","去冰","","","","","","","","","","45","","45","45","","","","","","","","","","","","1","是","是","","","","","","","","","","","","","","","","",""],["飲品","冬瓜鮮奶外帶自杯","冬鮮外自","","28.39","","","","","","","","","","","35","","35","35","","","","","","","","","","","","1","是","是","","","","","","","","","","","","","","","","",""],["飲品","冬瓜鮮奶內用","冬鮮內","","11.85","去冰","","","","","","","","","","25","","20","20","","","","","","","","","","","","1","是","是","","","","","","","","","","","","","","","","",""],["飲品","燒仙草外帶","仙外","","13.56","","","","","","","","","","","40","45","40","40","","","","","","","","","","","","1","是","是","","","","","","","","","","","","","","","","",""],["飲品","燒仙草外帶自杯","仙外自","","13.56","","","","","","","","","","","30","","30","30","","","","","","","","","","","","1","是","是","","","","","","","","","","","","","","","","",""],["飲品","燒仙草內用","仙內","","2.2","","","","","","","","","","","20","","20","20","","","","","","","","","","","","1","是","是","","","","","","","","","","","","","","","","",""],["咖啡","拿鐵外帶","拿外","","65.02","經典","低經","花果","香草","焦糖","胡椒","冰","去冰","","","95","125","95","95","","","","","","","","","","","","1","是","是","","","","","","","","","","","","","","","","",""],["咖啡","拿鐵外帶自杯","拿外自","","61.02","經典","低經","花果","香草","焦糖","胡椒","冰","去冰","","","85","","85","85","","","","","","","","","","","","1","是","是","","","","","","","","","","","","","","","","",""],["咖啡","拿鐵內用","拿內","","29","經典","低經","花果","香草","焦糖","胡椒","冰","去冰","","","55","85","55","55","","","","","","","","","","","","1","是","是","","","","","","","","","","","","","","","","",""],["咖啡","美式外帶","美外","","44.65","經典","低經","花果","香草","焦糖","胡椒","冰","去冰","","","60","","60","60","","","","","","","","","","","","1","是","是","","","","","","","","","","","","","","","","",""],["咖啡","美式外帶自杯","美外自","","40.65","經典","低經","花果","香草","焦糖","胡椒","冰","去冰","","","45","","45","45","","","","","","","","","","","","1","是","是","","","","","","","","","","","","","","","","",""],["咖啡","美式內用","美內","","19","經典","低經","花果","香草","焦糖","胡椒","冰","去冰","","","35","","35","35","","","","","","","","","","","","1","是","是","","","","","","","","","","","","","","","","",""],["包裝","不織布提網","提網","","1.22","","","","","","","","","","","5","6","5","5","","","","","","","","","","","","1","否","否","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""]];
-// @@gridData@@
-</script>
-
-<script>
-const ROWS = 106, COLS = 50;
-const user = 'menghushao';
-const repo = 'Order-management-product';
-const path = 'index.html';
-const jsonPath = 'gridData.json';
-const branch = 'main';
-
-const theadRow = document.getElementById('theadRow');
-const tbody = document.getElementById('tbody');
-
-for (let c = 0; c < COLS; c++) {
-  let label = '', n = c;
-  while (n >= 0) {
-    label = String.fromCharCode(n % 26 + 65) + label;
-    n = Math.floor(n / 26) - 1;
-  }
-  const th = document.createElement('th');
-  th.textContent = label;
-  theadRow.appendChild(th);
-}
-
-for (let r = 0; r < ROWS; r++) {
-  const tr = document.createElement('tr');
-  const rowTh = document.createElement('th');
-  rowTh.textContent = r + 1;
-  tr.appendChild(rowTh);
-  for (let c = 0; c < COLS; c++) {
-    const td = document.createElement('td');
-    td.contentEditable = true;
-    tr.appendChild(td);
-  }
-  tbody.appendChild(tr);
-}
-
-for (let r = 0; r < ROWS; r++) { for (let c = 0; c < COLS; c++) { tbody.rows[r].cells[c+1].textContent = ''; } }
-
-tbody.addEventListener('mouseover', e => {
-  if (e.target.tagName !== 'TD') return;
-  const td = e.target;
-  clearHighlight();
-
-  const tr = td.parentElement;
-  const rowIndex = tr.rowIndex - 1;
-  const colIndex = td.cellIndex;
-
-  for (let r = 0; r < ROWS; r++) {
-    const cell = tbody.rows[r].cells[colIndex];
-    if (cell) cell.classList.add('hover-col');
-  }
-
-  [...tr.children].forEach(cell => cell.classList.add('hover-row'));
-  theadRow.cells[colIndex].classList.add('hover-col');
-  tbody.rows[rowIndex].cells[0].classList.add('hover-row');
-});
-
-tbody.addEventListener('mouseout', clearHighlight);
-function clearHighlight() {
-  document.querySelectorAll('.hover-col, .hover-row').forEach(el =>
-    el.classList.remove('hover-col', 'hover-row')
-  );
-}
-
-window.addEventListener("beforeunload", function (e) {
-  e.preventDefault();
-  e.returnValue = '';
-});
-
-async function save() {
-  const token = prompt("請再次輸入 GitHub Token 作為加密密鑰");
-  if (!token) return;
-
-  const values = Array.from({ length: ROWS }, (_, r) =>
-    Array.from({ length: COLS }, (_, c) =>
-      (tbody.rows[r]?.cells[c + 1]?.textContent || "").trim()
-    )
-  );
-    // 更新 index.html：把 gridData 塞回碼中
-  const updatedCode = `const gridData = ${JSON.stringify(values)};\n// @@gridData@@`;
-  const sourceURL = `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${path}`;
-  const original = await fetch(sourceURL).then(r => r.text());
-  const replaced = original.replace(/const gridData = .*?\/\/ @@gridData@@/s, updatedCode);
-  const base64 = btoa(unescape(encodeURIComponent(replaced)));
-
-  const metaURL = `https://api.github.com/repos/${user}/${repo}/contents/${path}?ref=${branch}`;
-  const { sha } = await fetch(metaURL, {
-    headers: { Authorization: `Bearer ${token}` }
-  }).then(r => r.json());
-
-  const upload = await fetch(metaURL.replace('?ref=' + branch, ''), {
-    method: 'PUT',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      message: '🔐 加密儲存 gridData.json + 更新 index.html',
-      content: base64,
-      sha,
-      branch
-    })
-  });
-
-  if (!upload.ok) {
-    const err = await upload.text();
-    alert('❌ index.html 儲存失敗：' + err);
-    return;
-  }
-
-  // 加密 gridData → 儲存 gridData.json
-  const key = CryptoJS.enc.Utf8.parse(token.trim().slice(0, 32).padEnd(32, '0'));
-  const iv = CryptoJS.lib.WordArray.random(16);
-  const encrypted = CryptoJS.AES.encrypt(
-    JSON.stringify(values),
-    key,
-    { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }
-  );
-  const cipherText = encrypted.ciphertext.toString(CryptoJS.enc.Base64);
-  const ivHex = iv.toString(CryptoJS.enc.Hex);
-
-  const encData = {
-    ciphertext: cipherText,
-    iv: ivHex
-  };
-  const jsonRaw = JSON.stringify(encData, null, 2);
-  const jsonBase64 = btoa(unescape(encodeURIComponent(jsonRaw)));
-
-  const jsonURL = `https://api.github.com/repos/${user}/${repo}/contents/${jsonPath}?ref=${branch}`;
-  const meta = await fetch(jsonURL, {
-    headers: { Authorization: `Bearer ${token}` }
-  }).then(r => r.ok ? r.json() : { sha: null });
-
-  const uploadJSON = await fetch(jsonURL.replace('?ref=' + branch, ''), {
-    method: 'PUT',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      message: '🔐 加密儲存 gridData.json',
-      content: jsonBase64,
-      sha: meta.sha || undefined,
-      branch
-    })
-  });
-
-  if (uploadJSON.ok) {
-    alert("✅ 已儲存 index.html 並加密寫入 gridData.json");
-  } else {
-    const err = await uploadJSON.text();
-    alert("⚠️ index.html 更新成功，但 gridData.json 儲存失敗：" + err);
-  }
-}
-</script>
-
-
-<script>
-// ===== V1.00.05: Hardcoded encrypted load/save =====
-(function(){
-  // Hardcoded source/targets
-  const owner = 'menghushao';
-  const repo = 'Order-management-product';
-  const branch = 'main';
-  const jsonPath = 'gridData.json';
-  const plainPath = 'gridData.plain.json';
-  const rawURL = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${jsonPath}`;
-
-  let sessionToken = null; // keep in-memory for this session
-
-  function askTokenIfNeeded(purpose){
-    if (sessionToken && sessionToken.trim()) return sessionToken.trim();
-    const t = prompt(`🔐 請輸入 GitHub Token（用於${purpose}；同時作為加/解密金鑰）`);
-    if (!t) throw new Error('未提供 Token');
-    sessionToken = t.trim();
-    return sessionToken;
-  }
-
-  function deriveKeyStr(token){
-    return token.slice(0,32).padEnd(32,'0');
-  }
-
-  function show(msg){
-    console.log('[DB 106x50]', msg);
-    const s = document.getElementById('status');
-    if (s){ s.style.display='block'; s.textContent = msg; }
-  }
-
-  async function loadEncrypted(){
-    try{
-      const token = askTokenIfNeeded('載入加密資料');
-      show('⏳ 下載並解密：' + rawURL);
-      const res = await fetch(rawURL, { cache: 'no-store' });
-      if (!res.ok) throw new Error(`下載失敗：HTTP ${res.status}`);
-      const enc = await res.json();
-      if (!enc || !enc.ciphertext || !enc.iv) throw new Error('檔案格式錯誤：缺少 ciphertext/iv');
-
-      const key = CryptoJS.enc.Utf8.parse(deriveKeyStr(token));
-      const iv = CryptoJS.enc.Hex.parse(enc.iv);
-      const cipherWA = CryptoJS.enc.Base64.parse(enc.ciphertext);
-      const decrypted = CryptoJS.AES.decrypt({ ciphertext: cipherWA }, key, {
-        iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7
-      }).toString(CryptoJS.enc.Utf8);
-
-      const grid = JSON.parse(decrypted);
-      if (!Array.isArray(grid)) throw new Error('解密成功但資料型態不是 2D 陣列');
-
-      // fill table
-      const tbody = document.getElementById('tbody');
-      const ROWS = tbody.rows.length;
-      const COLS = tbody.rows[0].cells.length - 1;
-      for (let r=0; r<ROWS; r++){
-        for (let c=0; c<COLS; c++){
-          const v = (grid[r] && grid[r][c]) || '';
-          tbody.rows[r].cells[c+1].textContent = v;
-        }
-      }
-      show('✅ 已載入。');
-    }catch(err){
-      console.error(err);
-      show('❌ 載入失敗：' + err.message);
-      alert('載入失敗：' + err.message);
+    function summarizeName(type,a,b,accs){
+      let base='';
+      if(a && b) base = [a,b].sort().join('+');
+      else if(a && !b) base = (type === '雞蛋糕') ? (a + '+' + a) : a;
+      else if(!a && b) base = b;
+      const ext = accs.length ? '('+accs.join('+')+')' : '';
+      return base + ext;
     }
-  }
-
-  async function githubGetSha(path, token){
-    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`;
-    const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-    if (r.status === 404) return null;
-    if (!r.ok) throw new Error(`讀取 SHA 失敗: HTTP ${r.status}`);
-    const j = await r.json();
-    return j.sha || null;
-  }
-
-  async function githubPut(path, contentBase64, message, token){
-    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
-    const body = { message, branch, content: contentBase64 };
-    const sha = await githubGetSha(path, token).catch(()=>null);
-    if (sha) body.sha = sha;
-    const r = await fetch(url, {
-      method:'PUT',
-      headers:{ Authorization:`Bearer ${token}`, 'Content-Type':'application/json' },
-      body: JSON.stringify(body)
+    function renderCart(){
+      cartCount.textContent = String(cart.length);
+      if(!cart.length){ cartEmpty.style.display=''; cartList.style.display='none'; cartList.innerHTML=''; return; }
+      cartEmpty.style.display='none'; cartList.style.display='grid'; cartList.innerHTML='';
+      cart.forEach((it, idx) => {
+        const row = document.createElement('div'); row.className='cart-item';
+        const top = document.createElement('div'); top.className='top';
+        const title = document.createElement('div'); title.className='name'; title.textContent = it.title + ' × ' + it.qty;
+        const del = document.createElement('button'); del.className='del'; del.textContent='刪除';
+        del.addEventListener('click', () => { cart.splice(idx,1); renderCart(); });
+        top.append(title, del);
+        const meta = document.createElement('div'); meta.className='meta';
+        meta.textContent = '品項：' + it.type + (it.a? '；A：'+it.a : '') + (it.b? '；B：'+it.b : '') + (it.accs.length? '；附：'+it.accs.join('、') : '');
+        row.append(top, meta); cartList.appendChild(row);
+      });
+    }
+    addToCartBtn.addEventListener('click', () => {
+      const type = typeSel.value.trim();
+      const qty = Math.max(1, parseInt(qtyInput.value||'1',10));
+      const a = itemASel.value.trim();
+      const b = itemBSel.value.trim();
+      if(!type || (!a && !b)){ alert('請至少選擇「品項」與「商品A 或 商品B」其一。'); return; }
+      const accs = accSelects.map(s => s.value.trim()).filter(Boolean);
+      const title = summarizeName(type,a,b,accs);
+      cart.push({ type, qty, a, b, accs, title }); renderCart();
+      itemASel.value=''; itemBSel.value=''; accSelects.forEach(s=>s.value=''); qtyInput.value=1;
     });
-    if (!r.ok){
-      const t = await r.text().catch(()=>'');
-      throw new Error(`上傳 ${path} 失敗：HTTP ${r.status} ${t}`);
-    }
-  }
+    resetOrderBtn.addEventListener('click', () => {
+      typeSel.value=''; fillItemAB(''); accSelects.forEach(s=>s.value=''); qtyInput.value=1;
+    });
 
-  async function save(){
-    try{
-      const token = askTokenIfNeeded('上傳');
-      const keyStr = deriveKeyStr(token);
-      // read table
-      const tbody = document.getElementById('tbody');
-      const ROWS = tbody.rows.length;
-      const COLS = tbody.rows[0].cells.length - 1;
-      const values = Array.from({length: ROWS}, (_,r)=>
-        Array.from({length: COLS}, (_,c)=>(tbody.rows[r].cells[c+1].textContent||'').trim())
-      );
-
-      // encrypted
-      const key = CryptoJS.enc.Utf8.parse(keyStr);
-      const iv = CryptoJS.lib.WordArray.random(16);
-      const encrypted = CryptoJS.AES.encrypt(JSON.stringify(values), key, {
-        iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7
-      });
-      const encObj = { ciphertext: encrypted.ciphertext.toString(CryptoJS.enc.Base64), iv: iv.toString(CryptoJS.enc.Hex) };
-      const encBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(encObj, null, 2))));
-
-      // plaintext with E10..E106 blank
-      const plain = values.map(r => Array.isArray(r) ? r.slice() : r);
-      for (let r = 9; r <= 105 && r < plain.length; r++) {
-        if (!plain[r]) continue;
-        if (plain[r].length < 5) plain[r].length = 5;
-        plain[r][4] = '';
+    (async function init(){
+      try{
+        const res = await fetch(PLAIN_URL, { cache: 'no-store' });
+        if(!res.ok) throw new Error('HTTP ' + res.status);
+        const raw = await res.json();
+        grid = normalizePlainData(raw);
+        if(!is2DArray(grid)) throw new Error('資料格式錯誤');
+        buildMaps(); fillTypeSelect();
+      }catch(err){
+        console.error(err);
+        alert('載入菜單資料失敗：' + (err.message||''));
       }
-      const plainObj = { data: plain };
-      const plainBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(plainObj, null, 2))));
-
-      // upload
-      await githubPut(jsonPath, encBase64, `🔐 update ${jsonPath}`, token);
-      await githubPut(plainPath, plainBase64, `🧾 update ${plainPath} (E10~E106 blank)`, token);
-      show('✅ 已儲存：加密與明文（E10~E106 已清空）。');
-      alert('✅ 已儲存：加密與明文（E10~E106 已清空）。');
-    }catch(err){
-      console.error(err);
-      show('❌ 儲存失敗：' + err.message);
-      alert('❌ 儲存失敗：' + err.message);
-    }
-  }
-
-  // Wire + auto-load
-  document.addEventListener('DOMContentLoaded', ()=>{
-    // ensure status placeholder exists
-    if (!document.getElementById('status')){
-      const div = document.createElement('div');
-      div.id = 'status';
-      div.style.cssText = 'margin:8px 0;padding:8px;border-radius:8px;background:#f6f7ff;color:#333;';
-      const h3 = document.querySelector('h3');
-      (h3 && h3.parentNode ? h3.parentNode : document.body).insertBefore(div, h3.nextSibling);
-    }
-    // hook save button if present
-    document.getElementById('saveBtn')?.addEventListener('click', save);
-    // auto
-    loadEncrypted();
-  });
-})();
-</script>
-
+    })();
+  </script>
 </body>
 </html>
