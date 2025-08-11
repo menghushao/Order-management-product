@@ -107,6 +107,134 @@
 }
 </style>
 
+
+<style>
+/* v1.7.8: type + qty in same row; adjust column ratio on desktop */
+.mh-type-qty { grid-template-columns: 1.4fr 0.6fr; }
+@media (max-width:1023.98px){
+  .mh-type-qty { grid-template-columns: 1fr 1fr; } /* 手機平均分 */
+}
+</style>
+
+
+<style>
+/* v1.7.9: desktop panel spacing + no horizontal scrollbar */
+.mh-panel-body{
+  display: grid;
+  row-gap: 12px;
+  align-content: start;   /* pack content to top, no 'north/south poles' */
+  overflow-x: hidden;     /* prevent horizontal scrollbar */
+}
+/* prevent grid children from overflowing */
+.mh-row-2, .mh-row-3, .mh-field{ min-width: 0; }
+.mh-row-3{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:8px; }
+.mh-row-2{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px; }
+.mh-type-qty{ grid-template-columns: minmax(0,1.4fr) minmax(0,0.6fr); }
+</style>
+
+
+<style>
+/* v1.7.10: compact panel body on desktop — remove grid stretch and pack content naturally */
+.mh-panel-body{
+  display: block;              /* stop grid tracks from stretching */
+  overflow-x: hidden;
+  padding-bottom: 12px;
+}
+.mh-field, .mh-row-2, .mh-row-3{ margin-bottom: 12px; }
+.mh-row-2{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px; }
+.mh-row-3{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:8px; }
+.mh-type-qty{ grid-template-columns: minmax(0,1.4fr) minmax(0,0.6fr); }
+</style>
+
+
+<style>
+/* v1.7.11: Desktop — inline buttons no longer sticky (sit right under accessories) */
+@media (min-width:1024px){
+  .mh-actions-inline{
+    position: static !important;
+    box-shadow: none !important;
+  }
+}
+</style>
+
+
+<style>
+/* v1.7.12: Desktop — make panel a compact flex column, no stretched middle area */
+@media (min-width:1024px){
+  .mh-panel{
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    max-height: 92vh !important;
+  }
+  .mh-panel-head{ flex: 0 0 auto; }
+  .mh-panel-body{
+    flex: 0 0 auto;      /* don't stretch */
+    overflow: visible;   /* let content size naturally */
+  }
+}
+</style>
+
+
+<style>
+/* v1.7.13 — desktop panel next to cart; qty field polish */
+:root{ --mh-gap:12px; }
+.mh-input, .mh-select, .mh-number{ box-sizing: border-box; }
+.mh-number{
+  text-align: center;
+  /* remove browser spin buttons */
+}
+.mh-number::-webkit-outer-spin-button,
+.mh-number::-webkit-inner-spin-button{ -webkit-appearance: none; margin:0; }
+.mh-number{ -moz-appearance: textfield; }
+
+/* make qty a bit wider on desktop */
+@media (min-width:1024px){
+  .mh-type-qty{ grid-template-columns: minmax(0,1.2fr) minmax(0,0.8fr); }
+}
+
+/* Desktop panel: position by JS left of screen, adjacent to cart */
+@media (min-width:1024px){
+  .mh-panel{
+    width: 420px !important;
+    left: var(--mh-panel-left, auto) !important;
+    right: auto !important;
+    top: 0;
+    max-height: 92vh;
+    z-index: 10002;
+    box-shadow: -10px 0 40px rgba(0,0,0,.08);
+  }
+  .mh-panel.open{ /* no slide-in from right on desktop */ }
+}
+</style>
+
+
+<style>
+/* v1.7.14 — panel hidden by default; open shows it. Also align top/height via JS on desktop */
+.mh-panel{
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.mh-panel.open{
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+@media (min-width:1024px){
+  .mh-panel{
+    position: fixed;
+    width: 420px !important;
+    right: auto !important;
+    left: var(--mh-panel-left, auto) !important;
+    top: var(--mh-panel-top, 0) !important;
+    height: var(--mh-panel-height, auto) !important;
+    max-height: none !important;
+    overflow: auto;
+  }
+}
+</style>
+
 </head>
 <body>
 
@@ -267,16 +395,18 @@
     <button id="mh-close" class="mh-btn">關閉</button>
   </div>
   <div class="mh-panel-body">
-    <div class="mh-field">
-      <label for="mh-type">品項</label>
-      <select id="mh-type" class="mh-select"><option value="">請選擇</option></select>
-    </div>
-    <div class="mh-row-2">
-      <div class="mh-field">
-        <label for="mh-qty">數量</label>
-        <input id="mh-qty" class="mh-number" type="number" min="1" step="1" value="1" />
-      </div>
-      <div class="mh-field"><label>&nbsp;</label><div style="height:1px"></div></div>
+    
+<div class="mh-row-2 mh-type-qty">
+  <div class="mh-field">
+    <label for="mh-type">品項</label>
+    <select id="mh-type" class="mh-select"><option value="">請選擇</option></select>
+  </div>
+  <div class="mh-field">
+    <label for="mh-qty">數量</label>
+    <input id="mh-qty" class="mh-number" type="number" min="1" step="1" value="1" />
+  </div>
+</div>
+
     </div>
     <div class="mh-row-2">
       <div class="mh-field">
@@ -307,6 +437,7 @@
 </section>
 
 
+
 <script>
 (function(){
   const DATA_URL = "https://raw.githubusercontent.com/menghushao/Order-management-product/main/gridData.plain.json";
@@ -318,6 +449,7 @@
   // State
   let grid=[], rows=[], typeToItems=new Map(), itemToAccs=new Map();
   let cart=[];
+  let editIndex = -1; // <— currently editing cart index (-1 = new)
 
   // DOM shortcuts
   const menuRoot = document.querySelector('#menu-root, main .markdown-body, main, article, .content, .post, .wrap, .container');
@@ -380,7 +512,7 @@
   orderFab.addEventListener('click', openPanel);
   closeBtn.addEventListener('click', closePanel);
   cartFab.addEventListener('click', ()=> toggleCart());
-  document.getElementById('mh-cart-close').addEventListener('click', ()=> toggleCart(false));
+  document.getElementById('mh-cart-close')?.addEventListener('click', ()=> toggleCart(false));
 
   // Helpers
   function opt(label,value){ const o=document.createElement('option'); o.textContent=label; o.value=(value??label); return o; }
@@ -421,7 +553,7 @@
   aSel.addEventListener('change', updateAccessoryOptions);
   bSel.addEventListener('change', updateAccessoryOptions);
 
-  // Price helpers (simplified)
+  // Price helpers
   function cashPriceForRow(row){ const hdr=(grid[6]||[]).slice(15,30); const idx=hdr.indexOf(PAY); const arr=row.slice(15,30); const v=parseFloat(arr[idx]||0); return isFinite(v)?v:0; }
   function portionSizeForRow(row){ const v=parseFloat(row[30]||0); return (isFinite(v)&&v>0)? v:1; }
   function canJoinFullSet(row){ return ((row[31]||'')+'').trim()==='是'; }
@@ -455,19 +587,36 @@
   }
 
   function calcTotals(){
+    
     const portions = expandPortions();
     let orderAmt = portions.reduce((s,p)=> s + p.price, 0);
 
+    // 可參與滿份折扣的份（排序由低到高，用於折扣與點數）
     const eligible = portions.filter(p=> p.canSet).map(p=> p.price).sort((a,b)=> a-b);
+
+    // 12份為一循環：每循環折掉 1 份（最便宜），並給 1 點
     const cycles = Math.floor(eligible.length / CYCLE_SET);
     const discountParts = eligible.slice(0, cycles);
     const discountAmt = discountParts.reduce((s,p)=> s + p, 0);
+
     const payAmt = orderAmt - discountAmt;
 
-    const leftoverAmt = eligible.slice(cycles).reduce((s,p)=> s + p, 0);
+    // 「剩餘份」＝ 未達下一循環的份數，只用這些份的金額來算點數（最高 9 點）
+    const leftoverCount = eligible.length - cycles*CYCLE_SET;
+    const leftoverPrices = (leftoverCount>0) ? eligible.slice(-leftoverCount) : [];
+    const leftoverAmt = leftoverPrices.reduce((s,p)=> s + p, 0);
+
+    // 循環點：每循環 +1 點
     const cyclePoints = cycles * 1;
-    const leftoverPoints = Math.min(MAX_LEFTOVER_POINTS, Math.floor(leftoverAmt / MONEY_PER_POINT));
+
+    // 剩餘點：leftoverAmt / 60 取整，未滿一循環最高 9 點；若剩餘份數達 6 份 → 乘 2 倍
+    let leftoverPoints = Math.floor(leftoverAmt / MONEY_PER_POINT);
+    if (leftoverCount >= 6) leftoverPoints = leftoverPoints * 2;
+    leftoverPoints = Math.min(MAX_LEFTOVER_POINTS, leftoverPoints);
+
     const totalPoints = cyclePoints + leftoverPoints;
+
+
 
     return {orderAmt, cycles, discountAmt, payAmt, totalPoints};
   }
@@ -491,6 +640,19 @@
     return base + ext;
   }
 
+  function setSubmitLabel(){ addInline.textContent = (editIndex>=0? '更新項目' : '加入購物車'); }
+
+  function enterEdit(idx){
+    const it = cart[idx]; if (!it) return;
+    openPanel();
+    typeSel.value = it.type; fillAB(it.type);
+    aSel.value = it.a || ''; bSel.value = it.b || ''; updateAccessoryOptions();
+    qtyInput.value = it.qty;
+    accSelects.forEach((s,i)=> s.value = it.accs?.[i] || '');
+    editIndex = idx;
+    setSubmitLabel();
+  }
+
   function renderCart(){
     cartCount.textContent = String(cart.length);
     if (cartFabBadge){
@@ -504,27 +666,9 @@
       const row = document.createElement('div'); row.className='mh-cart-item';
       const title = document.createElement('div'); title.className='mh-name'; title.textContent = `${it.title} × ${it.qty}`;
       const edit = document.createElement('button'); edit.className='mh-edit'; edit.textContent='編輯';
-      edit.addEventListener('click', ()=>{
-        openPanel();
-        typeSel.value = it.type; fillAB(it.type);
-        aSel.value = it.a || ''; bSel.value = it.b || ''; updateAccessoryOptions();
-        qtyInput.value = it.qty;
-        accSelects.forEach((s,i)=> s.value = it.accs?.[i] || '');
-        // one-shot update handler
-        const handler = ()=>{
-          const type = typeSel.value.trim();
-          const qty = Math.max(1, parseInt(qtyInput.value||'1',10));
-          const a = aSel.value.trim(); const b=bSel.value.trim();
-          const accs = accSelects.map(s => s.value.trim()).filter(Boolean);
-          const title = summarizeName(type,a,b,accs);
-          cart[idx] = { type, qty, a, b, accs, title };
-          addInline.removeEventListener('click', handler);
-          renderCart();
-        };
-        addInline.addEventListener('click', handler, { once: true });
-      });
+      edit.addEventListener('click', ()=> enterEdit(idx));
       const del = document.createElement('button'); del.className='mh-del'; del.textContent='刪除';
-      del.addEventListener('click', ()=>{ cart.splice(idx,1); renderCart(); });
+      del.addEventListener('click', ()=>{ cart.splice(idx,1); if (editIndex===idx) editIndex=-1; renderCart(); setSubmitLabel(); });
       row.append(title, edit, del); cartList.appendChild(row);
     });
     renderSummary();
@@ -532,22 +676,32 @@
 
   function resetForm(){
     typeSel.value=''; fillAB(''); qtyInput.value=1; aSel.value=''; bSel.value=''; accSelects.forEach(s=> s.value='');
+    editIndex = -1; setSubmitLabel();
   }
-  function addCurrent(){
+
+  function submitCurrent(){
     const type = typeSel.value.trim();
     const qty = Math.max(1, parseInt(qtyInput.value||'1',10));
     const a = aSel.value.trim(); const b=bSel.value.trim();
     if(!type || (!a && !b)){ alert('請至少選擇「品項」與「商品」其一。'); return; }
     const accs = accSelects.map(s => s.value.trim()).filter(Boolean);
     const title = summarizeName(type,a,b,accs);
-    cart.push({ type, qty, a, b, accs, title });
+    const item = { type, qty, a, b, accs, title };
+    if (editIndex >= 0){
+      cart[editIndex] = item;
+      editIndex = -1;
+    } else {
+      cart.push(item);
+    }
     renderCart();
     if (window.matchMedia('(max-width:1023.98px)').matches){ cartEl.classList.add('open'); }
     resetForm();
+    setSubmitLabel();
   }
-  addInline.addEventListener('click', addCurrent);
+
+  addInline.addEventListener('click', submitCurrent);
   resetInline.addEventListener('click', resetForm);
-  clearBtn.addEventListener('click', ()=>{ cart=[]; renderCart(); });
+  clearBtn.addEventListener('click', ()=>{ cart=[]; renderCart(); resetForm(); });
 
   // Copy / Send
   function formatDate(dt){ try{ const d=new Date(dt); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const day=String(d.getDate()).padStart(2,'0'); const hh=String(d.getHours()).padStart(2,'0'); const mm=String(d.getMinutes()).padStart(2,'0'); return `${y}/${m}/${day} ${hh}:${mm}`; }catch(e){ return ''; } }
@@ -575,9 +729,89 @@
   (async function init(){
     try{
       const res = await fetch(DATA_URL, {cache:'no-store'});
-      const raw = await res.json(); grid = normalize(raw); buildMaps(); fillType(); placeDesktop();
+      const raw = await res.json(); grid = normalize(raw); buildMaps(); fillType(); placeDesktop(); setSubmitLabel(); renderCart();
     }catch(err){ console.error(err); alert('載入菜單資料失敗：' + (err.message||'')); }
   })();
+})();
+</script>
+
+
+
+<script>
+// v1.7.13: place order panel right next to the cart (desktop)
+(function(){
+  const panel = document.getElementById('mh-panel');
+  const cartEl = document.getElementById('mh-cart');
+  const orderFab = document.getElementById('mh-fab');
+
+  function placePanelNextToCart(){
+    if (!panel || !cartEl) return;
+    if (!window.matchMedia('(min-width:1024px)').matches) return;
+    const r = cartEl.getBoundingClientRect();
+    const W = 420;
+    let left = r.right + 12; // snug to the cart
+    // clamp to viewport
+    const maxLeft = Math.max(12, window.innerWidth - W - 12);
+    if (left > maxLeft) left = maxLeft;
+    panel.style.setProperty('--mh-panel-left', left + 'px');
+  }
+
+  // Run when panel opens and on resize/scroll
+  const _open = (function(){
+    return function(){ panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); placePanelNextToCart(); }
+  })();
+  // Replace existing openPanel if defined
+  if (window.openPanel) {
+    window.openPanel = _open;
+  } else {
+    // fallback hook on 點餐按鈕
+    orderFab?.addEventListener('click', _open);
+  }
+
+  window.addEventListener('resize', ()=>{ if (panel.classList.contains('open')) placePanelNextToCart(); });
+  window.addEventListener('scroll', ()=>{ if (panel.classList.contains('open')) placePanelNextToCart(); });
+})();
+</script>
+
+
+<script>
+// v1.7.14: desktop align panel next to cart and equal height; fix open/close
+(function(){
+  const panel  = document.getElementById('mh-panel');
+  const cartEl = document.getElementById('mh-cart');
+  const orderFab = document.getElementById('mh-fab');
+  const closeBtn = document.getElementById('mh-close');
+
+  function placePanelToCart(){
+    if (!panel || !cartEl) return;
+    if (!window.matchMedia('(min-width:1024px)').matches) return;
+    const r = cartEl.getBoundingClientRect();
+    const left = Math.max(12, Math.min(r.right + 12, window.innerWidth - 420 - 12));
+    panel.style.setProperty('--mh-panel-left', left + 'px');
+    panel.style.setProperty('--mh-panel-top',  r.top + 'px');
+    panel.style.setProperty('--mh-panel-height', r.height + 'px');
+  }
+
+  function openPanel(){
+    panel.classList.add('open');
+    panel.setAttribute('aria-hidden','false');
+    placePanelToCart();
+  }
+  function closePanel(){
+    panel.classList.remove('open');
+    panel.setAttribute('aria-hidden','true');
+  }
+
+  // Wire buttons
+  orderFab?.addEventListener('click', openPanel);
+  closeBtn?.addEventListener('click', closePanel);
+
+  // Reposition while open
+  function maybeReposition(){
+    if (panel.classList.contains('open')) placePanelToCart();
+  }
+  window.addEventListener('resize', maybeReposition);
+  window.addEventListener('scroll', maybeReposition);
 })();
 </script>
 
