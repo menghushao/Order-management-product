@@ -8,38 +8,40 @@
   <meta name="keywords" content="萌虎燒,雞蛋糕,苗栗雞蛋糕,甜點,下午茶,苗栗點心,萌虎燒菜單,萌虎燒訂購">
 
 <style>
-/* === Cart Overlay v1.6.1 === */
+/* === Cart Overlay v1.7.0 (mobile polished) === */
 :root{
-  --mh-gap: 12px;
   --mh-muted:#4b5563; --mh-text:#111827; --mh-line:#e5e7eb; --mh-card:#ffffff;
   --mh-accent:#3b82f6;
+  --mh-cart-bg:#f5ede3;        /* 淡咖啡底 */
+  --mh-cart-text:#2b1d14;      /* 深咖啡字 */
 }
-.mh-fab, .mh-panel, .mh-cart { position: fixed; z-index: 9999; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", Arial; color: var(--mh-text); }
+.mh-fab, .mh-panel, .mh-cart, .mh-toast { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", Arial; }
 .mh-fab{
-  top: 14px; left: 50%;
+  position: fixed; z-index: 10001; top: 14px;
+  left: 50%; transform: translateX(0);
   background: linear-gradient(180deg, #60a5fa, #3b82f6);
-  color:#fff; border:0; border-radius:999px;
-  padding:10px 14px; font-size:14px; cursor:pointer;
+  color:#fff; border:0; border-radius:999px; padding:10px 14px; font-size:14px; cursor:pointer;
   box-shadow:0 6px 24px rgba(59,130,246,.35);
 }
-.mh-card{ background: var(--mh-card); border:1px solid var(--mh-line); border-radius: 12px; }
-
-.mh-cart{
-  top: 64px; left: 50%; width: 360px;
-  background: var(--mh-card);
-  border:1px solid var(--mh-line);
-  border-radius:16px; padding:12px;
-  display:grid; gap:10px; max-height:72vh; overflow:auto;
-  box-shadow: 0 10px 24px rgba(0,0,0,.06);
+#mh-cart-fab{
+  position: fixed; z-index: 10001; top: 14px; left: calc(50% + 100px);
+  background: linear-gradient(180deg, #a7805a, #8b6a49); color:#fff; border:0; border-radius:999px; padding:10px 14px; font-size:14px;
+  box-shadow:0 6px 24px rgba(0,0,0,.25);
 }
-.mh-cart h4{ margin:0; font-size:15px; display:flex; align-items:center; justify-content:space-between; gap:6px; }
-.mh-badge{ font-size:12px; padding:2px 8px; border-radius:999px; background:#eef2ff; color:#374151; border:1px solid #c7d2fe; }
-.mh-cart-empty{ color:var(--mh-muted); font-size:13px; }
+.mh-cart{
+  position: fixed; z-index: 10000;
+  top: 64px; left: 50%; width: 360px; background: var(--mh-cart-bg);
+  border:1px solid #e1d5c7; border-radius:16px; padding:12px;
+  display:grid; gap:10px; max-height:72vh; overflow:auto; color: var(--mh-cart-text);
+  box-shadow: 0 10px 24px rgba(0,0,0,.12);
+}
+.mh-cart h4{ margin:0; font-size:15px; display:flex; align-items:center; justify-content:space-between; gap:6px; color: var(--mh-cart-text); }
+.mh-badge{ font-size:12px; padding:2px 8px; border-radius:999px; background:#efe4d7; color:#5b402d; border:1px solid #e1d5c7; }
+.mh-cart-empty{ color:#6b4f3f; font-size:13px; }
 .mh-cart-list{ display:grid; gap:10px; }
-.mh-cart-item{ border:1px solid var(--mh-line); border-radius:12px; padding:10px; background:var(--mh-card); display:flex; align-items:center; justify-content:space-between; gap:8px; }
-.mh-name{ font-size:14px; }
-.mh-actions{ display:flex; gap:8px; }
-.mh-del, .mh-edit{ background:transparent; border:1px solid #cbd5e1; color:#334155; border-radius:10px; padding:6px 8px; cursor:pointer; }
+.mh-cart-item{ border:1px solid #e1d5c7; border-radius:12px; padding:10px; background:#fffdf9; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.mh-name{ font-size:14px; color:#2b1d14; }
+.mh-del, .mh-edit{ background:#fff; border:1px solid #d9cbbb; color:#533b2a; border-radius:10px; padding:6px 8px; cursor:pointer; }
 .mh-btn{ padding:10px 14px; border-radius:10px; border:1px solid #cbd5e1; background:#f8fafc; color:#111827; cursor:pointer; }
 .mh-btn.primary{ background: linear-gradient(180deg, #60a5fa, #3b82f6); border:none; color:#fff; }
 .mh-field label{ font-size:12px; color:#6b7280; display:block; margin:0 0 4px; }
@@ -53,29 +55,42 @@
 
 /* Slide-over order panel */
 .mh-panel{
-  right: -420px; top: 0; height: 100vh; width: 400px;
+  position: fixed; right: -420px; top: 0; height: 100vh; width: 400px;
   background: #ffffff;
   border-left:1px solid #e5e7eb;
   box-shadow:-10px 0 40px rgba(0,0,0,.08);
   transition:right .22s ease;
   display:grid; grid-template-rows:auto 1fr auto;
   overflow:hidden;
-  color:#111827;
+  color:#111827; z-index: 10002;
 }
 .mh-panel.open{ right:0; }
 .mh-panel-head{ padding:12px 14px; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; justify-content:space-between; gap:8px; background:#f8fafc; }
 .mh-panel-body{ padding:12px 14px; overflow:auto; }
 .mh-panel-actions{ display:flex; gap:8px; padding:12px 14px; border-top:1px solid #e5e7eb; background:#f8fafc; }
 
-/* 手機：購物車改為底部抽屜；點餐鈕右下角 */
+/* Mobile layout improvements */
 @media (max-width:1023.98px){
-  .mh-fab{ left:auto; right: 12px; bottom: 12px; top:auto; }
-  .mh-cart{
-    left: 0; right: 0; bottom: 0; top: auto; width: auto; max-height: 60vh;
-    border-radius: 12px 12px 0 0;
-    transform: translateY(100%); transition: transform .22s ease;
+  .mh-fab{ left: 12px; transform:none; top:auto; bottom: 12px; }
+  #mh-cart-fab{ left:auto; right:12px; top:auto; bottom: 64px; }
+  .mh-panel{
+    left:0; right:0; width:100vw; bottom:0; top:auto; height:auto; max-height:86vh;
+    border-left:none; border-top:1px solid #e5e7eb; border-radius:12px 12px 0 0;
+    transform: translateY(110%); transition: transform .22s ease;
+    box-shadow: 0 -10px 24px rgba(0,0,0,.12);
   }
-  .mh-cart.open{ transform: translateY(0); }
+  .mh-panel.open{ transform: translateY(0); }
+  .mh-panel-body{ max-height: calc(86vh - 76px); overflow:auto; -webkit-overflow-scrolling: touch; }
+  .mh-panel-actions{ display:none; } /* hide bottom bar on mobile */
+  .mh-actions-inline{
+    position: sticky; bottom: 0; z-index: 2;
+    display:flex; gap:8px; padding:10px 12px; background:#ffffff; border-top:1px solid #e5e7eb;
+  }
+  .mh-actions-inline .mh-btn{ flex:1; min-height:44px; }
+  .mh-cart{ left:0; right:0; top:auto; bottom:0; width:auto; max-height:60vh; border-radius:12px 12px 0 0; }
+}
+@media (min-width:1024px){
+  #mh-cart-fab{ display:none; }
 }
 </style>
 
@@ -197,28 +212,29 @@
 
 
 
-<!-- === 點餐/購物車 v1.6.1（內嵌） === -->
-<button id="mh-fab" class="mh-fab">🛒 點餐</button>
+<!-- === 點餐 / 購物車 v1.7.0 === -->
+<button id="mh-fab" class="mh-fab" title="打開點餐面板">🛒 點餐</button>
+<button id="mh-cart-fab" title="開啟購物車">🧺 購物車</button>
 
 <aside id="mh-cart" class="mh-cart" aria-label="購物車">
   <h4>購物車 <small id="mh-cart-count" class="mh-badge">0</small></h4>
   <div id="mh-cart-list" class="mh-cart-list"></div>
   <div id="mh-cart-empty" class="mh-cart-empty">尚無品項</div>
 
-  <div class="mh-total">
-    <div id="mh-summary-text">訂單金額 — 元；滿份折 0 份 0 元；結帳金額 — 元；點數發放 — 點</div>
+  <div class="mh-total" id="mh-summary">
+    <div id="mh-summary-line">訂單金額 — 元；滿份折 0 份 0 元；結帳金額 — 元；點數發放 — 點</div>
   </div>
 
   <div class="mh-field"><label for="mh-when">取餐/送達時間（可留空）</label><input id="mh-when" type="datetime-local" class="mh-input"></div>
-  <div class="mh-field"><label for="mh-addr">外送地址（留空＝到店取餐）</label><input id="mh-addr" type="text" class="mh-input" placeholder="苗栗市..."></div>
+  <div class="mh-field"><label for="mh-addr">外送地址（留空＝到店取餐）</label><input id="mh-addr" type="text" class="mh-input" placeholder="台北市信義區..."></div>
   <div class="mh-row-2">
-    <div class="mh-field"><label for="mh-sign">招牌</label><input id="mh-sign" type="text" class="mh-input" placeholder="某某學校、機關"></div>
-    <div class="mh-field"><label for="mh-name">稱呼</label><input id="mh-name" type="text" class="mh-input" placeholder="某先生 / 小姐"></div>
+    <div class="mh-field"><label for="mh-sign">招牌</label><input id="mh-sign" type="text" class="mh-input" placeholder="例如：OO便利商店"></div>
+    <div class="mh-field"><label for="mh-name">稱呼</label><input id="mh-name" type="text" class="mh-input" placeholder="王先生 / 小美"></div>
   </div>
   <div class="mh-field"><label for="mh-phone">電話</label><input id="mh-phone" type="tel" class="mh-input" placeholder="0912-345678"></div>
 
   <div class="mh-field">
-    <label for="mh-channel">發送媒介_我們透過通訊軟體點餐</label>
+    <label for="mh-channel">發送媒介</label>
     <select id="mh-channel" class="mh-select">
       <option value="LINE|https://reurl.cc/qZAE2y">LINE</option>
       <option value="FB|https://m.me/menghushao">FB</option>
@@ -247,10 +263,7 @@
         <label for="mh-qty">數量</label>
         <input id="mh-qty" class="mh-number" type="number" min="1" step="1" value="1" />
       </div>
-      <div class="mh-field">
-        <label class="mh-label">&nbsp;</label>
-        <div style="font-size:12px;color:#6b7280;"></div>
-      </div>
+      <div class="mh-field"><label>&nbsp;</label><div style="height:1px"></div></div>
     </div>
     <div class="mh-row-2">
       <div class="mh-field">
@@ -273,37 +286,36 @@
         <select class="mh-select mh-acc"><option value="">附</option></select>
       </div>
     </div>
+    <!-- 行動版：把操作鈕放在附項下方 -->
+    <div class="mh-actions-inline">
+      <button id="mh-add-inline" class="mh-btn primary">加入購物車</button>
+      <button id="mh-reset-inline" class="mh-btn">清空</button>
+    </div>
   </div>
+  <!-- 桌面版底部操作區 -->
   <div class="mh-panel-actions">
     <button id="mh-add" class="mh-btn primary">加入購物車</button>
-    <button id="mh-update" class="mh-btn" style="display:none">更新項目</button>
     <button id="mh-reset" class="mh-btn">清空</button>
   </div>
 </section>
 
 
 <script>
-// === 點餐/購物車 v1.6.1 ===
 (function(){
   const DATA_URL = "https://raw.githubusercontent.com/menghushao/Order-management-product/main/gridData.plain.json";
-  const PAY_METHOD = "現金";
-  const FULL_SET_COUNT = 12; // 每滿 12 份折 1 份、+1 點
-  const POINT_PER_CASH = 60; // 剩餘金額 60 元 1 點（封頂 9）
-  const REMAINDER_POINTS_CAP = 9;
+  const PAY = "現金";
+  const MONEY_PER_POINT = 60; // 門檻
+  const MAX_LEFTOVER_POINTS = 9;
+  const CYCLE_SET = 12; // 每 12 份 1 點
 
   // State
-  let grid = [];
-  let rows = [];
-  let typeToItems = new Map();
-  let itemRow = new Map(); // name -> row
-  let cashColIndex = -1;
-
-  let cart = [];
-  let editingIndex = -1;
+  let grid=[], rows=[], typeToItems=new Map(), itemToAccs=new Map();
+  let cart=[];
 
   // DOM
   const menuRoot = document.querySelector('#menu-root, main .markdown-body, main, article, .content, .post, .wrap, .container');
   const fab = document.getElementById('mh-fab');
+  const cartFab = document.getElementById('mh-cart-fab');
   const panel = document.getElementById('mh-panel');
   const closeBtn = document.getElementById('mh-close');
   const typeSel = document.getElementById('mh-type');
@@ -313,13 +325,17 @@
   const accSelects = Array.from(document.querySelectorAll('.mh-acc'));
   const qtyInput = document.getElementById('mh-qty');
   const addBtn = document.getElementById('mh-add');
-  const updateBtn = document.getElementById('mh-update');
   const resetBtn = document.getElementById('mh-reset');
+  const addInline = document.getElementById('mh-add-inline');
+  const resetInline = document.getElementById('mh-reset-inline');
+
   const cartEl = document.getElementById('mh-cart');
   const cartList = document.getElementById('mh-cart-list');
   const cartEmpty = document.getElementById('mh-cart-empty');
   const cartCount = document.getElementById('mh-cart-count');
   const clearBtn = document.getElementById('mh-clear');
+  const summaryLine = document.getElementById('mh-summary-line');
+
   const whenInput = document.getElementById('mh-when');
   const addrInput = document.getElementById('mh-addr');
   const signInput = document.getElementById('mh-sign');
@@ -328,358 +344,257 @@
   const channelSel = document.getElementById('mh-channel');
   const copyBtn = document.getElementById('mh-copy');
   const sendBtn = document.getElementById('mh-send');
-  const summaryText = document.getElementById('mh-summary-text');
 
-  // Positioning
+  // Positioning to menu edge on desktop
   function placeAtMenuEdge(el, extraTop){
     const rect = menuRoot?.getBoundingClientRect?.();
     if (rect && window.matchMedia('(min-width:1024px)').matches){
-      const left = rect.right + 12;
-      el.style.left = left + 'px';
-      if (typeof extraTop === 'number') el.style.top = `${extraTop}px`;
+      el.style.left = (rect.right + 12) + 'px';
+      if (typeof extraTop === 'number') el.style.top = extraTop + 'px';
     } else {
       el.style.left = '';
     }
   }
-  function placeAll(){
-    if (window.matchMedia('(max-width:1023.98px)').matches){
-      cartEl.classList.remove('open'); return;
-    }
-    placeAtMenuEdge(fab, 14);
-    placeAtMenuEdge(cartEl, 64);
-  }
-  window.addEventListener('resize', placeAll);
-  window.addEventListener('scroll', placeAll);
+  function placeAll(){ if (window.matchMedia('(min-width:1024px)').matches){ placeAtMenuEdge(fab,14); placeAtMenuEdge(cartEl,64); } }
+  window.addEventListener('resize', placeAll); window.addEventListener('scroll', placeAll);
 
-  // Panel
+  // Open/close panel + cart
   function openPanel(){ panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); }
-  function closePanel(){ panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); editingIndex=-1; updateBtn.style.display='none'; addBtn.style.display=''; }
-  fab.addEventListener('click', openPanel);
-  closeBtn.addEventListener('click', closePanel);
+  function closePanel(){ panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); }
+  fab.addEventListener('click', openPanel); closeBtn.addEventListener('click', closePanel);
+  cartFab.addEventListener('click', ()=>{ cartEl.classList.toggle('open'); });
 
   // Helpers
-  function opt(label, value){ const o=document.createElement('option'); o.textContent=label; o.value=value??label; return o; }
-  function uniq(arr){ return [...new Set(arr.filter(Boolean))]; }
-  function is2DArray(x){ return Array.isArray(x) && x.every(r => Array.isArray(r)); }
+  function opt(label,value){ const o=document.createElement('option'); o.textContent=label; o.value=(value??label); return o; }
+  function uniq(a){ return [...new Set(a.filter(Boolean))]; }
+  function is2D(x){ return Array.isArray(x)&&x.every(r=>Array.isArray(r)); }
   function normalize(data){
-    if (is2DArray(data)) return data;
-    if (data && is2DArray(data.data)) return data.data;
-    if (data && is2DArray(data.grid)) return data.grid;
-    if (data && is2DArray(data.values)) return data.values;
-    throw new Error('資料格式錯誤');
-  }
-  function findCashColumn(){
-    const hdr = grid[6] || []; // 依你資料表結構
-    for (let j=0;j<hdr.length;j++){
-      const s = (hdr[j]||'').toString().trim();
-      if (s.includes('現金')) return j;
-    }
-    return -1;
-  }
-  function cashPrice(row){
-    let idx = cashColIndex;
-    if (idx>=0 && idx<row.length){
-      const v = row[idx];
-      const n = parseFloat((''+v).replace(/[^0-9.]/g,''));
-      if (isFinite(n)) return n;
-    }
-    // 後備：找本列第一個「...元」或數字
-    for (let i=0;i<row.length;i++){
-      const s=(''+row[i]);
-      const m=s.match(/([0-9]{1,5})\s*元/);
-      if (m) return parseFloat(m[1]);
-    }
-    for (let i=0;i<row.length;i++){
-      const n=parseFloat((''+row[i]).replace(/[^0-9.]/g,''));
-      if (isFinite(n) && n>0) return n;
-    }
-    return 0;
-  }
-  function perPortion(row){
-    const v = row[30]; // AE 欄
-    const n = parseFloat((''+v).replace(/[^0-9.]/g,''));
-    return isFinite(n) && n>0 ? n : 1;
-  }
-  function allowFullSet(row){
-    const v = row[31]; // AF 欄，是否可參與滿份折
-    const s = (v||'').toString().trim();
-    if (!s) return true;
-    return !(['否','不','0','N','n','false'].includes(s));
+    if (is2D(data)) return data;
+    if (data && is2D(data.data)) return data.data;
+    if (data && is2D(data.grid)) return data.grid;
+    if (data && is2D(data.values)) return data.values;
+    throw new Error("資料格式錯誤");
   }
 
-  // Build maps
   function buildMaps(){
-    rows = grid.slice(10, 200); // 菜單主體
-    typeToItems = new Map();
-    itemRow = new Map();
+    rows = grid.slice(10, 106);
+    typeToItems.clear(); itemToAccs.clear();
     for(const r of rows){
-      const type = (r?.[0] || '').toString().trim();
-      const item = (r?.[1] || '').toString().trim();
-      if(!type || !item) continue;
+      const type = (r?.[0]||'').trim();
+      const item = (r?.[1]||'').trim();
+      if(!type||!item) continue;
       if(!typeToItems.has(type)) typeToItems.set(type, []);
       typeToItems.get(type).push(item);
-      if(!itemRow.has(item)) itemRow.set(item, r);
+      const accs = uniq((r.slice(5,15)||[]).map(x=> (x||'').toString().trim()).filter(Boolean));
+      if(accs.length) itemToAccs.set(item, accs);
     }
     for(const [k,v] of typeToItems.entries()) typeToItems.set(k, uniq(v));
-    cashColIndex = findCashColumn();
   }
-
-  function fillType(){
-    typeSel.innerHTML=''; typeSel.append(opt('請選擇',''));
-    [...typeToItems.keys()].forEach(t => typeSel.append(opt(t,t)));
-  }
+  function fillType(){ typeSel.innerHTML=''; typeSel.append(opt('請選擇','')); [...typeToItems.keys()].forEach(t=> typeSel.append(opt(t,t))); }
   function fillAB(type){
-    const items = typeToItems.get(type) || [];
-    aSel.innerHTML=''; aSel.append(opt('商品',''));
-    bSel.innerHTML=''; bSel.append(opt('商品',''));
-    items.forEach(i => { aSel.append(opt(i,i)); bSel.append(opt(i,i)); });
-    if (type === '雞蛋糕'){ bWrap.style.display=''; } else { bWrap.style.display='none'; bSel.value=''; }
+    const items = typeToItems.get(type)||[];
+    aSel.innerHTML=''; bSel.innerHTML=''; aSel.append(opt('商品','')); bSel.append(opt('商品',''));
+    items.forEach(i=>{ aSel.append(opt(i,i)); bSel.append(opt(i,i)); });
+    if(type==='雞蛋糕'){ bWrap.style.display=''; } else { bWrap.style.display='none'; bSel.value=''; }
+    updateAccessoryOptions();
   }
-  typeSel.addEventListener('change', e => fillAB(e.target.value));
-
-  // Accessory options (可留空；此版先不影響計價)
-  function updateAccessoryOptions(){/* 留作擴充 */}
+  function updateAccessoryOptions(){
+    const finalName = bSel.value || aSel.value || '';
+    const options = uniq(itemToAccs.get(finalName)||[]);
+    accSelects.forEach(sel=>{
+      const keep = sel.value; sel.innerHTML=''; sel.append(opt('附','')); options.forEach(x=> sel.append(opt(x,x)));
+      if(keep && options.includes(keep)) sel.value = keep;
+    });
+  }
+  typeSel.addEventListener('change', e=> fillAB(e.target.value));
   aSel.addEventListener('change', updateAccessoryOptions);
   bSel.addEventListener('change', updateAccessoryOptions);
 
-  // Summaries
-  function summarizeName(type,a,b,accs){
-    let base='';
-    if(type==='雞蛋糕'){
-      if(a && b) base = [a,b].sort().join('+');
-      else if(a) base = a + '+' + a;
-      else if(b) base = b + '+' + b;
-    }else{
-      base = a || b || '';
-    }
-    const ext = accs?.length ? '('+accs.join('+')+')' : '';
-    return base + ext;
+  // Price helpers (simplified): find unit price at PAY column of price sheet header in row index 6 (P..AD)
+  function cashPriceForRow(row){
+    const headers = (grid[6]||[]).slice(15,30);
+    const idx = headers.indexOf(PAY);
+    const arr = row.slice(15,30);
+    const v = parseFloat(arr[idx]||0);
+    return isFinite(v)? v:0;
+  }
+  function portionSizeForRow(row){ // AE (index 30)
+    const v = parseFloat(row[30]||0);
+    return (isFinite(v)&&v>0)? v:1;
+  }
+  function canJoinFullSet(row){ // AF (index 31) = 是/否
+    return ((row[31]||'')+'').trim()==='是';
   }
 
-  // Compute portion prices list according to store logic
-  function buildPortionsFromCart(){
-    const portions = []; // each = {price, eligibleForFullSet: bool}
-    for(const it of cart){
-      const {type, a, b, qty} = it;
-      if (!a && !b) continue;
-      const rowA = itemRow.get(a) || [];
-      const rowB = itemRow.get(b) || [];
-      const pA = a ? cashPrice(rowA) : 0;
-      const pB = b ? cashPrice(rowB) : 0;
-      const perA = a ? perPortion(rowA) : 0;
-      const perB = b ? perPortion(rowB) : 0;
-      const allowA = a ? allowFullSet(rowA) : false;
-      const allowB = b ? allowFullSet(rowB) : false;
-
-      let portionPrice = 0;
-      let eligible = true;
-
-      if (type === '雞蛋糕'){
-        // 以 AE 為 2 份為常態：A+B 或 單 A 視為 1 份
-        if (a && b){
-          // 若兩品項 AE 都在，取平均拆分；一般來說 AE=2
-          if (perA && perB && perA===perB && perA===2){
-            portionPrice = pA + pB;
-          }else{
-            // 通用：一份的總單價= (pA * perA/2) + (pB * perB/2)
-            const aPart = perA ? pA * (perA/2) : 0;
-            const bPart = perB ? pB * (perB/2) : 0;
-            portionPrice = aPart + bPart;
-          }
-          eligible = allowA && allowB;
-        }else if (a){
-          if (perA>=2) portionPrice = pA * (perA); else portionPrice = pA*2;
-          eligible = allowA;
-        }else if (b){
-          if (perB>=2) portionPrice = pB * (perB); else portionPrice = pB*2;
-          eligible = allowB;
-        }
+  // Order → expand portions (store-like; A/B → build one portion price)
+  function expandPortions(){
+    const portions=[]; // each = {price, canSet}
+    for (const it of cart){
+      const {type,a,b,qty} = it;
+      const aRow = rows.find(r=> r[1]===a);
+      const bRow = rows.find(r=> r[1]===b);
+      if(type==='雞蛋糕'){
+        // 一份的份價：若 A+B；單選就 A×2
+        const aPrice = aRow? cashPriceForRow(aRow):0;
+        const bPrice = bRow? cashPriceForRow(bRow):0;
+        const psize = (aRow?portionSizeForRow(aRow):1); // 以 A 的 AE 當份量（店內若不同可再調）
+        const canSet = (aRow?canJoinFullSet(aRow):true);
+        let portionPrice=0;
+        if (a && b) portionPrice = aPrice + bPrice;
+        else if (a && !b) portionPrice = aPrice*2;
+        else if (!a && b) portionPrice = bPrice*2;
+        for(let i=0;i<qty;i++){ portions.push({price:portionPrice, canSet}); }
       }else{
-        // 非雞蛋糕：單一商品為一份，份價 = 單價 * AE（若 AE=1 就是單價）
-        const row = rowA || rowB;
-        const p = (a? pA : pB);
-        const per = perPortion(row);
-        portionPrice = p * (per || 1);
-        eligible = allowFullSet(row);
-      }
-
-      // 把 qty 份推入
-      for(let i=0;i<qty;i++){
-        portions.push({price: portionPrice, eligible});
+        const row = aRow || bRow;
+        if (!row) continue;
+        const unit = cashPriceForRow(row);
+        const per = portionSizeForRow(row);
+        const canSet = canJoinFullSet(row);
+        const portionPrice = unit*per;
+        for(let i=0;i<qty;i++){ portions.push({price:portionPrice, canSet}); }
       }
     }
     return portions;
   }
 
-  function calculateOrderTotals(){
-    const portions = buildPortionsFromCart();
-    const allPrices = portions.map(p=>p.price);
-    const orderAmount = allPrices.reduce((s,x)=>s+x,0);
+  function calcTotals(){
+    const portions = expandPortions();
+    // 訂單金額 = 所有份價相加
+    let orderAmt = portions.reduce((s,p)=> s + p.price, 0);
 
-    // 可折參與的部分（只取 eligible=true 的份）
-    const discountCandidates = portions.filter(p=>p.eligible).map(p=>p.price).sort((a,b)=>b-a); // 高到低
-    const groups = Math.floor(discountCandidates.length / FULL_SET_COUNT);
-    let discount = 0;
-    for(let g=0; g<groups; g++){
-      const start = g*FULL_SET_COUNT;
-      const group = discountCandidates.slice(start, start+FULL_SET_COUNT).sort((a,b)=>a-b); // 升冪取最便宜
-      discount += (group[0] || 0);
-    }
-    const payable = Math.max(0, orderAmount - discount);
+    // 可參與滿份折扣的份：
+    const eligible = portions.filter(p=> p.canSet).map(p=> p.price).sort((a,b)=> a-b);
+    const cycles = Math.floor(eligible.length / CYCLE_SET);
+    const discountParts = eligible.slice(0, cycles); // 折最便宜的每循環一份
+    const discountAmt = discountParts.reduce((s,p)=> s + p, 0);
 
-    // 點數：每滿 12 份 +1 點；剩餘用金額 60 元 1 點、封頂 9
-    const portionsCount = portions.length;
-    const cyclePoints = Math.floor(portionsCount / FULL_SET_COUNT) * 1;
-    const remainderCount = portionsCount % FULL_SET_COUNT;
-    // 取「剩餘份」的金額：我們用參與排序後剩下的尾巴估算
-    const leftoverPrices = discountCandidates.slice(groups*FULL_SET_COUNT);
-    // 但「剩餘份」應該是整體剩下的份（不只可折的）；保守估算，用所有份數價格排序後尾巴的 remainderCount 個
-    const allSorted = allPrices.slice().sort((a,b)=>b-a);
-    const leftoverAll = allSorted.slice(groups*FULL_SET_COUNT).slice(0, remainderCount);
-    const leftoverAmount = leftoverAll.reduce((s,x)=>s+x,0);
-    const remainderPoints = Math.min(REMAINDER_POINTS_CAP, Math.floor(leftoverAmount / POINT_PER_CASH));
-    const points = cyclePoints + remainderPoints;
+    const payAmt = orderAmt - discountAmt;
 
-    return {
-      orderAmount: Math.round(orderAmount),
-      discountGroups: groups,
-      discountAmount: Math.round(discount),
-      payable: Math.round(payable),
-      points
-    };
+    // 點數：循環 1 點 + 剩餘份金額按 60 元 1 點（最高 9）
+    const leftoverCount = eligible.length - cycles*CYCLE_SET;
+    const leftoverAmt = eligible.slice(cycles).reduce((s,p)=> s + p, 0);
+    const cyclePoints = cycles * 1;
+    const leftoverPoints = Math.min(MAX_LEFTOVER_POINTS, Math.floor(leftoverAmt / MONEY_PER_POINT));
+    const totalPoints = cyclePoints + leftoverPoints;
+
+    return {orderAmt, cycles, discountAmt, payAmt, totalPoints};
   }
 
   function renderSummary(){
-    const t = calculateOrderTotals();
-    summaryText.textContent = `訂單金額 ${t.orderAmount} 元；滿份折 ${t.discountGroups} 份 ${t.discountAmount} 元；結帳金額 ${t.payable} 元；點數發放 ${t.points} 點`;
+    const {orderAmt, cycles, discountAmt, payAmt, totalPoints} = calcTotals();
+    summaryLine.textContent = `訂單金額 ${orderAmt.toFixed(0)} 元；滿份折 ${cycles} 份 ${discountAmt.toFixed(0)} 元；結帳金額 ${payAmt.toFixed(0)} 元；點數發放 ${totalPoints} 點`;
   }
 
   function renderCart(){
     cartCount.textContent = String(cart.length);
-    cartList.innerHTML='';
+    cartList.innerHTML = '';
     if(!cart.length){ cartEmpty.style.display=''; renderSummary(); return; }
     cartEmpty.style.display='none';
-    cart.forEach((it, idx) => {
+    cart.forEach((it, idx)=>{
       const row = document.createElement('div'); row.className='mh-cart-item';
       const title = document.createElement('div'); title.className='mh-name'; title.textContent = `${it.title} × ${it.qty}`;
-      const actions = document.createElement('div'); actions.className='mh-actions';
       const edit = document.createElement('button'); edit.className='mh-edit'; edit.textContent='編輯';
-      const del = document.createElement('button'); del.className='mh-del'; del.textContent='刪除';
-      edit.addEventListener('click', () => {
-        editingIndex = idx;
-        addBtn.style.display='none'; updateBtn.style.display=''; openPanel();
+      edit.addEventListener('click', ()=>{
+        openPanel();
         typeSel.value = it.type; fillAB(it.type);
-        aSel.value = it.a || ''; bSel.value = it.b || '';
-        accSelects.forEach((s,i)=> s.value = it.accs?.[i] || '');
+        aSel.value = it.a || ''; bSel.value = it.b || ''; updateAccessoryOptions();
         qtyInput.value = it.qty;
+        accSelects.forEach((s,i)=> s.value = it.accs?.[i] || '');
+        // 更新改為覆蓋此索引
+        addBtn.textContent = '更新項目';
+        addInline.textContent = '更新項目';
+        const handler = ()=>{
+          const type = typeSel.value.trim();
+          const qty = Math.max(1, parseInt(qtyInput.value||'1',10));
+          const a = aSel.value.trim(); const b=bSel.value.trim();
+          const accs = accSelects.map(s => s.value.trim()).filter(Boolean);
+          const title = summarizeName(type,a,b,accs);
+          cart[idx] = { type, qty, a, b, accs, title };
+          addBtn.textContent='加入購物車'; addInline.textContent='加入購物車';
+          addBtn.removeEventListener('click', handler); addInline.removeEventListener('click', handler);
+          renderCart();
+        };
+        addBtn.addEventListener('click', handler);
+        addInline.addEventListener('click', handler);
       });
+      const del = document.createElement('button'); del.className='mh-del'; del.textContent='刪除';
       del.addEventListener('click', ()=>{ cart.splice(idx,1); renderCart(); });
-      actions.append(edit, del);
-      row.append(title, actions);
-      cartList.appendChild(row);
+      row.append(title, edit, del); cartList.appendChild(row);
     });
     renderSummary();
   }
 
-  function currentAccs(){ return accSelects.map(s => s.value.trim()).filter(Boolean); }
+  function summarizeName(type,a,b,accs){
+    let base='';
+    if(type==='雞蛋糕'){
+      if(a && b) base = [a,b].sort().join('+');
+      else if(a && !b) base = a + '+' + a;
+      else if(!a && b) base = b + '+' + b;
+      else base = '';
+    }else{
+      base = a || b || '';
+    }
+    const ext = accs.length ? '('+accs.join('+')+')' : '';
+    return base + ext;
+  }
 
-  addBtn.addEventListener('click', () => {
+  function resetForm(){
+    typeSel.value=''; fillAB(''); qtyInput.value=1; aSel.value=''; bSel.value=''; accSelects.forEach(s=> s.value='');
+  }
+
+  function addCurrent(){
     const type = typeSel.value.trim();
     const qty = Math.max(1, parseInt(qtyInput.value||'1',10));
-    const a = aSel.value.trim();
-    const b = bSel.value.trim();
+    const a = aSel.value.trim(); const b=bSel.value.trim();
     if(!type || (!a && !b)){ alert('請至少選擇「品項」與「商品」其一。'); return; }
-    const accs = currentAccs();
+    const accs = accSelects.map(s => s.value.trim()).filter(Boolean);
     const title = summarizeName(type,a,b,accs);
     cart.push({ type, qty, a, b, accs, title });
-    aSel.value=''; bSel.value=''; accSelects.forEach(s=>s.value=''); qtyInput.value=1;
     renderCart();
     if (window.matchMedia('(max-width:1023.98px)').matches){ cartEl.classList.add('open'); }
-  });
+    resetForm();
+  }
 
-  updateBtn.addEventListener('click', () => {
-    if (editingIndex<0) return;
-    const type = typeSel.value.trim();
-    const qty = Math.max(1, parseInt(qtyInput.value||'1',10));
-    const a = aSel.value.trim();
-    const b = bSel.value.trim();
-    const accs = currentAccs();
-    const title = summarizeName(type,a,b,accs);
-    cart[editingIndex] = { type, qty, a, b, accs, title };
-    editingIndex = -1;
-    addBtn.style.display=''; updateBtn.style.display='none';
-    renderCart(); closePanel();
-  });
+  addBtn.addEventListener('click', addCurrent);
+  addInline.addEventListener('click', addCurrent);
+  resetBtn.addEventListener('click', resetForm);
+  resetInline.addEventListener('click', resetForm);
+  clearBtn.addEventListener('click', ()=>{ cart=[]; renderCart(); });
 
-  resetBtn.addEventListener('click', () => {
-    typeSel.value=''; fillAB(''); accSelects.forEach(s=>s.value=''); qtyInput.value=1;
-    editingIndex = -1; addBtn.style.display=''; updateBtn.style.display='none';
-  });
-  clearBtn.addEventListener('click', () => { cart = []; renderCart(); });
-
-  // Message compose
+  // Compose message
   function formatDate(dt){
     try{
-      const d = new Date(dt);
-      const y = d.getFullYear();
-      const m = String(d.getMonth()+1).padStart(2,'0');
-      const day = String(d.getDate()).padStart(2,'0');
-      const hh = String(d.getHours()).padStart(2,'0');
-      const mm = String(d.getMinutes()).padStart(2,'0');
+      const d=new Date(dt); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0');
+      const day=String(d.getDate()).padStart(2,'0'); const hh=String(d.getHours()).padStart(2,'0'); const mm=String(d.getMinutes()).padStart(2,'0');
       return `${y}/${m}/${day} ${hh}:${mm}`;
     }catch(e){ return ''; }
   }
   function orderItemsText(){ return cart.map(it => `${it.title} × ${it.qty}`).join('；'); }
   function buildMessage(){
     const itemsText = orderItemsText() || '（尚未選擇商品）';
-    const whenText = whenInput.value ? formatDate(whenInput.value) : '';
-    const addr = addrInput.value.trim();
-    const sign = signInput.value.trim();
-    const name = nameInput.value.trim();
-    const phone = phoneInput.value.trim();
-    let header = '';
+    const whenText = whenInput.value ? ` ${formatDate(whenInput.value)}` : '';
+    const addr = addrInput.value.trim(), sign=signInput.value.trim(), name=nameInput.value.trim(), phone=phoneInput.value.trim();
     if (addr && sign){
-      header = `請幫我外送到(${addr})(${sign})(${name||''})(${phone||''})`;
-      if (whenText) header += ` 請在 ${whenText} 送達`;
-    }else{
-      const nh = (name? `${name}` : '') + (phone? ` / ${phone}` : '');
-      header = nh? `（${nh}）` : '';
-      if (whenText) header += (header? ' ' : '') + `預計 ${whenText} 取餐`;
+      return `老闆你好，我要 ${itemsText} ，請幫我外送到(${addr})(${sign})(${name})(${phone})` + (whenText? ` 請在${whenText} 送達`:'') + `，謝謝。`;
+    } else {
+      const who = [name, phone].filter(Boolean).join(' / ');
+      return `老闆你好，我要 ${itemsText}` + (who? ` ，${who}`:'') + (whenText? ` ，預計${whenText} 取餐`:'') + `，謝謝。`;
     }
-    const t = calculateOrderTotals();
-    const summary = `訂單金額 ${t.orderAmount} 元；滿份折 ${t.discountGroups} 份 ${t.discountAmount} 元；結帳金額 ${t.payable} 元；點數發放 ${t.points} 點`;
-    return `老闆你好，我要 ${itemsText} ，${summary}。${header ? ' ' + header : ''}`;
   }
   async function copyMessage(){
     const msg = buildMessage();
-    try{
-      await navigator.clipboard.writeText(msg);
-      alert('訂單內容已複製到剪貼簿，可直接貼上對話視窗。');
-    }catch(e){
-      const ta = document.createElement('textarea'); ta.value = msg; document.body.appendChild(ta);
-      ta.select(); document.execCommand('copy'); ta.remove();
-      alert('已嘗試複製到剪貼簿。');
-    }
+    try{ await navigator.clipboard.writeText(msg); alert('訂單內容已複製到剪貼簿，可直接貼上對話視窗。'); }
+    catch(e){ const ta=document.createElement('textarea'); ta.value=msg; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); alert('已嘗試複製到剪貼簿。'); }
   }
   copyBtn.addEventListener('click', copyMessage);
-  sendBtn.addEventListener('click', async () => {
-    await copyMessage();
-    const [type, url] = channelSel.value.split('|');
-    window.open(url, '_blank');
-  });
+  sendBtn.addEventListener('click', async ()=>{ await copyMessage(); const [t,url]=channelSel.value.split('|'); window.open(url,'_blank'); });
 
-  // Bootstrap
+  // Init
   (async function init(){
     try{
-      const res = await fetch(DATA_URL, { cache: 'no-store' });
-      if(!res.ok) throw new Error('HTTP ' + res.status);
-      const raw = await res.json();
-      grid = normalize(raw);
-      buildMaps(); fillType(); placeAll();
-    }catch(err){
-      console.error(err);
-      alert('載入菜單資料失敗：' + (err.message||''));
-    }
+      const res = await fetch(DATA_URL, {cache:'no-store'});
+      const raw = await res.json(); grid = normalize(raw); buildMaps(); fillType(); placeAll();
+    }catch(err){ console.error(err); alert('載入菜單資料失敗：' + (err.message||'')); }
   })();
 })();
 </script>
