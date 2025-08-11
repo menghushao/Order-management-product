@@ -136,6 +136,22 @@
 }
 </style>
 
+
+<style>
+/* === v1.7.3: button layout & icon swap === */
+/* Mobile: both buttons on the right, stacked (點餐在上、購物車在下) */
+@media (max-width:1023.98px){
+  .mh-fab{ left:auto !important; right:12px !important; bottom:64px !important; top:auto !important; transform:none !important; }
+  #mh-cart-fab{ left:auto !important; right:12px !important; bottom:12px !important; top:auto !important; }
+  .mh-panel-actions{ display:none !important; }   /* keep inline actions only on mobile */
+}
+/* Desktop: hide inline actions to avoid duplication; show bottom bar */
+@media (min-width:1024px){
+  .mh-actions-inline{ display:none !important; }
+  .mh-panel-actions{ display:flex !important; }
+}
+</style>
+
 </head>
 <body>
 
@@ -255,8 +271,8 @@
 
 
 <!-- === 點餐 / 購物車 v1.7.0 === -->
-<button id="mh-fab" class="mh-fab" title="打開點餐面板">🛒 點餐</button>
-<button id="mh-cart-fab" title="開啟購物車">🧺 購物車</button>
+<button id="mh-fab" class="mh-fab" title="打開點餐面板">🧾 點餐</button>
+<button id="mh-cart-fab" title="開啟購物車">🛒 購物車</button>
 
 <aside id="mh-cart" class="mh-cart" aria-label="購物車">
   <h4>購物車 <small id="mh-cart-count" class="mh-badge">0</small><button id="mh-cart-close" class="mh-close">收合</button></h4>
@@ -728,6 +744,38 @@
   window.addEventListener('resize', placeDesktopFab);
   window.addEventListener('scroll', placeDesktopFab);
   placeDesktopFab();
+})();
+</script>
+
+
+<script>
+// === v1.7.3: desktop button stacking & ensure 點餐 button visible ===
+(function(){
+  const menuRoot = document.querySelector('#menu-root, main .markdown-body, main, article, .content, .post, .wrap, .container');
+  const orderFab = document.getElementById('mh-fab');       // 🧾 點餐
+  const cartFab  = document.getElementById('mh-cart-fab');  // 🛒 購物車
+
+  function placeAtMenuEdge(el, topOffset){
+    if (!el) return;
+    const rect = menuRoot?.getBoundingClientRect?.();
+    if (rect && window.matchMedia('(min-width:1024px)').matches){
+      el.style.left = (rect.right + 12) + 'px';
+      el.style.top = (topOffset || 14) + 'px';
+      el.style.right = 'auto';
+      el.style.bottom = 'auto';
+      el.style.transform = 'none';
+      el.style.position = 'fixed';
+      el.style.display = 'inline-block';
+    }
+  }
+  function placeDesktopButtons(){
+    if (!window.matchMedia('(min-width:1024px)').matches) return;
+    placeAtMenuEdge(orderFab, 14);   // 點餐（上）
+    placeAtMenuEdge(cartFab, 58);    // 購物車（下）
+  }
+  window.addEventListener('resize', placeDesktopButtons);
+  window.addEventListener('scroll', placeDesktopButtons);
+  placeDesktopButtons();
 })();
 </script>
 
