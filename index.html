@@ -68,7 +68,7 @@
 .mh-panel.open{ right:0; }
 .mh-panel-head{ padding:12px 14px; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; justify-content:space-between; gap:8px; background:#f8fafc; }
 .mh-panel-body{ padding:12px 14px; overflow:auto; }
-.mh-panel-actions{ display:none; } /* hidden in both views; we use inline actions */
+.mh-panel .mh-panel-actions{ display:none; } /* hidden in both views; we use inline actions */
 .mh-actions-inline{
   position: sticky; bottom: 0; z-index: 2; display:flex; gap:8px; padding:10px 12px; background:#ffffff; border-top:1px solid #e5e7eb;
 }
@@ -92,6 +92,18 @@
 /* Desktop */
 @media (min-width:1024px){
   /* place buttons near menu edge via JS */
+}
+</style>
+
+
+<style>
+/* v1.7.6: Ensure cart actions visible */
+.mh-cart .mh-panel-actions{
+  display:flex; gap:8px; padding:10px 12px; border-top:1px solid #e1d5c7; background:#fffdf9; border-radius:0 0 12px 12px;
+}
+.mh-cart .mh-panel-actions .mh-btn{ flex:1; min-height:40px; }
+@media (max-width:1023.98px){
+  .mh-cart .mh-panel-actions{ position: sticky; bottom: 0; z-index: 2; }
 }
 </style>
 
