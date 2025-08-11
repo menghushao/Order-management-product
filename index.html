@@ -1,283 +1,687 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>萌虎燒官網 + 點餐覆蓋層 v0.2.1</title>
-  <style>
-    :root {
-      --bg:#0b1020;
-      --panel:#121832;
-      --muted:#9aa4c3;
-      --text:#e7ecff;
-      --brand:#5b8cff;
-      --accent:#c9ff70;
-      --card:#0e1430;
-      --line:#1f2848;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;background:#000}
-    .site-wrap{ position:fixed; inset:0; }
-    .site{ position:absolute; inset:0; width:100%; height:100%; border:0; background:#000; }
-    .overlay{
-      position:fixed; inset:0; pointer-events:none; z-index:50;
-      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "Helvetica Neue", Arial;
-      color:var(--text);
-    }
-    .stack{ position:absolute; right:14px; top:14px; display:grid; gap:10px; align-items:start; }
-    .fab, .panel, .cart { pointer-events:auto; }
-    .fab{
-      justify-self:end;
-      background: linear-gradient(180deg, #6b90ff, #3a62ff);
-      color:#fff; border:0; border-radius:999px;
-      padding:10px 14px; font-size:14px; cursor:pointer;
-      box-shadow: 0 6px 28px rgba(60,100,255,.35);
-    }
-    .panel{
-      position:fixed; right:-420px; top:0; height:100vh; width:400px;
-      background: linear-gradient(180deg, rgba(16,22,45,.98), rgba(16,22,45,.94));
-      border-left:1px solid rgba(255,255,255,.06);
-      box-shadow:-10px 0 40px rgba(0,0,0,.4);
-      transition:right .22s ease;
-      display:grid; grid-template-rows:auto 1fr auto;
-      overflow:hidden;
-    }
-    .panel.open{ right:0; }
-    .panel-head{ padding:12px 14px; border-bottom:1px solid rgba(255,255,255,.06); display:flex; align-items:center; justify-content:space-between; gap:8px; }
-    .panel-body{ padding:12px 14px; overflow:auto; overscroll-behavior:contain; }
-    .panel-actions{ display:flex; gap:8px; padding:12px 14px; border-top:1px solid rgba(255,255,255,.06); }
-    .btn{ padding:10px 14px; border-radius:12px; border:1px solid #2a355e; background:#0f1533; color:#e7ecff; cursor:pointer; }
-    .btn.primary{ background: linear-gradient(180deg, #6b90ff, #3a62ff); border:none; }
-    .btn.ghost{ background:transparent; }
-    label{ font-size:12px; color:var(--muted); display:block; margin:0 0 4px; }
-    select, input[type="number"] { width:100%; padding:8px 10px; border-radius:10px; border:1px solid #2a355e; background:#0c122d; color:#e7ecff; font-size:14px; }
-    .row-2{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-    .row-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-    .cart{
-      position:fixed; right:14px; top:64px; width:320px;
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:16px; padding:12px; backdrop-filter: blur(6px) saturate(120%);
-      display:grid; gap:10px; max-height: 70vh; overflow:auto;
-    }
-    .cart h4{ margin:0; font-size:15px; display:flex; align-items:center; justify-content:space-between; gap:6px; }
-    .badge { font-size:12px; padding:2px 8px; border-radius:999px; background:rgba(91,140,255,.16); color:#bcd0ff; border:1px solid #2a3c7a; }
-    .cart-empty{ color:var(--muted); font-size:13px; }
-    .cart-list{ display:grid; gap:10px; }
-    .cart-item{ border:1px solid var(--line); border-radius:12px; padding:10px; background:var(--card); display:grid; gap:8px; }
-    .top{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
-    .name{ font-size:14px; }
-    .meta{ color:var(--muted); font-size:12px; }
-    .del{ background:transparent; border:1px solid #3a4a86; color:#b7c7ff; border-radius:10px; padding:6px 8px; cursor:pointer; }
-    .hint{ font-size:12px; color:#a7b3da; }
-    .ver{ position:fixed; left:8px; bottom:6px; font-size:12px; color:#a7b3da; }
-  </style>
+<html lang="zh-Hant"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>萌虎燒 | 雞蛋糕・甜點・下午茶</title>
+  <meta name="description" content="萌虎燒是苗栗市的現點現做雞蛋糕專賣店，提供多種創意口味與飲品，支援外送與線上點餐。">
+  <meta name="keywords" content="萌虎燒,雞蛋糕,苗栗雞蛋糕,甜點,下午茶,苗栗點心,萌虎燒菜單,萌虎燒訂購">
+
+<style>
+/* === Cart Overlay v1.6.1 === */
+:root{
+  --mh-gap: 12px;
+  --mh-muted:#4b5563; --mh-text:#111827; --mh-line:#e5e7eb; --mh-card:#ffffff;
+  --mh-accent:#3b82f6;
+}
+.mh-fab, .mh-panel, .mh-cart { position: fixed; z-index: 9999; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", Arial; color: var(--mh-text); }
+.mh-fab{
+  top: 14px; left: 50%;
+  background: linear-gradient(180deg, #60a5fa, #3b82f6);
+  color:#fff; border:0; border-radius:999px;
+  padding:10px 14px; font-size:14px; cursor:pointer;
+  box-shadow:0 6px 24px rgba(59,130,246,.35);
+}
+.mh-card{ background: var(--mh-card); border:1px solid var(--mh-line); border-radius: 12px; }
+
+.mh-cart{
+  top: 64px; left: 50%; width: 360px;
+  background: var(--mh-card);
+  border:1px solid var(--mh-line);
+  border-radius:16px; padding:12px;
+  display:grid; gap:10px; max-height:72vh; overflow:auto;
+  box-shadow: 0 10px 24px rgba(0,0,0,.06);
+}
+.mh-cart h4{ margin:0; font-size:15px; display:flex; align-items:center; justify-content:space-between; gap:6px; }
+.mh-badge{ font-size:12px; padding:2px 8px; border-radius:999px; background:#eef2ff; color:#374151; border:1px solid #c7d2fe; }
+.mh-cart-empty{ color:var(--mh-muted); font-size:13px; }
+.mh-cart-list{ display:grid; gap:10px; }
+.mh-cart-item{ border:1px solid var(--mh-line); border-radius:12px; padding:10px; background:var(--mh-card); display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.mh-name{ font-size:14px; }
+.mh-actions{ display:flex; gap:8px; }
+.mh-del, .mh-edit{ background:transparent; border:1px solid #cbd5e1; color:#334155; border-radius:10px; padding:6px 8px; cursor:pointer; }
+.mh-btn{ padding:10px 14px; border-radius:10px; border:1px solid #cbd5e1; background:#f8fafc; color:#111827; cursor:pointer; }
+.mh-btn.primary{ background: linear-gradient(180deg, #60a5fa, #3b82f6); border:none; color:#fff; }
+.mh-field label{ font-size:12px; color:#6b7280; display:block; margin:0 0 4px; }
+.mh-input, .mh-select, .mh-number {
+  width:100%; padding:8px 10px; border-radius:10px; border:1px solid #cbd5e1; background:#fff; color:#111827; font-size:14px;
+}
+.mh-row-2{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.mh-row-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.mh-total{ padding:10px; border:1px dashed #d1d5db; border-radius:10px; font-size:14px; color:#111827; background:#f9fafb; }
+.mh-total small{ color:#6b7280; }
+
+/* Slide-over order panel */
+.mh-panel{
+  right: -420px; top: 0; height: 100vh; width: 400px;
+  background: #ffffff;
+  border-left:1px solid #e5e7eb;
+  box-shadow:-10px 0 40px rgba(0,0,0,.08);
+  transition:right .22s ease;
+  display:grid; grid-template-rows:auto 1fr auto;
+  overflow:hidden;
+  color:#111827;
+}
+.mh-panel.open{ right:0; }
+.mh-panel-head{ padding:12px 14px; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; justify-content:space-between; gap:8px; background:#f8fafc; }
+.mh-panel-body{ padding:12px 14px; overflow:auto; }
+.mh-panel-actions{ display:flex; gap:8px; padding:12px 14px; border-top:1px solid #e5e7eb; background:#f8fafc; }
+
+/* 手機：購物車改為底部抽屜；點餐鈕右下角 */
+@media (max-width:1023.98px){
+  .mh-fab{ left:auto; right: 12px; bottom: 12px; top:auto; }
+  .mh-cart{
+    left: 0; right: 0; bottom: 0; top: auto; width: auto; max-height: 60vh;
+    border-radius: 12px 12px 0 0;
+    transform: translateY(100%); transition: transform .22s ease;
+  }
+  .mh-cart.open{ transform: translateY(0); }
+}
+</style>
+
 </head>
 <body>
-  <div class="site-wrap">
-    <iframe class="site" src="https://menghushao.github.io/home-page/#" title="萌虎燒官網"></iframe>
+
+<section style="position: relative; display: flex; flex-wrap: wrap; justify-content: center; gap: 2em; padding: 2em 1em; font-size: 1.05rem; line-height: 1.6; background: #fffefb; max-width: 1280px; margin: auto;">
+  <!-- 左頁：店家資訊 -->
+  <div style="flex: 1 1 320px; background: #fffbe7; padding: 1.5em; border-radius: 8px 0 0 8px; box-shadow: -4px 4px 12px rgba(0,0,0,0.08); z-index: 2;">
+    <h2 style="color: #e65100;">
+     萌虎燒   <img src="https://github.com/menghushao/MENU/blob/main/%E5%8E%9F%E5%A7%8B%E8%99%8E%E9%A0%AD(%E5%8E%BB%E8%83%8C).png?raw=true" alt="logo" style="width: 1.2em; height: 1.2em; vertical-align: middle; margin-right: 0.3em; border-radius: 3px;">
+      店家資訊
+    </h2>
+    <p><strong>地址：</strong><a href="https://maps.app.goo.gl/B6KTsppsNF3jqvfC9" target="_blank">苗栗市中山路203號</a><br><em>單向雙線道，汽車停車位設置在右側，我們在左側，機/腳踏車可以停在騎樓(暫時)。</em></p>
+    <p><strong>電話：</strong>
+      <a href="tel:0912457104" style="color: inherit; text-decoration: underline;">0912457104<em>  (拒接隱藏來電號碼)</em></a>
+    </p>
+    <p><strong>官方LINE：</strong>
+      <a href="https://reurl.cc/qZAE2y" target="_blank" style="margin-left: 0.5em;">
+        <img src="https://pic.pimg.tw/softwarecenter/1405438113-157016513.png" alt="LINE" style="width: 1.6em; vertical-align: middle;">
+      </a><em>   (回覆速度較快)</em>
+    </p>
+    <p><strong>官 方 F B ：  </strong>
+      <a href="https://m.me/menghushao" target="_blank" style="margin-left: 0.5em;">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="FB" style="width: 1.4em; vertical-align: middle;">
+      </a>
+    </p>
+    <p><strong>營業時間：</strong><br><em>週日固定休息<br>週一 ~ 五 的11:00 ~ 22:00<br>週六 的10:00 ~ 23:59</em></p>
+    <p><strong>臨時休息日：<br></strong><em>2025/07/30(三)11:00 ~ 18:00<br>2025/08/02(六)10:00 ~ 17:00</em>
+    </p><p><strong>Wi-Fi 密碼：</strong>0912457104</p>
+    <p>📄 有統編章可供公司行號核銷點心費用，可使用現金、LINEPAY、全支付結帳。</p>
+    <p>⏱️ 餐點都是現點現做，可透過電話或通訊軟體提前預訂，避免現場等待。<br>🕓 若有營業時間外的訂單需求，可以提前跟老闆聯繫商量。</p>
+    <p>
+  🛵 滿300元苗栗市門牌可外送，不滿可透過
+  <a href="https://www.ubereats.com/tw/store/%E8%90%8C%E8%99%8E%E7%87%92-%E7%94%9C%E9%BB%9E-%E4%B8%8B%E5%8D%88%E8%8C%B6-%E9%BB%9E%E5%BF%83-%E9%9B%9E%E8%9B%8B%E7%B3%95/C-zADMIpWq-_9Pep-1uOVQ?diningMode=DELIVERY&amp;sc=SEARCH_SUGGESTION" target="_blank">UBER Eats</a>
+  點餐，市外建議透過
+  <a href="https://maps.app.goo.gl/B6KTsppsNF3jqvfC9" target="_blank">GOOGLE地圖</a>
+  避開收費路段，取得與萌虎燒的距離 (公里)，再填入下方欄位估算保送門檻。
+  <input type="number" id="distanceInput" min="0" step="0.1" style="width: 5em; margin-left: 0.3em;">
+  <span id="deliveryMsg" style="margin-left: 0.5em; color: #d32f2f;"></span>
+</p>
+    <script>
+      const distanceInput = document.getElementById("distanceInput");
+      const deliveryMsg = document.getElementById("deliveryMsg");
+      distanceInput?.addEventListener("input", () => {
+        const km = parseFloat(distanceInput.value) || 0;
+        const fullKM = Math.ceil(km);
+        let amount = 0;
+        if (fullKM <= 3) amount = 300;
+        else if (fullKM <= 15) amount = 300 + (fullKM - 3) * 100;
+        else amount = 300 + (fullKM - 3) * 150;
+        deliveryMsg.textContent = `需滿 ${amount} 元，請先聯繫店家評估`;
+      });
+    </script>
+    <p>🚫 我們「不」提供塑膠袋和吸管，雞蛋糕單次消費滿5份，會提供一個不織布提網，滿12份再加贈萌虎不織布提袋，外送量大會使用二手但乾淨的紙箱。</p>
+<p>🎟️單次消費滿60元可獲得集點卡1點，餐點滿6份點數雙倍，滿12份直接折抵1份，點數改贈1點。集滿10點可兌換任何口味雞蛋糕1份。</p>
+    <p>⚠️ 偶有麵糊沒完全熟透的情況，這無法完全避免，若發生了請告訴我們，我們將直接退回餐點費用。</p>
+    <p>🛍️ <a href="https://reurl.cc/Aym5rE" target="_blank">[萌虎燒-石虎小貓貓] LINE 貼圖</a></p>
+  </div>
+  <!-- 右頁：菜單與點餐 -->
+  <div id="menu-root" data-menu="" style="flex: 1 1 640px; background: #fff; padding: 1.5em; border-radius: 0 8px 8px 0; box-shadow: 4px 4px 12px rgba(0,0,0,0.08); z-index: 2;">
+    <h2 style="color: #e65100;">🐣 雞蛋糕</h2>
+     <li><em>霜淇淋由於客流量不高，所以多數都是倒掉，為避免浪費故暫時不會販售。若對機器有興趣，可以跟老闆聯繫商談。</em></li>
+    <p><strong>一份皆為 2 顆</strong>，可混搭不同口味與價位。<br>自備容器集點卡加贈1點~</p>
+    <ul>
+      <li><strong>純雞蛋糕</strong>：<br>2 顆 20元，混區組合價10元<br><em>只有蛋糕體</em></li>
+      <li><strong>單餡雞蛋糕</strong>：<br>2 顆 30元，混區組合價 15元<br><em>檬香、巧克力、奶油、鹹蛋黃、抹茶、紅豆、芝麻、蒜香、梅子花生、草莓</em></li>
+      <li><strong>雙餡雞蛋糕</strong>：<br>2 顆 35元，混區組合價20元<br><em>奶油鹹蛋、雙色乳酪、抹茶紅豆、抹茶巧克力、芝麻巧克力、花生巧克力、玉米濃湯</em></li>
+    </ul>
+
+    <hr style="margin: 2em 0;">
+
+    <h2 style="color: #00796b;">🧋 飲品</h2>
+    <p><strong>外帶自備悲劇折 10 元</strong>！甜度無法調整，冰塊可調整。</p>
+    <ul>
+      <li><strong>冬瓜茶</strong>：<br>外帶 480mL 25元 ／ 內用 240mL 10元</li>
+      <li><strong>冬瓜茶檸檬</strong>：<br>外帶 480mL 30元 ／ 內用 240mL 15元</li>
+      <li><strong>冬瓜鮮奶</strong>：<br>外帶 480mL 45元 ／ 內用 240mL 25元</li>
+      <li><strong>燒仙草（熱）</strong>：<br>外帶 480mL 40元（目前停供）／ 內用 240mL 20元</li>
+    </ul>
+
+    <hr style="margin: 2em 0;">
+
+    <h2 style="color: #6d4c41;">☕ 咖啡</h2>
+    <p><strong>外帶自備悲劇折 10 元</strong>！風味為香氣呈現，全無糖、不提供糖，冰／熱可調。</p>
+
+    <p><strong>先選風味：</strong></p>
+    <ul>
+      <li>經典（烘焙 33%，咖啡因 75mg）</li>
+      <li>低因經典（烘焙 33%，咖啡因 2mg）</li>
+      <li>香草（烘焙 58%，咖啡因 68mg）</li>
+      <li>焦糖（烘焙 58%，咖啡因 68mg）</li>
+      <li>花果（烘焙 16%，咖啡因 69mg）</li>
+      <li>胡椒（烘焙 75%，咖啡因 55mg）</li>
+    </ul>
+
+    <p><strong>再選作法：</strong></p>
+    <ul>
+      <li><strong>美式</strong>：<br>內用 240mL 35元 ／ 外帶 480mL 60元</li>
+      <li><strong>拿鐵</strong>：<br>內用 240mL 55元 ／ 外帶 480mL 95元</li>
+      <li><strong>萌翻拿鐵</strong>：<br>240mL  65元 （限定內用）
+        <br><em>奶泡灑上一隻萌虎巧克力粉圖案。灑成功是萌翻拿鐵，失敗就是憨翻拿鐵，老闆不會重做一杯但會少收10元，所以親愛的萌友們要承擔一點看到憨臉的風險</em> 🐯💥
+      </li>
+    </ul>
+
+    </div>
+</section>
+
+<!-- ✅ 瀏覽人次區塊：使用 vercount.one，穩定顯示人次 -->
+<div style="text-align: center; margin: 2em 0; font-size: 14px;">
+  🐾 來訪萌友第 <span id="busuanzi_value_site_pv">載入中...</span> 位！
+</div>
+
+<script async="" src="https://vercount.one/js"></script>
+
+  
+
+
+
+
+
+<!-- === 點餐/購物車 v1.6.1（內嵌） === -->
+<button id="mh-fab" class="mh-fab">🛒 點餐</button>
+
+<aside id="mh-cart" class="mh-cart" aria-label="購物車">
+  <h4>購物車 <small id="mh-cart-count" class="mh-badge">0</small></h4>
+  <div id="mh-cart-list" class="mh-cart-list"></div>
+  <div id="mh-cart-empty" class="mh-cart-empty">尚無品項</div>
+
+  <div class="mh-total">
+    <div id="mh-summary-text">訂單金額 — 元；滿份折 0 份 0 元；結帳金額 — 元；點數發放 — 點</div>
   </div>
 
-  <div class="overlay" aria-hidden="true">
-    <div class="stack">
-      <button id="orderFab" class="fab" title="打開點餐面板">🛒 點餐</button>
-      <div id="cart" class="cart">
-        <h4>購物車 <small id="cartCount" class="badge">0</small></h4>
-        <div id="cartEmpty" class="cart-empty">尚無品項</div>
-        <div id="cartList" class="cart-list" style="display:none;"></div>
-        <div class="hint">面板開啟時，把滑鼠移到左側即可滾動下層官網。</div>
+  <div class="mh-field"><label for="mh-when">取餐/送達時間（可留空）</label><input id="mh-when" type="datetime-local" class="mh-input"></div>
+  <div class="mh-field"><label for="mh-addr">外送地址（留空＝到店取餐）</label><input id="mh-addr" type="text" class="mh-input" placeholder="苗栗市..."></div>
+  <div class="mh-row-2">
+    <div class="mh-field"><label for="mh-sign">招牌</label><input id="mh-sign" type="text" class="mh-input" placeholder="某某學校、機關"></div>
+    <div class="mh-field"><label for="mh-name">稱呼</label><input id="mh-name" type="text" class="mh-input" placeholder="某先生 / 小姐"></div>
+  </div>
+  <div class="mh-field"><label for="mh-phone">電話</label><input id="mh-phone" type="tel" class="mh-input" placeholder="0912-345678"></div>
+
+  <div class="mh-field">
+    <label for="mh-channel">發送媒介_我們透過通訊軟體點餐</label>
+    <select id="mh-channel" class="mh-select">
+      <option value="LINE|https://reurl.cc/qZAE2y">LINE</option>
+      <option value="FB|https://m.me/menghushao">FB</option>
+    </select>
+  </div>
+
+  <div class="mh-panel-actions">
+    <button id="mh-copy" class="mh-btn">複製訂單</button>
+    <button id="mh-send" class="mh-btn primary">送出訂單</button>
+    <button id="mh-clear" class="mh-btn">清空購物車</button>
+  </div>
+</aside>
+
+<section id="mh-panel" class="mh-panel" aria-hidden="true">
+  <div class="mh-panel-head">
+    <strong>建立訂單小卡</strong>
+    <button id="mh-close" class="mh-btn">關閉</button>
+  </div>
+  <div class="mh-panel-body">
+    <div class="mh-field">
+      <label for="mh-type">品項</label>
+      <select id="mh-type" class="mh-select"><option value="">請選擇</option></select>
+    </div>
+    <div class="mh-row-2">
+      <div class="mh-field">
+        <label for="mh-qty">數量</label>
+        <input id="mh-qty" class="mh-number" type="number" min="1" step="1" value="1" />
+      </div>
+      <div class="mh-field">
+        <label class="mh-label">&nbsp;</label>
+        <div style="font-size:12px;color:#6b7280;"></div>
       </div>
     </div>
-
-    <section id="orderPanel" class="panel" aria-hidden="true">
-      <div class="panel-head">
-        <strong>建立訂單小卡</strong>
-        <button id="closeOrder" class="btn ghost">關閉</button>
+    <div class="mh-row-2">
+      <div class="mh-field">
+        <label for="mh-a">商品</label>
+        <select id="mh-a" class="mh-select"><option value="">商品</option></select>
       </div>
-      <div class="panel-body">
-        <div class="field">
-          <label for="typeSel">品項</label>
-          <select id="typeSel"><option value="">請選擇</option></select>
-        </div>
-        <div class="row-2">
-          <div class="field">
-            <label for="qtyInput">數量</label>
-            <input id="qtyInput" type="number" min="1" step="1" value="1" />
-          </div>
-          <div class="field">
-            <label>&nbsp;</label>
-            <div class="hint">資料來源：gridData.plain.json</div>
-          </div>
-        </div>
-        <div class="row-2">
-          <div class="field">
-            <label for="itemA">商品A</label>
-            <select id="itemA"><option value="">商品A</option></select>
-          </div>
-          <div class="field">
-            <label for="itemB">商品B</label>
-            <select id="itemB"><option value="">商品B</option></select>
-          </div>
-        </div>
-        <div class="field">
-          <label>附項（最多 6）</label>
-          <div class="row-3">
-            <select class="acc"><option value="">附</option></select>
-            <select class="acc"><option value="">附</option></select>
-            <select class="acc"><option value="">附</option></select>
-            <select class="acc"><option value="">附</option></select>
-            <select class="acc"><option value="">附</option></select>
-            <select class="acc"><option value="">附</option></select>
-          </div>
-        </div>
+      <div class="mh-field" id="mh-b-wrap">
+        <label for="mh-b">商品</label>
+        <select id="mh-b" class="mh-select"><option value="">商品</option></select>
       </div>
-      <div class="panel-actions">
-        <button id="addToCartBtn" class="btn primary">加入購物車</button>
-        <button id="resetOrderBtn" class="btn">清空</button>
+    </div>
+    <div class="mh-field">
+      <label class="mh-label">附項（最多 6）</label>
+      <div class="mh-row-3">
+        <select class="mh-select mh-acc"><option value="">附</option></select>
+        <select class="mh-select mh-acc"><option value="">附</option></select>
+        <select class="mh-select mh-acc"><option value="">附</option></select>
+        <select class="mh-select mh-acc"><option value="">附</option></select>
+        <select class="mh-select mh-acc"><option value="">附</option></select>
+        <select class="mh-select mh-acc"><option value="">附</option></select>
       </div>
-    </section>
+    </div>
   </div>
+  <div class="mh-panel-actions">
+    <button id="mh-add" class="mh-btn primary">加入購物車</button>
+    <button id="mh-update" class="mh-btn" style="display:none">更新項目</button>
+    <button id="mh-reset" class="mh-btn">清空</button>
+  </div>
+</section>
 
-  <div class="ver">v0.2.1</div>
 
-  <script>
-    const PLAIN_URL = "https://raw.githubusercontent.com/menghushao/Order-management-product/main/gridData.plain.json";
+<script>
+// === 點餐/購物車 v1.6.1 ===
+(function(){
+  const DATA_URL = "https://raw.githubusercontent.com/menghushao/Order-management-product/main/gridData.plain.json";
+  const PAY_METHOD = "現金";
+  const FULL_SET_COUNT = 12; // 每滿 12 份折 1 份、+1 點
+  const POINT_PER_CASH = 60; // 剩餘金額 60 元 1 點（封頂 9）
+  const REMAINDER_POINTS_CAP = 9;
 
-    let grid = [];
-    let rows = [];
-    let typeToItems = new Map();
-    let itemToAccs = new Map();
-    let cart = [];
+  // State
+  let grid = [];
+  let rows = [];
+  let typeToItems = new Map();
+  let itemRow = new Map(); // name -> row
+  let cashColIndex = -1;
 
-    const orderFab = document.getElementById('orderFab');
-    const orderPanel = document.getElementById('orderPanel');
-    const closeOrder = document.getElementById('closeOrder');
-    const typeSel = document.getElementById('typeSel');
-    const itemASel = document.getElementById('itemA');
-    const itemBSel = document.getElementById('itemB');
-    const accSelects = Array.from(document.querySelectorAll('.acc'));
-    const qtyInput = document.getElementById('qtyInput');
-    const addToCartBtn = document.getElementById('addToCartBtn');
-    const resetOrderBtn = document.getElementById('resetOrderBtn');
-    const cartList = document.getElementById('cartList');
-    const cartEmpty = document.getElementById('cartEmpty');
-    const cartCount = document.getElementById('cartCount');
+  let cart = [];
+  let editingIndex = -1;
 
-    function openPanel(){ orderPanel.classList.add('open'); orderPanel.setAttribute('aria-hidden','false'); }
-    function closePanel(){ orderPanel.classList.remove('open'); orderPanel.setAttribute('aria-hidden','true'); }
-    orderFab.addEventListener('click', openPanel);
-    closeOrder.addEventListener('click', closePanel);
+  // DOM
+  const menuRoot = document.querySelector('#menu-root, main .markdown-body, main, article, .content, .post, .wrap, .container');
+  const fab = document.getElementById('mh-fab');
+  const panel = document.getElementById('mh-panel');
+  const closeBtn = document.getElementById('mh-close');
+  const typeSel = document.getElementById('mh-type');
+  const aSel = document.getElementById('mh-a');
+  const bSel = document.getElementById('mh-b');
+  const bWrap = document.getElementById('mh-b-wrap');
+  const accSelects = Array.from(document.querySelectorAll('.mh-acc'));
+  const qtyInput = document.getElementById('mh-qty');
+  const addBtn = document.getElementById('mh-add');
+  const updateBtn = document.getElementById('mh-update');
+  const resetBtn = document.getElementById('mh-reset');
+  const cartEl = document.getElementById('mh-cart');
+  const cartList = document.getElementById('mh-cart-list');
+  const cartEmpty = document.getElementById('mh-cart-empty');
+  const cartCount = document.getElementById('mh-cart-count');
+  const clearBtn = document.getElementById('mh-clear');
+  const whenInput = document.getElementById('mh-when');
+  const addrInput = document.getElementById('mh-addr');
+  const signInput = document.getElementById('mh-sign');
+  const nameInput = document.getElementById('mh-name');
+  const phoneInput = document.getElementById('mh-phone');
+  const channelSel = document.getElementById('mh-channel');
+  const copyBtn = document.getElementById('mh-copy');
+  const sendBtn = document.getElementById('mh-send');
+  const summaryText = document.getElementById('mh-summary-text');
 
-    function opt(label, value){ const o = document.createElement('option'); o.textContent = label; o.value = value ?? label; return o; }
-    function uniq(arr){ return [...new Set(arr.filter(Boolean))]; }
-    function is2DArray(x){ return Array.isArray(x) && x.every(r => Array.isArray(r)); }
-
-    function normalizePlainData(data){
-      // Accept shapes:
-      // 1) [[...], [...]]  ← array of arrays
-      // 2) { data: [[...]] }
-      // 3) { grid: [[...]] } or { values: [[...]] }
-      if (is2DArray(data)) return data;
-      if (data && is2DArray(data.data)) return data.data;
-      if (data && is2DArray(data.grid)) return data.grid;
-      if (data && is2DArray(data.values)) return data.values;
-      throw new Error('資料格式錯誤');
+  // Positioning
+  function placeAtMenuEdge(el, extraTop){
+    const rect = menuRoot?.getBoundingClientRect?.();
+    if (rect && window.matchMedia('(min-width:1024px)').matches){
+      const left = rect.right + 12;
+      el.style.left = left + 'px';
+      if (typeof extraTop === 'number') el.style.top = `${extraTop}px`;
+    } else {
+      el.style.left = '';
     }
-
-    function buildMaps(){
-      rows = grid.slice(10, 106); // 0-based: 11..106 → 10..105; end index exclusive → 106
-      typeToItems = new Map();
-      itemToAccs = new Map();
-
-      for(const r of rows){
-        const type = (r?.[0] || '').trim();
-        const item = (r?.[1] || '').trim();
-        if(!type || !item) continue;
-        if(!typeToItems.has(type)) typeToItems.set(type, []);
-        typeToItems.get(type).push(item);
-
-        const accs = uniq((r.slice(5,15) || []).map(x => (x||'').trim()).filter(Boolean));
-        if(accs.length) itemToAccs.set(item, accs);
-      }
-      for(const [k,v] of typeToItems.entries()) typeToItems.set(k, uniq(v));
+  }
+  function placeAll(){
+    if (window.matchMedia('(max-width:1023.98px)').matches){
+      cartEl.classList.remove('open'); return;
     }
+    placeAtMenuEdge(fab, 14);
+    placeAtMenuEdge(cartEl, 64);
+  }
+  window.addEventListener('resize', placeAll);
+  window.addEventListener('scroll', placeAll);
 
-    function fillTypeSelect(){
-      typeSel.innerHTML = ''; typeSel.append(opt('請選擇',''));
-      [...typeToItems.keys()].forEach(t => typeSel.append(opt(t,t)));
-    }
-    function fillItemAB(type){
-      const items = typeToItems.get(type) || [];
-      const build = (sel, title) => { sel.innerHTML=''; sel.append(opt(title,'')); items.forEach(i => sel.append(opt(i,i))); };
-      build(itemASel, '商品A'); build(itemBSel, '商品B');
-      updateAccessoryOptions();
-    }
-    function updateAccessoryOptions(){
-      const finalProduct = itemBSel.value || itemASel.value || '';
-      const options = uniq(itemToAccs.get(finalProduct) || []);
-      accSelects.forEach(sel => {
-        const keep = sel.value;
-        sel.innerHTML=''; sel.append(opt('附',''));
-        options.forEach(x => sel.append(opt(x,x)));
-        if(keep && options.includes(keep)) sel.value = keep;
-      });
-    }
-    typeSel.addEventListener('change', e => fillItemAB(e.target.value));
-    itemASel.addEventListener('change', updateAccessoryOptions);
-    itemBSel.addEventListener('change', updateAccessoryOptions);
+  // Panel
+  function openPanel(){ panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); }
+  function closePanel(){ panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); editingIndex=-1; updateBtn.style.display='none'; addBtn.style.display=''; }
+  fab.addEventListener('click', openPanel);
+  closeBtn.addEventListener('click', closePanel);
 
-    function summarizeName(type,a,b,accs){
-      let base='';
+  // Helpers
+  function opt(label, value){ const o=document.createElement('option'); o.textContent=label; o.value=value??label; return o; }
+  function uniq(arr){ return [...new Set(arr.filter(Boolean))]; }
+  function is2DArray(x){ return Array.isArray(x) && x.every(r => Array.isArray(r)); }
+  function normalize(data){
+    if (is2DArray(data)) return data;
+    if (data && is2DArray(data.data)) return data.data;
+    if (data && is2DArray(data.grid)) return data.grid;
+    if (data && is2DArray(data.values)) return data.values;
+    throw new Error('資料格式錯誤');
+  }
+  function findCashColumn(){
+    const hdr = grid[6] || []; // 依你資料表結構
+    for (let j=0;j<hdr.length;j++){
+      const s = (hdr[j]||'').toString().trim();
+      if (s.includes('現金')) return j;
+    }
+    return -1;
+  }
+  function cashPrice(row){
+    let idx = cashColIndex;
+    if (idx>=0 && idx<row.length){
+      const v = row[idx];
+      const n = parseFloat((''+v).replace(/[^0-9.]/g,''));
+      if (isFinite(n)) return n;
+    }
+    // 後備：找本列第一個「...元」或數字
+    for (let i=0;i<row.length;i++){
+      const s=(''+row[i]);
+      const m=s.match(/([0-9]{1,5})\s*元/);
+      if (m) return parseFloat(m[1]);
+    }
+    for (let i=0;i<row.length;i++){
+      const n=parseFloat((''+row[i]).replace(/[^0-9.]/g,''));
+      if (isFinite(n) && n>0) return n;
+    }
+    return 0;
+  }
+  function perPortion(row){
+    const v = row[30]; // AE 欄
+    const n = parseFloat((''+v).replace(/[^0-9.]/g,''));
+    return isFinite(n) && n>0 ? n : 1;
+  }
+  function allowFullSet(row){
+    const v = row[31]; // AF 欄，是否可參與滿份折
+    const s = (v||'').toString().trim();
+    if (!s) return true;
+    return !(['否','不','0','N','n','false'].includes(s));
+  }
+
+  // Build maps
+  function buildMaps(){
+    rows = grid.slice(10, 200); // 菜單主體
+    typeToItems = new Map();
+    itemRow = new Map();
+    for(const r of rows){
+      const type = (r?.[0] || '').toString().trim();
+      const item = (r?.[1] || '').toString().trim();
+      if(!type || !item) continue;
+      if(!typeToItems.has(type)) typeToItems.set(type, []);
+      typeToItems.get(type).push(item);
+      if(!itemRow.has(item)) itemRow.set(item, r);
+    }
+    for(const [k,v] of typeToItems.entries()) typeToItems.set(k, uniq(v));
+    cashColIndex = findCashColumn();
+  }
+
+  function fillType(){
+    typeSel.innerHTML=''; typeSel.append(opt('請選擇',''));
+    [...typeToItems.keys()].forEach(t => typeSel.append(opt(t,t)));
+  }
+  function fillAB(type){
+    const items = typeToItems.get(type) || [];
+    aSel.innerHTML=''; aSel.append(opt('商品',''));
+    bSel.innerHTML=''; bSel.append(opt('商品',''));
+    items.forEach(i => { aSel.append(opt(i,i)); bSel.append(opt(i,i)); });
+    if (type === '雞蛋糕'){ bWrap.style.display=''; } else { bWrap.style.display='none'; bSel.value=''; }
+  }
+  typeSel.addEventListener('change', e => fillAB(e.target.value));
+
+  // Accessory options (可留空；此版先不影響計價)
+  function updateAccessoryOptions(){/* 留作擴充 */}
+  aSel.addEventListener('change', updateAccessoryOptions);
+  bSel.addEventListener('change', updateAccessoryOptions);
+
+  // Summaries
+  function summarizeName(type,a,b,accs){
+    let base='';
+    if(type==='雞蛋糕'){
       if(a && b) base = [a,b].sort().join('+');
-      else if(a && !b) base = (type === '雞蛋糕') ? (a + '+' + a) : a;
-      else if(!a && b) base = b;
-      const ext = accs.length ? '('+accs.join('+')+')' : '';
-      return base + ext;
+      else if(a) base = a + '+' + a;
+      else if(b) base = b + '+' + b;
+    }else{
+      base = a || b || '';
     }
-    function renderCart(){
-      cartCount.textContent = String(cart.length);
-      if(!cart.length){ cartEmpty.style.display=''; cartList.style.display='none'; cartList.innerHTML=''; return; }
-      cartEmpty.style.display='none'; cartList.style.display='grid'; cartList.innerHTML='';
-      cart.forEach((it, idx) => {
-        const row = document.createElement('div'); row.className='cart-item';
-        const top = document.createElement('div'); top.className='top';
-        const title = document.createElement('div'); title.className='name'; title.textContent = it.title + ' × ' + it.qty;
-        const del = document.createElement('button'); del.className='del'; del.textContent='刪除';
-        del.addEventListener('click', () => { cart.splice(idx,1); renderCart(); });
-        top.append(title, del);
-        const meta = document.createElement('div'); meta.className='meta';
-        meta.textContent = '品項：' + it.type + (it.a? '；A：'+it.a : '') + (it.b? '；B：'+it.b : '') + (it.accs.length? '；附：'+it.accs.join('、') : '');
-        row.append(top, meta); cartList.appendChild(row);
-      });
-    }
-    addToCartBtn.addEventListener('click', () => {
-      const type = typeSel.value.trim();
-      const qty = Math.max(1, parseInt(qtyInput.value||'1',10));
-      const a = itemASel.value.trim();
-      const b = itemBSel.value.trim();
-      if(!type || (!a && !b)){ alert('請至少選擇「品項」與「商品A 或 商品B」其一。'); return; }
-      const accs = accSelects.map(s => s.value.trim()).filter(Boolean);
-      const title = summarizeName(type,a,b,accs);
-      cart.push({ type, qty, a, b, accs, title }); renderCart();
-      itemASel.value=''; itemBSel.value=''; accSelects.forEach(s=>s.value=''); qtyInput.value=1;
-    });
-    resetOrderBtn.addEventListener('click', () => {
-      typeSel.value=''; fillItemAB(''); accSelects.forEach(s=>s.value=''); qtyInput.value=1;
-    });
+    const ext = accs?.length ? '('+accs.join('+')+')' : '';
+    return base + ext;
+  }
 
-    (async function init(){
-      try{
-        const res = await fetch(PLAIN_URL, { cache: 'no-store' });
-        if(!res.ok) throw new Error('HTTP ' + res.status);
-        const raw = await res.json();
-        grid = normalizePlainData(raw);
-        if(!is2DArray(grid)) throw new Error('資料格式錯誤');
-        buildMaps(); fillTypeSelect();
-      }catch(err){
-        console.error(err);
-        alert('載入菜單資料失敗：' + (err.message||''));
+  // Compute portion prices list according to store logic
+  function buildPortionsFromCart(){
+    const portions = []; // each = {price, eligibleForFullSet: bool}
+    for(const it of cart){
+      const {type, a, b, qty} = it;
+      if (!a && !b) continue;
+      const rowA = itemRow.get(a) || [];
+      const rowB = itemRow.get(b) || [];
+      const pA = a ? cashPrice(rowA) : 0;
+      const pB = b ? cashPrice(rowB) : 0;
+      const perA = a ? perPortion(rowA) : 0;
+      const perB = b ? perPortion(rowB) : 0;
+      const allowA = a ? allowFullSet(rowA) : false;
+      const allowB = b ? allowFullSet(rowB) : false;
+
+      let portionPrice = 0;
+      let eligible = true;
+
+      if (type === '雞蛋糕'){
+        // 以 AE 為 2 份為常態：A+B 或 單 A 視為 1 份
+        if (a && b){
+          // 若兩品項 AE 都在，取平均拆分；一般來說 AE=2
+          if (perA && perB && perA===perB && perA===2){
+            portionPrice = pA + pB;
+          }else{
+            // 通用：一份的總單價= (pA * perA/2) + (pB * perB/2)
+            const aPart = perA ? pA * (perA/2) : 0;
+            const bPart = perB ? pB * (perB/2) : 0;
+            portionPrice = aPart + bPart;
+          }
+          eligible = allowA && allowB;
+        }else if (a){
+          if (perA>=2) portionPrice = pA * (perA); else portionPrice = pA*2;
+          eligible = allowA;
+        }else if (b){
+          if (perB>=2) portionPrice = pB * (perB); else portionPrice = pB*2;
+          eligible = allowB;
+        }
+      }else{
+        // 非雞蛋糕：單一商品為一份，份價 = 單價 * AE（若 AE=1 就是單價）
+        const row = rowA || rowB;
+        const p = (a? pA : pB);
+        const per = perPortion(row);
+        portionPrice = p * (per || 1);
+        eligible = allowFullSet(row);
       }
-    })();
-  </script>
-</body>
-</html>
+
+      // 把 qty 份推入
+      for(let i=0;i<qty;i++){
+        portions.push({price: portionPrice, eligible});
+      }
+    }
+    return portions;
+  }
+
+  function calculateOrderTotals(){
+    const portions = buildPortionsFromCart();
+    const allPrices = portions.map(p=>p.price);
+    const orderAmount = allPrices.reduce((s,x)=>s+x,0);
+
+    // 可折參與的部分（只取 eligible=true 的份）
+    const discountCandidates = portions.filter(p=>p.eligible).map(p=>p.price).sort((a,b)=>b-a); // 高到低
+    const groups = Math.floor(discountCandidates.length / FULL_SET_COUNT);
+    let discount = 0;
+    for(let g=0; g<groups; g++){
+      const start = g*FULL_SET_COUNT;
+      const group = discountCandidates.slice(start, start+FULL_SET_COUNT).sort((a,b)=>a-b); // 升冪取最便宜
+      discount += (group[0] || 0);
+    }
+    const payable = Math.max(0, orderAmount - discount);
+
+    // 點數：每滿 12 份 +1 點；剩餘用金額 60 元 1 點、封頂 9
+    const portionsCount = portions.length;
+    const cyclePoints = Math.floor(portionsCount / FULL_SET_COUNT) * 1;
+    const remainderCount = portionsCount % FULL_SET_COUNT;
+    // 取「剩餘份」的金額：我們用參與排序後剩下的尾巴估算
+    const leftoverPrices = discountCandidates.slice(groups*FULL_SET_COUNT);
+    // 但「剩餘份」應該是整體剩下的份（不只可折的）；保守估算，用所有份數價格排序後尾巴的 remainderCount 個
+    const allSorted = allPrices.slice().sort((a,b)=>b-a);
+    const leftoverAll = allSorted.slice(groups*FULL_SET_COUNT).slice(0, remainderCount);
+    const leftoverAmount = leftoverAll.reduce((s,x)=>s+x,0);
+    const remainderPoints = Math.min(REMAINDER_POINTS_CAP, Math.floor(leftoverAmount / POINT_PER_CASH));
+    const points = cyclePoints + remainderPoints;
+
+    return {
+      orderAmount: Math.round(orderAmount),
+      discountGroups: groups,
+      discountAmount: Math.round(discount),
+      payable: Math.round(payable),
+      points
+    };
+  }
+
+  function renderSummary(){
+    const t = calculateOrderTotals();
+    summaryText.textContent = `訂單金額 ${t.orderAmount} 元；滿份折 ${t.discountGroups} 份 ${t.discountAmount} 元；結帳金額 ${t.payable} 元；點數發放 ${t.points} 點`;
+  }
+
+  function renderCart(){
+    cartCount.textContent = String(cart.length);
+    cartList.innerHTML='';
+    if(!cart.length){ cartEmpty.style.display=''; renderSummary(); return; }
+    cartEmpty.style.display='none';
+    cart.forEach((it, idx) => {
+      const row = document.createElement('div'); row.className='mh-cart-item';
+      const title = document.createElement('div'); title.className='mh-name'; title.textContent = `${it.title} × ${it.qty}`;
+      const actions = document.createElement('div'); actions.className='mh-actions';
+      const edit = document.createElement('button'); edit.className='mh-edit'; edit.textContent='編輯';
+      const del = document.createElement('button'); del.className='mh-del'; del.textContent='刪除';
+      edit.addEventListener('click', () => {
+        editingIndex = idx;
+        addBtn.style.display='none'; updateBtn.style.display=''; openPanel();
+        typeSel.value = it.type; fillAB(it.type);
+        aSel.value = it.a || ''; bSel.value = it.b || '';
+        accSelects.forEach((s,i)=> s.value = it.accs?.[i] || '');
+        qtyInput.value = it.qty;
+      });
+      del.addEventListener('click', ()=>{ cart.splice(idx,1); renderCart(); });
+      actions.append(edit, del);
+      row.append(title, actions);
+      cartList.appendChild(row);
+    });
+    renderSummary();
+  }
+
+  function currentAccs(){ return accSelects.map(s => s.value.trim()).filter(Boolean); }
+
+  addBtn.addEventListener('click', () => {
+    const type = typeSel.value.trim();
+    const qty = Math.max(1, parseInt(qtyInput.value||'1',10));
+    const a = aSel.value.trim();
+    const b = bSel.value.trim();
+    if(!type || (!a && !b)){ alert('請至少選擇「品項」與「商品」其一。'); return; }
+    const accs = currentAccs();
+    const title = summarizeName(type,a,b,accs);
+    cart.push({ type, qty, a, b, accs, title });
+    aSel.value=''; bSel.value=''; accSelects.forEach(s=>s.value=''); qtyInput.value=1;
+    renderCart();
+    if (window.matchMedia('(max-width:1023.98px)').matches){ cartEl.classList.add('open'); }
+  });
+
+  updateBtn.addEventListener('click', () => {
+    if (editingIndex<0) return;
+    const type = typeSel.value.trim();
+    const qty = Math.max(1, parseInt(qtyInput.value||'1',10));
+    const a = aSel.value.trim();
+    const b = bSel.value.trim();
+    const accs = currentAccs();
+    const title = summarizeName(type,a,b,accs);
+    cart[editingIndex] = { type, qty, a, b, accs, title };
+    editingIndex = -1;
+    addBtn.style.display=''; updateBtn.style.display='none';
+    renderCart(); closePanel();
+  });
+
+  resetBtn.addEventListener('click', () => {
+    typeSel.value=''; fillAB(''); accSelects.forEach(s=>s.value=''); qtyInput.value=1;
+    editingIndex = -1; addBtn.style.display=''; updateBtn.style.display='none';
+  });
+  clearBtn.addEventListener('click', () => { cart = []; renderCart(); });
+
+  // Message compose
+  function formatDate(dt){
+    try{
+      const d = new Date(dt);
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,'0');
+      const day = String(d.getDate()).padStart(2,'0');
+      const hh = String(d.getHours()).padStart(2,'0');
+      const mm = String(d.getMinutes()).padStart(2,'0');
+      return `${y}/${m}/${day} ${hh}:${mm}`;
+    }catch(e){ return ''; }
+  }
+  function orderItemsText(){ return cart.map(it => `${it.title} × ${it.qty}`).join('；'); }
+  function buildMessage(){
+    const itemsText = orderItemsText() || '（尚未選擇商品）';
+    const whenText = whenInput.value ? formatDate(whenInput.value) : '';
+    const addr = addrInput.value.trim();
+    const sign = signInput.value.trim();
+    const name = nameInput.value.trim();
+    const phone = phoneInput.value.trim();
+    let header = '';
+    if (addr && sign){
+      header = `請幫我外送到(${addr})(${sign})(${name||''})(${phone||''})`;
+      if (whenText) header += ` 請在 ${whenText} 送達`;
+    }else{
+      const nh = (name? `${name}` : '') + (phone? ` / ${phone}` : '');
+      header = nh? `（${nh}）` : '';
+      if (whenText) header += (header? ' ' : '') + `預計 ${whenText} 取餐`;
+    }
+    const t = calculateOrderTotals();
+    const summary = `訂單金額 ${t.orderAmount} 元；滿份折 ${t.discountGroups} 份 ${t.discountAmount} 元；結帳金額 ${t.payable} 元；點數發放 ${t.points} 點`;
+    return `老闆你好，我要 ${itemsText} ，${summary}。${header ? ' ' + header : ''}`;
+  }
+  async function copyMessage(){
+    const msg = buildMessage();
+    try{
+      await navigator.clipboard.writeText(msg);
+      alert('訂單內容已複製到剪貼簿，可直接貼上對話視窗。');
+    }catch(e){
+      const ta = document.createElement('textarea'); ta.value = msg; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); ta.remove();
+      alert('已嘗試複製到剪貼簿。');
+    }
+  }
+  copyBtn.addEventListener('click', copyMessage);
+  sendBtn.addEventListener('click', async () => {
+    await copyMessage();
+    const [type, url] = channelSel.value.split('|');
+    window.open(url, '_blank');
+  });
+
+  // Bootstrap
+  (async function init(){
+    try{
+      const res = await fetch(DATA_URL, { cache: 'no-store' });
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      const raw = await res.json();
+      grid = normalize(raw);
+      buildMaps(); fillType(); placeAll();
+    }catch(err){
+      console.error(err);
+      alert('載入菜單資料失敗：' + (err.message||''));
+    }
+  })();
+})();
+</script>
+
+</body></html>
