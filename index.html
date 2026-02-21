@@ -54,10 +54,19 @@ body{
   display:flex;
   align-items:center;
   justify-content:space-between;
+
+  gap:12px;
+  min-width:0;
 }
 .title{
   font-size:20px;
   font-weight:700;
+
+  display:flex;
+  align-items:center;
+  flex:1 1 auto;
+  min-width:0;
+  overflow:hidden;
 }
 .toggle-btn{
   background:none;
@@ -66,6 +75,10 @@ body{
   padding:6px 18px;
   cursor:pointer;
   min-height:36px;
+
+  flex:0 0 auto;
+  white-space:nowrap;
+  transform:none;
 }
 
 /* ===== Page ===== */
@@ -107,6 +120,27 @@ input[type=number]{
   padding:4px 6px;
   width:90px;
 }
+
+/* ===== Logo strip（不撐破BAR） ===== */
+.logo-strip{
+  display:flex;
+  align-items:center;
+  gap:0.35em;
+  overflow:hidden;
+  white-space:nowrap;
+  max-width:100%;
+
+  min-width:0;
+  flex:1 1 auto;
+}
+.logo-strip img{
+  width:2em;
+  height:2em;
+  border-radius:3px;
+  display:block;
+  flex:0 0 auto;
+}
+
 </style>
 </head>
 
@@ -115,7 +149,7 @@ input[type=number]{
 <!-- ===== BAR ===== -->
 <div class="topbar">
   <div class="wrap">
-    <div class="title">萌虎燒</div>
+    <div class="title"><div id="logoStrip" class="logo-strip" aria-label="logo strip"></div></div>
     <button id="toggleBtn" class="toggle-btn">↪︎ 菜單</button>
   </div>
 </div>
@@ -242,6 +276,53 @@ distanceInput.addEventListener("input", () => {
   else amount = 300 + (km - 3) * 150;
   deliveryMsg.textContent = ` 需滿 ${amount} 元，請先聯繫店家評估`;
 });
+
+/* ===== Logo strip render（每張往右+30°，自動不撐破BAR） ===== */
+(function(){
+  const LOGO_URL = "https://github.com/menghushao/MENU/blob/main/%E4%BA%8C%E4%BB%A3%E8%99%8E%E9%A0%AD%E5%8E%BB%E8%83%8C(%E7%99%BD).png?raw=true";
+  const strip = document.getElementById("logoStrip");
+  const btn = document.getElementById("toggleBtn");
+
+  function renderStrip(){
+    if(!strip) return;
+
+    // 以 topbar 內的 .wrap 寬度作為可用區域，扣掉按鈕寬度
+    const wrap = strip.closest(".wrap");
+    const total = wrap ? wrap.clientWidth : strip.parentElement.clientWidth;
+    const btnW = btn ? Math.ceil(btn.getBoundingClientRect().width) : 0;
+    const safe = 24; // 安全邊距
+    const usable = Math.max(0, total - btnW - safe);
+
+    // 每張圖片占用寬度（含 gap），用 em 換算避免不同字級不準
+    const em = parseFloat(getComputedStyle(document.documentElement).fontSize || "16") || 16;
+    const imgW = 2 * em;     // 2em
+    const gap = 0.35 * em;   // 0.35em
+    const per = imgW + gap;
+
+    const count = Math.max(1, Math.floor(usable / per));
+
+    strip.innerHTML = "";
+    for(let i=0;i<count;i++){
+      const img = document.createElement("img");
+      img.src = LOGO_URL;
+      img.alt = "logo";
+      img.style.transform = `rotate(${i * 30}deg)`;
+      strip.appendChild(img);
+    }
+
+    strip.style.maxWidth = usable + "px";
+  }
+
+  // 初次 + resize 重新算
+  window.addEventListener("load", renderStrip, { once: true });
+  window.addEventListener("resize", renderStrip);
+  try{
+    const ro = new ResizeObserver(renderStrip);
+    ro.observe(document.body);
+  }catch(e){}
+  renderStrip();
+})();
+
 </script>
 
 </body>
