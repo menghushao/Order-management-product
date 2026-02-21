@@ -15,6 +15,9 @@
   --wood:#7a4a24;
   --wood-dark:#5a3518;
   --text:#f4f1e9;
+
+  /* ===== 旋轉游標：轉一圈時間（原本 2.4s） ===== */
+  --cursor-spin-speed: 2.4s;
 }
 
 /* ===== 基礎 ===== */
@@ -79,7 +82,7 @@ body{
   border:2px solid var(--text);
   color:var(--text);
   padding:6px 18px;
-  cursor:pointer; /* 這裡仍然保留 pointer，避免你想要 hover 變手指時可改用區域化啟用 */
+  cursor:pointer; /* 保留 */
   min-height:36px;
 
   flex:0 0 auto;
@@ -147,7 +150,7 @@ input[type=number]{
   flex:0 0 auto;
 }
 
-/* ===== 自訂旋轉游標（一直轉） ===== */
+/* ===== 自訂旋轉游標（永遠旋轉 + 按住放大 + 左右晃動） ===== */
 #spinCursor{
   position: fixed;
   left: 0;
@@ -159,13 +162,45 @@ input[type=number]{
   pointer-events: none; /* 不要擋點擊/拖曳 */
   display: none;        /* 等滑鼠進來才顯示 */
 }
-#spinCursor img{
-  width: 100%;
-  height: 100%;
-  display: block;
-  animation: spinCursorRot 2.4s linear infinite;
+
+/* 外層 wrapper：專門處理「放大」與「晃動」 */
+#spinCursor .cursorWrap{
+  width:100%;
+  height:100%;
+  display:block;
+
+  transition:
+    transform 120ms ease-out,
+    filter 120ms ease-out;
+
   filter: drop-shadow(0 0 2px rgba(0,0,0,.35));
 }
+
+/* 內層 img：永遠只負責旋轉（不要跟放大/晃動搶 transform） */
+#spinCursor .cursorImg{
+  width:100%;
+  height:100%;
+  display:block;
+
+  animation: spinCursorRot var(--cursor-spin-speed) linear infinite;
+}
+
+/* 左右晃動（幅度很小） */
+@keyframes cursorWiggle{
+  0%   { transform: translateX(0); }
+  25%  { transform: translateX(-2px); }
+  50%  { transform: translateX(2px); }
+  75%  { transform: translateX(-1px); }
+  100% { transform: translateX(0); }
+}
+
+/* ✅ 按住狀態：放大 + 晃動（旋轉照常在 img 上跑） */
+#spinCursor.hold .cursorWrap{
+  transform: scale(10);
+  filter: drop-shadow(0 0 6px rgba(255,255,255,.55));
+  animation: cursorWiggle 0.18s ease-in-out infinite;
+}
+
 @keyframes spinCursorRot{
   to{ transform: rotate(360deg); }
 }
@@ -275,9 +310,11 @@ input[type=number]{
   </div>
 </div>
 
-<!-- ===== 旋轉游標 DOM ===== -->
+<!-- ===== 旋轉游標 DOM（✅ 多一層 wrapper，解決 transform 打架） ===== -->
 <div id="spinCursor" aria-hidden="true">
-  <img id="spinCursorImg" alt="">
+  <div class="cursorWrap">
+    <img id="spinCursorImg" class="cursorImg" alt="">
+  </div>
 </div>
 
 <script>
@@ -314,17 +351,15 @@ distanceInput.addEventListener("input", () => {
   function renderStrip(){
     if(!strip) return;
 
-    // 以 topbar 內的 .wrap 寬度作為可用區域，扣掉按鈕寬度
     const wrap = strip.closest(".wrap");
     const total = wrap ? wrap.clientWidth : strip.parentElement.clientWidth;
     const btnW = btn ? Math.ceil(btn.getBoundingClientRect().width) : 0;
-    const safe = 24; // 安全邊距
+    const safe = 24;
     const usable = Math.max(0, total - btnW - safe);
 
-    // 每張圖片占用寬度（含 gap），用 em 換算避免不同字級不準
     const em = parseFloat(getComputedStyle(document.documentElement).fontSize || "16") || 16;
-    const imgW = 2 * em;     // 2em
-    const gap = 0.35 * em;   // 0.35em
+    const imgW = 2 * em;
+    const gap = 0.35 * em;
     const per = imgW + gap;
 
     const count = Math.max(1, Math.floor(usable / per));
@@ -341,7 +376,6 @@ distanceInput.addEventListener("input", () => {
     strip.style.maxWidth = usable + "px";
   }
 
-  // 初次 + resize 重新算
   window.addEventListener("load", renderStrip, { once: true });
   window.addEventListener("resize", renderStrip);
   try{
@@ -351,7 +385,7 @@ distanceInput.addEventListener("input", () => {
   renderStrip();
 })();
 
-/* ===== 旋轉游標（在官網內一直轉） ===== */
+/* ===== 旋轉游標（在官網內一直轉 + 按住放大 + 左右晃動） ===== */
 (function(){
   const CURSOR_URL = "https://github.com/menghushao/MENU/blob/main/%E4%BA%8C%E4%BB%A3%E8%99%8E%E9%A0%AD%E5%8E%BB%E8%83%8C(%E7%99%BD).png?raw=true";
   const c = document.getElementById("spinCursor");
@@ -362,7 +396,6 @@ distanceInput.addEventListener("input", () => {
 
   const isFinePointer = window.matchMedia && window.matchMedia("(pointer:fine)").matches;
   if(!isFinePointer){
-    // 手機/平板通常沒游標，直接不啟用（也避免擋觸控）
     document.body.style.cursor = "auto";
     return;
   }
@@ -377,6 +410,8 @@ distanceInput.addEventListener("input", () => {
   function hide(){
     shown = false;
     c.style.display = "none";
+    c.classList.remove("hold");
+    document.documentElement.style.setProperty("--cursor-spin-speed", NORMAL_SPEED);
   }
 
   window.addEventListener("mousemove", (e) => {
@@ -388,7 +423,27 @@ distanceInput.addEventListener("input", () => {
   window.addEventListener("mouseenter", show, { passive:true });
   window.addEventListener("mouseleave", hide, { passive:true });
 
-  // 切到別的分頁先隱藏，避免回來位置怪
+  // ===== 按住放大（可順便加速旋轉）=====
+  const NORMAL_SPEED = "3.6s";  // 你原本速度
+  const HOLD_SPEED   = "3.6s"; // 按住時速度（要不要加速你可改成同樣 2.4s）
+  document.documentElement.style.setProperty("--cursor-spin-speed", NORMAL_SPEED);
+
+  function holdOn(){
+    c.classList.add("hold");
+    document.documentElement.style.setProperty("--cursor-spin-speed", HOLD_SPEED);
+  }
+  function holdOff(){
+    c.classList.remove("hold");
+    document.documentElement.style.setProperty("--cursor-spin-speed", NORMAL_SPEED);
+  }
+
+  window.addEventListener("mousedown", holdOn);
+  window.addEventListener("mouseup", holdOff);
+
+  // 防止卡住（按住拖出視窗 / alt-tab）
+  window.addEventListener("blur", holdOff);
+  window.addEventListener("mouseleave", holdOff);
+
   document.addEventListener("visibilitychange", () => {
     if(document.hidden) hide();
   });
