@@ -1,2118 +1,239 @@
-<!DOCTYPE html>
-<html lang="zh-Hant"><head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>萌虎燒 官方網頁| 雞蛋糕・甜點・下午茶 </title>
-  <meta name="description" content="萌虎燒是苗栗市的現點現做雞蛋糕專賣店，提供多種創意口味與飲品，支援外送與線上點餐。">
-  <meta name="keywords" content="萌虎燒,雞蛋糕,苗栗雞蛋糕,甜點,下午茶,苗栗點心,萌虎燒菜單,萌虎燒訂購">
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>萌虎燒 官方網頁| 雞蛋糕・甜點・下午茶</title>
 
 <style>
-/* === v1.7.5 (mobile/desktop polish + cart toggle + badge) === */
+/* ========= 主題色 ========= */
 :root{
-  --mh-muted:#4b5563; --mh-text:#111827; --mh-line:#e5e7eb; --mh-card:#ffffff;
-  --mh-accent:#3b82f6;
-  --mh-cart-bg:#f5ede3;        /* 淡咖啡底 */
-  --mh-cart-text:#2b1d14;      /* 深咖啡字 */
-}
-.mh-fab, .mh-panel, .mh-cart { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", Arial; }
-.mh-fab{
-  position: fixed; z-index: 10001; background: linear-gradient(180deg, #60a5fa, #3b82f6);
-  color:#fff; border:0; border-radius:999px; padding:10px 14px; font-size:14px; cursor:pointer;
-  box-shadow:0 6px 24px rgba(59,130,246,.35);
-}
-#mh-fab{}
-#mh-cart-fab{
-  position: fixed; z-index: 10003; background: linear-gradient(180deg, #a7805a, #8b6a49); color:#fff;
-  border:0; border-radius:999px; padding:10px 14px; font-size:14px; box-shadow:0 6px 24px rgba(0,0,0,.25);
-}
-/* badge on cart fab */
-#mh-cart-fab{ position: fixed; }
-#mh-cart-fab-badge{
-  position:absolute; top:-6px; right:-6px; min-width:18px; height:18px; padding:0 4px;
-  border-radius:999px; background:#ef4444; color:#fff; font-size:12px; line-height:18px; text-align:center;
-  display:none; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,.2);
-}
-/* Cart drawer */
-.mh-cart{
-  position: fixed; z-index: 10000;
-  top: 64px; left: 50%; width: 360px; background: var(--mh-cart-bg);
-  border:1px solid #e1d5c7; border-radius:16px; padding:12px;
-  display:grid; gap:10px; max-height:72vh; overflow:auto; color: var(--mh-cart-text);
-  box-shadow: 0 10px 24px rgba(0,0,0,.12);
-  opacity:0; visibility:hidden; pointer-events:none; transition: opacity .2s ease, transform .22s ease;
-}
-.mh-cart.open{ opacity:1; visibility:visible; pointer-events:auto; }
-.mh-cart h4{ margin:0; font-size:15px; display:flex; align-items:center; justify-content:space-between; gap:8px; color: var(--mh-cart-text); }
-.mh-badge{ font-size:12px; padding:2px 8px; border-radius:999px; background:#efe4d7; color:#5b402d; border:1px solid #e1d5c7; }
-.mh-cart-empty{ color:#6b4f3f; font-size:13px; }
-.mh-cart-list{ display:grid; gap:10px; }
-.mh-cart-item{ border:1px solid #e1d5c7; border-radius:12px; padding:10px; background:#fffdf9; display:flex; align-items:center; justify-content:space-between; gap:8px; }
-.mh-name{ font-size:14px; color:#2b1d14; }
-.mh-del, .mh-edit, .mh-close{ background:#fff; border:1px solid #d9cbbb; color:#533b2a; border-radius:10px; padding:6px 8px; cursor:pointer; font-size:12px; }
-.mh-btn{ padding:10px 14px; border-radius:10px; border:1px solid #cbd5e1; background:#f8fafc; color:#111827; cursor:pointer; }
-.mh-btn.primary{ background: linear-gradient(180deg, #60a5fa, #3b82f6); border:none; color:#fff; }
-.mh-field label{ font-size:12px; color:#6b7280; display:block; margin:0 0 4px; }
-.mh-input, .mh-select, .mh-number { width:100%; padding:8px 10px; border-radius:10px; border:1px solid #cbd5e1; background:#fff; color:#111827; font-size:14px; }
-.mh-row-2{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-.mh-row-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-.mh-total{ padding:10px; border:1px dashed #d1d5db; border-radius:10px; font-size:14px; color:#111827; background:#f4ece4; }
-.mh-total small{ color:#6b7280; }
-
-/* Panel */
-.mh-panel{
-  position: fixed; right: -420px; top: 0; height: 100vh; width: 400px;
-  background: #ffffff; border-left:1px solid #e5e7eb; box-shadow:-10px 0 40px rgba(0,0,0,.08);
-  transition:right .22s ease; display:grid; grid-template-rows:auto 1fr auto; overflow:hidden; color:#111827; z-index: 10002;
-}
-.mh-panel.open{ right:0; }
-.mh-panel-head{ padding:12px 14px; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; justify-content:space-between; gap:8px; background:#f8fafc; }
-.mh-panel-body{ padding:12px 14px; overflow:auto; }
-.mh-panel .mh-panel-actions{ display:none; } /* hidden in both views; we use inline actions */
-.mh-actions-inline{
-  position: sticky; bottom: 0; z-index: 2; display:flex; gap:8px; padding:10px 12px; background:#ffffff; border-top:1px solid #e5e7eb;
-}
-.mh-actions-inline .mh-btn{ flex:1; min-height:44px; }
-
-/* Mobile */
-@media (max-width:1023.98px){
-  .mh-fab{ right:12px; bottom:64px; left:auto; top:auto; transform:none; }
-  #mh-cart-fab{ right:12px; bottom:12px; left:auto; top:auto; }
-  .mh-panel{
-    left:0; right:0; width:100vw; bottom:0; top:auto; height:auto; max-height:86vh;
-    border-left:none; border-top:1px solid #e5e7eb; border-radius:12px 12px 0 0;
-    transform: translateY(110%); transition: transform .22s ease; box-shadow: 0 -10px 24px rgba(0,0,0,.12);
-  }
-  .mh-panel.open{ transform: translateY(0); }
-  .mh-panel-body{ max-height: calc(86vh - 92px); overflow:auto; -webkit-overflow-scrolling: touch; }
-  .mh-cart{ left:0; right:0; top:auto; bottom:0; width:auto; max-height:60vh; border-radius:12px 12px 0 0; transform: translateY(100%); }
-  .mh-cart.open{ transform: translateY(0); }
+  --board:#1f2f2b;
+  --board-dark:#182420;
+  --wood:#7a4a24;
+  --wood-dark:#5a3518;
+  --text:#f4f1e9;
 }
 
-/* Desktop */
-@media (min-width:1024px){
-  /* place buttons near menu edge via JS */
-}
-</style>
+/* ========= 全站基礎 ========= */
+*{ box-sizing:border-box; }
 
-
-<style>
-/* v1.7.6: Ensure cart actions visible */
-.mh-cart .mh-panel-actions{
-  display:flex; gap:8px; padding:10px 12px; border-top:1px solid #e1d5c7; background:#fffdf9; border-radius:0 0 12px 12px;
-}
-.mh-cart .mh-panel-actions .mh-btn{ flex:1; min-height:40px; }
-@media (max-width:1023.98px){
-  .mh-cart .mh-panel-actions{ position: sticky; bottom: 0; z-index: 2; }
-}
-</style>
-
-
-<style>
-/* v1.7.8: type + qty in same row; adjust column ratio on desktop */
-.mh-type-qty { grid-template-columns: 1.4fr 0.6fr; }
-@media (max-width:1023.98px){
-  .mh-type-qty { grid-template-columns: 1fr 1fr; } /* 手機平均分 */
-}
-</style>
-
-
-<style>
-/* v1.7.9: desktop panel spacing + no horizontal scrollbar */
-.mh-panel-body{
-  display: grid;
-  row-gap: 12px;
-  align-content: start;   /* pack content to top, no 'north/south poles' */
-  overflow-x: hidden;     /* prevent horizontal scrollbar */
-}
-/* prevent grid children from overflowing */
-.mh-row-2, .mh-row-3, .mh-field{ min-width: 0; }
-.mh-row-3{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:8px; }
-.mh-row-2{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px; }
-.mh-type-qty{ grid-template-columns: minmax(0,1.4fr) minmax(0,0.6fr); }
-</style>
-
-
-<style>
-/* v1.7.10: compact panel body on desktop — remove grid stretch and pack content naturally */
-.mh-panel-body{
-  display: block;              /* stop grid tracks from stretching */
-  overflow-x: hidden;
-  padding-bottom: 12px;
-}
-.mh-field, .mh-row-2, .mh-row-3{ margin-bottom: 12px; }
-.mh-row-2{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px; }
-.mh-row-3{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:8px; }
-.mh-type-qty{ grid-template-columns: minmax(0,1.4fr) minmax(0,0.6fr); }
-</style>
-
-
-<style>
-/* v1.7.11: Desktop — inline buttons no longer sticky (sit right under accessories) */
-@media (min-width:1024px){
-  .mh-actions-inline{
-    position: static !important;
-    box-shadow: none !important;
-  }
-}
-</style>
-
-
-<style>
-/* v1.7.12: Desktop — make panel a compact flex column, no stretched middle area */
-@media (min-width:1024px){
-  .mh-panel{
-    display: flex !important;
-    flex-direction: column !important;
-    height: auto !important;
-    max-height: 92vh !important;
-  }
-  .mh-panel-head{ flex: 0 0 auto; }
-  .mh-panel-body{
-    flex: 0 0 auto;      /* don't stretch */
-    overflow: visible;   /* let content size naturally */
-  }
-}
-</style>
-
-
-<style>
-/* v1.7.13 — desktop panel next to cart; qty field polish */
-:root{ --mh-gap:12px; }
-.mh-input, .mh-select, .mh-number{ box-sizing: border-box; }
-.mh-number{
-  text-align: center;
-  /* remove browser spin buttons */
-}
-.mh-number::-webkit-outer-spin-button,
-.mh-number::-webkit-inner-spin-button{ -webkit-appearance: none; margin:0; }
-.mh-number{ -moz-appearance: textfield; }
-
-/* make qty a bit wider on desktop */
-@media (min-width:1024px){
-  .mh-type-qty{ grid-template-columns: minmax(0,1.2fr) minmax(0,0.8fr); }
+body{
+  margin:0;
+  background:var(--board-dark);
+  color:var(--text);
+  font-family:
+    "Noto Sans TC",
+    "PingFang TC",
+    "Microsoft JhengHei",
+    "Heiti TC",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  letter-spacing:0.6px;
+  line-height:1.75;
 }
 
-/* Desktop panel: position by JS left of screen, adjacent to cart */
-@media (min-width:1024px){
-  .mh-panel{
-    width: 420px !important;
-    left: var(--mh-panel-left, auto) !important;
-    right: auto !important;
-    top: 0;
-    max-height: 92vh;
-    z-index: 10002;
-    box-shadow: -10px 0 40px rgba(0,0,0,.08);
-  }
-  .mh-panel.open{ /* no slide-in from right on desktop */ }
-}
-</style>
-
-
-<style>
-/* v1.7.14 — panel hidden by default; open shows it. Also align top/height via JS on desktop */
-.mh-panel{
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-.mh-panel.open{
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-@media (min-width:1024px){
-  .mh-panel{
-    position: fixed;
-    width: 420px !important;
-    right: auto !important;
-    left: var(--mh-panel-left, auto) !important;
-    top: var(--mh-panel-top, 0) !important;
-    height: var(--mh-panel-height, auto) !important;
-    max-height: none !important;
-    overflow: auto;
-  }
-}
-</style>
-
-
-<style>
-/* v1.7.16: hide 商品B by default; show it with JS (display='block') when品項為『雞蛋糕』 */
-#mh-b-wrap{ display: none; }
-</style>
-
-
-<style>
-/* v1.7.17 — anchor buttons & drawers inside #menu-root; no internal scroll; toggle 點餐 via same button */
-#menu-root{ position: relative; overflow: visible; }
-
-/* place two buttons inside menu frame, bottom-right, one left one right */
-#mh-floating{
-  position: absolute;
-  right: 12px;
-  bottom: 12px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  width: min(320px, 48%);
-  align-items: end;
-  z-index: 50;
+/* ========= Top Bar ========= */
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:10;
+  height:68px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 18px;
+  background:var(--board);
+  border:8px solid var(--wood);
+  border-bottom-color:var(--wood-dark);
 }
 
-/* ensure original fixed positioning is disabled when inside the floating container */
-#mh-floating .mh-fab,
-#mh-floating #mh-cart-fab{
-  position: static !important;
-  transform: none !important;
-  right: auto !important; left: auto !important; top: auto !important; bottom: auto !important;
-  margin: 0 !important;
+.title{
+  font-size:20px;
+  font-weight:700;
 }
 
-/* Cart & Panel become bottom drawers INSIDE the menu frame; width ~ menu width (slightly inset) */
-.mh-cart, .mh-panel{
-  position: absolute !important;
-  left: 12px !important;
-  right: 12px !important;
-  bottom: calc(12px + 44px + 8px) !important;  /* stay just above the two buttons */
-  top: auto !important;
-  width: auto !important; max-width: none !important;
-  height: auto !important; max-height: none !important;
-  overflow: visible !important;   /* no inner scrollbars */
-  transform: none !important;
-  border-radius: 12px !important;
-  z-index: 40 !important;
-  box-shadow: 0 10px 24px rgba(0,0,0,.12);
-  opacity: 0; visibility: hidden; pointer-events: none;
-}
-.mh-cart.open, .mh-panel.open{
-  opacity: 1; visibility: visible; pointer-events: auto;
+.toggle-btn{
+  background:none;
+  border:2px solid var(--text);
+  color:var(--text);
+  padding:6px 18px;
+  cursor:pointer;
+  min-height:36px;
 }
 
-/* Make inner areas adapt instead of scrolling */
-.mh-panel-body{ overflow: visible !important; }
-.mh-actions-inline,
-.mh-cart .mh-panel-actions{ position: static !important; box-shadow: none !important; }
-
-/* Avoid content overflow in grid children */
-.mh-field, .mh-row-2, .mh-row-3 { min-width: 0 !important; }
-</style>
-
-
-<style>
-/* v1.7.18 — raise z-index, ensure pointer events, and keep buttons side-by-side */
-#mh-floating{ z-index: 10050 !important; pointer-events: auto !important; }
-#mh-floating .mh-fab, #mh-floating #mh-cart-fab{ pointer-events: auto !important; }
-.mh-cart, .mh-panel{ z-index: 10040 !important; } /* below buttons but above content */
-</style>
-
-
-<style>
-/* v1.7.19 — mobile follow-scroll + fix button text wrapping */
-#mh-floating{
-  /* default (desktop) stays absolute; JS will flip to fixed on small screens */
-  display: inline-flex !important;
-  gap: 8px !important;
-  justify-content: flex-end !important;
-  align-items: center !important;
-  width: auto !important;
-  max-width: none !important;
-}
-#mh-floating .mh-fab, #mh-floating #mh-cart-fab{
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  height: 44px !important;
-  padding: 8px 12px !important;
-  white-space: nowrap !important;    /* avoid Chinese character wrapping like "購物
-車" */
-  line-height: 1 !important;
-  min-width: fit-content !important;
+/* ========= Page ========= */
+.page{
+  display:none;
+  min-height:100vh;
+  padding:40px 20px;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,.04), transparent 45%),
+    radial-gradient(circle at 80% 70%, rgba(255,255,255,.03), transparent 45%),
+    var(--board);
+  border-left:12px solid var(--wood);
+  border-right:12px solid var(--wood);
 }
 
-/* drawers default styles remain from previous versions; add a shell class for fixed mode alignment */
-.mh-cart, .mh-panel{
-  will-change: left, right, bottom, width, transform;
+.page.active{ display:block; }
+
+.content{
+  max-width:900px;
+  margin:auto;
 }
 
-/* Utilities toggled by JS */
-:root.fixed-drawer #mh-floating{ position: fixed !important; }
-:root.fixed-drawer .mh-cart, :root.fixed-drawer .mh-panel{ position: fixed !important; }
-</style>
+a{ color:#ffe9b0; }
 
-
-<style>
-/* v1.7.26 — safety: border-box so borders/padding don't push width */
-.mh-cart, .mh-panel { box-sizing: border-box !important; }
-</style>
-
-
-<style>
-/* v1.7.29 — Drawer row spacing = 3px (uniform) */
-.mh-panel-body > .mh-field,
-.mh-panel-body > .mh-row-2,
-.mh-panel-body > .mh-row-3 { margin-bottom: 3px !important; }
-
-/* Grid rows inside the drawer: both axes 3px */
-.mh-row-2, .mh-row-3 {
-  gap: 3px !important;
-  row-gap: 3px !important;
-  column-gap: 3px !important;
+/* ========= 區塊 ========= */
+.section{ margin-bottom:28px; }
+.section h2{
+  font-size:20px;
+  margin:0 0 10px;
+  font-weight:700;
 }
+.note{ opacity:.85; font-size:14px; }
+.warn{ color:#ffb4b4; }
 
-/* Cart list and items spacing */
-.mh-cart-list { gap: 3px !important; row-gap: 3px !important; }
-.mh-cart-item { gap: 3px !important; }
-</style>
-
-
-<style>
-/* v1.7.30 — ensure 3px vertical rhythm inside .mh-panel-body */
-.mh-panel-body { row-gap: 3px !important; }
-</style>
-
-
-<style>
-/* v1.7.32 — Vertical spacing = 0.5px in both drawers (panel & cart) */
-.mh-panel-body { row-gap: 0.5px !important; } /* when body is grid on some views */
-
-/* Direct children (block layout fallback) */
-.mh-panel-body > .mh-field,
-.mh-panel-body > .mh-row-2,
-.mh-panel-body > .mh-row-3 { margin-bottom: 0.5px !important; }
-
-/* Only adjust vertical gaps inside grid rows; keep existing column gaps */
-.mh-row-2, .mh-row-3 { row-gap: 0.5px !important; }
-
-/* Cart list: reduce vertical distance between items only */
-.mh-cart-list { row-gap: 0.5px !important; }
-</style>
-
-
-<style>
-/* v1.7.56 — 購物車清單改為內部卷軸，防止突破畫面；標題吸頂；動作區固定在底部 */
-.mh-cart{ 
-  display: flex !important; 
-  flex-direction: column !important; 
-  max-height: var(--mh-cart-max, 70vh) !important; 
-  overflow: hidden !important; 
-}
-.mh-cart h4{ 
-  position: sticky !important; 
-  top: 0; 
-  background: var(--mh-cart-bg); 
-  z-index: 2; 
-  padding-top: 6px; 
-  padding-bottom: 6px;
-}
-.mh-cart-list{ 
-  flex: 1 1 auto !important; 
-  min-height: 0 !important; 
-  overflow: auto !important; 
-  -webkit-overflow-scrolling: touch !important; 
-  max-height: var(--mh-cart-list-max, 60vh) !important; 
-}
-/* 保留原有總計與欄位、動作區塊在底部，不參與滾動高度計算 */
-.mh-cart .mh-total,
-.mh-cart .mh-field,
-.mh-cart .mh-panel-actions{
-  flex: 0 0 auto !important;
-}
-/* 小螢幕：高度給更高一點，但仍以內部清單滾動為主 */
-@media (max-width:1023.98px){
-  .mh-cart{ max-height: var(--mh-cart-max, 80vh) !important; }
-}
-</style>
-
-
-<style>
-/* v1.7.56 — 手機非全螢幕：讓「訂單清單 + 下方表單」共用同一層卷軸 */
-/* 1) 由 .mh-cart 作為唯一的滾動容器；標題吸頂；其餘皆在同一層內捲動 */
-.mh-cart{
-  display:flex !important;
-  flex-direction:column !important;
-  max-height: var(--mh-cart-max, 80vh) !important;
-  overflow: auto !important;            /* 關鍵：外層滾動 */
-  -webkit-overflow-scrolling: touch !important;
-}
-.mh-cart h4{
-  position: sticky !important;
-  top: 0;
-  background: var(--mh-cart-bg);
-  z-index: 2;
-  padding-top: 6px;
-  padding-bottom: 6px;
-}
-
-/* 2) 清單區不再自帶滾動，改為隨外層一起捲動 */
-.mh-cart-list{
-  overflow: visible !important;
-  max-height: none !important;
-  min-height: 0 !important;
-  flex: 0 0 auto !important;
-}
-
-/* 3) 其餘區塊皆在同一層內排列，避免「只看到總計」的錯覺 */
-.mh-cart .mh-total,
-.mh-cart .mh-field,
-.mh-cart .mh-panel-actions{
-  flex: 0 0 auto !important;
-}
-
-/* 小螢幕高度稍放寬 */
-@media (max-width:1023.98px){
-  .mh-cart{ max-height: var(--mh-cart-max, 85vh) !important; }
-}
-</style>
-
-
-<style>
-/* v1.7.56 — 外層單一卷軸 + 標題吸頂 */
-.mh-cart{
-  display:flex !important;
-  flex-direction:column !important;
-  max-height: var(--mh-cart-max, 85vh) !important;
-  overflow:auto !important;
-  -webkit-overflow-scrolling: touch !important;
-}
-.mh-cart h4{
-  position: sticky !important;
-  top: 0;
-  background: var(--mh-cart-bg);
-  z-index: 2;
-  padding-top: 6px;
-  padding-bottom: 6px;
-}
-.mh-cart-list{
-  overflow: visible !important;
-  max-height: none !important;
-  min-height: 0 !important;
-  flex: 0 0 auto !important;
-}
-.mh-cart .mh-total,
-.mh-cart .mh-field,
-.mh-cart .mh-panel-actions{
-  flex: 0 0 auto !important;
-}
-</style>
-
-<style>
-/* === v1.7.57 — Cart actions fixed at bottom; middle scroll only === */
-.mh-cart{
-  display: flex !important;
-  flex-direction: column !important;
-  max-height: 85vh !important;
-  overflow: hidden !important;
-}
-
-.mh-cart-list{
-  flex: 1 1 auto !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-}
-
-.mh-cart .mh-panel-actions{
-  flex: 0 0 auto !important;
-  background: #fffdf9 !important;
-  border-top: 1px solid #e1d5c7 !important;
-}
-</style>
-<style>
-/* === v1.7.58 — Cart header + footer both fixed; middle scroll only === */
-.mh-cart{
-  display: flex !important;
-  flex-direction: column !important;
-  max-height: 85vh !important;
-  overflow: hidden !important;
-}
-
-/* Header stays fixed (top) */
-.mh-cart h4{
-  flex: 0 0 auto !important;
-  position: sticky !important;
-  top: 0 !important;
-  background: var(--mh-cart-bg) !important;
-  z-index: 3 !important;
-}
-
-/* Middle scroll area */
-.mh-cart-list{
-  flex: 1 1 auto !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-}
-
-/* Footer actions fixed at bottom */
-.mh-cart .mh-panel-actions{
-  flex: 0 0 auto !important;
-  background: #fffdf9 !important;
-  border-top: 1px solid #e1d5c7 !important;
-  z-index: 3 !important;
-}
-</style>
-<style>
-/* === v1.7.59 — Correct scroll container: keep cart scrollable, freeze header & footer === */
-
-/* 1. Cart itself MUST scroll (restore scrollbar) */
-.mh-cart{
-  display: flex !important;
-  flex-direction: column !important;
-  max-height: 85vh !important;
-  overflow-y: auto !important;   /* 關鍵：恢復滾輪 */
-  overflow-x: hidden !important;
-  -webkit-overflow-scrolling: touch !important;
-}
-
-/* 2. Header frozen at top */
-.mh-cart h4{
-  position: sticky !important;
-  top: 0 !important;
-  background: var(--mh-cart-bg) !important;
-  z-index: 5 !important;
-}
-
-/* 3. Footer frozen at bottom */
-.mh-cart .mh-panel-actions{
-  position: sticky !important;
-  bottom: 0 !important;
-  background: #fffdf9 !important;
-  border-top: 1px solid #e1d5c7 !important;
-  z-index: 5 !important;
-}
-
-/* 4. Middle content flows naturally inside the same scroll */
-.mh-cart-list{
-  overflow: visible !important;
-  flex: 0 0 auto !important;
+input[type=number]{
+  background:transparent;
+  border:1px solid var(--text);
+  color:var(--text);
+  padding:4px 6px;
+  width:90px;
 }
 </style>
 </head>
+
 <body>
 
-<section style="position: relative; display: flex; flex-wrap: wrap; justify-content: center; gap: 2em; padding: 2em 1em; font-size: 1.05rem; line-height: 1.6; background: #fffefb; max-width: 1280px; margin: auto;">
-  <!-- 左頁：店家資訊 -->
-  <div style="flex: 1 1 320px; background: #fffbe7; padding: 1.5em; border-radius: 8px 0 0 8px; box-shadow: -4px 4px 12px rgba(0,0,0,0.08); z-index: 2;">
-    <h2 style="color: #e65100;">
-     萌虎燒   <img src="https://github.com/menghushao/MENU/blob/main/%E5%8E%9F%E5%A7%8B%E8%99%8E%E9%A0%AD(%E5%8E%BB%E8%83%8C).png?raw=true" alt="logo" style="width: 1.2em; height: 1.2em; vertical-align: middle; margin-right: 0.3em; border-radius: 3px;">
-      店家資訊
-    </h2>
-    <p><strong>地址：</strong><a href="https://maps.app.goo.gl/B6KTsppsNF3jqvfC9" target="_blank">苗栗市中山路203號</a><br><em>單向雙線道，汽車停車位設置在右側，我們在左側，機/腳踏車可以停在騎樓(暫時)。</em></p>
-    <p><strong>電話：</strong>
-      <a href="tel:0912457104" style="color: inherit; text-decoration: underline;">0912457104<em>  (拒接隱藏來電號碼)</em></a>
-    </p>
-    <p><strong>官方LINE：</strong>
-      <a href="https://reurl.cc/qZAE2y" target="_blank" style="margin-left: 0.5em;">
-        <img src="https://pic.pimg.tw/softwarecenter/1405438113-157016513.png" alt="LINE" style="width: 1.6em; vertical-align: middle;">
-      </a><em>   (回覆速度較快)</em>
-    </p>
-    <p><strong>官 方 F B ：  </strong>
-      <a href="https://m.me/menghushao" target="_blank" style="margin-left: 0.5em;">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="FB" style="width: 1.4em; vertical-align: middle;">
-      </a>
-    </p>
-    <p><strong>營業時間：</strong><br><em>週日固定休息<br>週一 ~ 五 的11:00 ~ 22:00<br>週六 的10:00 ~ 23:59</em></p>
-    <p><strong>非固定休息日：<br></strong><em style="color: red;">2026 02/16(一) ~ 02/21(六)</em></p>
-    <p><strong>Wi-Fi 密碼：</strong>0912457104</p>
-    <p>📄 有統編章可供公司行號核銷點心費用，可使用現金、行動支付結帳。</p>
-    <p>⏱️ 餐點都是現點現做，可透過電話或通訊軟體提前預訂，避免現場等待。<br>🕓 若有營業時間外的訂單需求，可以提前跟老闆聯繫商量。</p>
-    <p>
-  🛵 滿300元苗栗市門牌可外送，不滿可透過
-  <a href="https://www.ubereats.com/tw/store/%E8%90%8C%E8%99%8E%E7%87%92-%E7%94%9C%E9%BB%9E-%E4%B8%8B%E5%8D%88%E8%8C%B6-%E9%BB%9E%E5%BF%83-%E9%9B%9E%E8%9B%8B%E7%B3%95/C-zADMIpWq-_9Pep-1uOVQ?diningMode=DELIVERY&amp;sc=SEARCH_SUGGESTION" target="_blank">UBER Eats</a>
-  點餐，市外建議透過
-  <a href="https://maps.app.goo.gl/B6KTsppsNF3jqvfC9" target="_blank">GOOGLE地圖</a>
-  避開收費路段，取得與萌虎燒的距離 (公里)，再填入下方欄位估算保送門檻。
-  <input type="number" id="distanceInput" min="0" step="0.1" style="width: 5em; margin-left: 0.3em;">
-  <span id="deliveryMsg" style="margin-left: 0.5em; color: #d32f2f;"></span></p><p style="color: red;">（外送量大請至少前一天與老闆聯繫，避免使用外送平台，否則極有可能因為備料不足無法承接）</p>
-<p></p>
-    <script>
-      const distanceInput = document.getElementById("distanceInput");
-      const deliveryMsg = document.getElementById("deliveryMsg");
-      distanceInput?.addEventListener("input", () => {
-        const km = parseFloat(distanceInput.value) || 0;
-        const fullKM = Math.ceil(km);
-        let amount = 0;
-        if (fullKM <= 3) amount = 300;
-        else if (fullKM <= 15) amount = 300 + (fullKM - 3) * 100;
-        else amount = 300 + (fullKM - 3) * 150;
-        deliveryMsg.textContent = `需滿 ${amount} 元，請先聯繫店家評估`;
-      });
-    
-// v1.7.56 — Fix: Step3 cross-item combine by same price; summary text fixed.
-</script>
-    
-    <p>⚠️ 偶有麵糊沒完全熟透的情況，這無法完全避免，若發生了請告訴我們，我們將直接退回餐點費用。</p>
-    <p>🛍️ <a href="https://reurl.cc/Aym5rE" target="_blank">[萌虎燒-石虎小貓貓] LINE 貼圖</a></p>
-<li><em>霜淇淋由於客流量不高，所以多數都是倒掉，為避免浪費故暫時不會販售。若對機器有興趣，可以跟老闆聯繫商談。</em></li>
-  </div>
-  <!-- 右頁：菜單與點餐 -->
-<div id="menu-root" data-menu="" style="flex: 1 1 640px;
-            background: linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0.1)),
-                        url('https://github.com/menghushao/MENU/blob/main/Coarse_fiber_paper_LE_upscale_prime_x4.jpg?raw=true') center/cover no-repeat;
-            padding: 1.5em; border-radius: 0 8px 8px 0;
-            box-shadow: 4px 4px 12px rgba(0,0,0,0.08); z-index: 2;">
-   <p>🚫 我們<strong style="color: red;">「不提供」</strong>塑膠袋和吸管。<br>雞蛋糕消費滿5份，提供不織布提網，滿12份再加贈萌虎不織布提袋，量大會使用乾淨的紙箱。</p>
-<p>🎟️消費滿60元可獲得集點卡1點，滿6份點數雙倍，滿12份直接折抵1份，點數改贈1點。<br>集滿10點可兌換任何口味雞蛋糕1份。</p>
- <h2 style="color: #e65100;">🐣 雞蛋糕 Fluffy Egg Cakes <span style="font-size: 1rem; color: #000;">自備容器集點卡加贈1點！</span></h2>
-<p><strong style="color: red; font-size: 20px;">1 份 2 顆，可以不同口味，但請以份為單位點餐。</strong></p>
-<!-- 純雞蛋糕 -->
- <h3>1 顆 10 元 (1 份 20 元)</h3>
-<p>純雞蛋糕 Original：無內餡，只有蛋糕體 </p>
-
-<!-- 單餡與雙餡並排 -->
-<div style="display: flex; gap: 0px; flex-wrap: wrap;">
-  <!-- 單餡 -->
-  <div style="flex: 1; min-width: 250px;">
-    <h3>1 顆 15 元 (1 份 30 元)</h3>
-    <ol>
-      <li data-stock="">巧克力 chocolate</li>
-      <li data-stock="">奶油 Milk</li>
-      <li data-stock="7">鹹蛋黃 Savory Egg Yolk</li>
-      <li data-stock="0">抹茶 Matcha</li>
-      <li data-stock="0">紅豆 Red Bean</li>
-      <li data-stock="3">芝麻 Sesame</li>
-      <li data-stock="">蒜香 Garlic</li>
-      <li data-stock="2">梅子花生 Plum Peanuts</li>
-      <li data-stock="">草莓 Strawberry</li>
-    </ol>
-  </div>
-
-  <!-- 雙餡 -->
-  <div style="flex: 1; min-width: 250px;">
-    <h3>1 顆 20 元 (1 份 <strong style="color: green;">35</strong> 元)</h3>
-    <ol start="10">
-      <li data-stock="">奶油鹹蛋(雙餡) Milk &amp; Savory Egg Yolk</li>
-      <li data-stock="">雙色乳酪 Cheddar &amp; Mozzarella</li>
-      <li data-stock="0">抹茶紅豆(雙餡) Matcha &amp; Red Bean</li>
-      <li data-stock="0">抹茶巧克力(雙餡) Matcha &amp; Chocolate</li>
-      <li data-stock="4">芝麻巧克力(雙餡) Sesame &amp; Chocolate</li>
-      <li data-stock="3">花生巧克力(雙餡) Plum Peanuts &amp; Chocolate</li>
-      <li data-stock="1">玉米濃湯 Corn Chowder</li>
-    </ol>
-  </div>
-</div>
-    <hr style="margin: 2em 0;">
-
-    <h2 style="color: #00796b;">🥛飲品Drink<span style="font-size: 1rem; color: #000;">外帶自備悲劇折 10 元！甜度無法調整，冰塊可調整。</span></h2>
-    
-   <style>
-  ul.drink-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2em; /* 控制項目間距 */
-    padding-left: 1.2em; /* 保留圓點縮排 */
-  }
-
-  ul.drink-list li {
-    list-style-type: disc; /* 保留圓點 */
-    width: auto;
-    min-width: 200px; /* 可依需要調整 */
-  }
-</style>
- <style>
-  ol li {
-    margin-bottom: 12px; /* 每項之間加 12px 間距 */
-    line-height: 1.6;    /* 文字行距更舒適 */
-  }
-</style>
-
-<ol>
-  <li><strong>冬瓜茶 Winter Melon (with Brown Sugar)</strong><br>
-      外帶 Take Out 480mL 25元 ／ 內用 Dine In 240mL 10元
-  </li>
-  <li style="display:none;"><strong>冬瓜檸檬 <span style="color:red;">(目前停供)</span> Winter Melon &amp; Lemon (with Brown Sugar)</strong><br>
-      外帶 Take Out 480mL 30元 ／ 內用 Dine In 240mL 15元
-  </li>
-  <li><strong>冬瓜紫蘇梅 Winter Melon &amp; Salted Plum (with Brown Sugar)</strong><br>
-      外帶 Take Out 480mL 35元 ／ 內用 Dine In 240mL 20元
-  </li>
-  <li><strong>冬瓜鮮奶 Winter Melon &amp; Milk (with Brown Sugar)</strong><br>
-      外帶 Take Out 480mL 45元 ／ 內用 Dine In 240mL 25元
-  </li>
-  <li><strong>燒仙草 Sweet Hot Grass Jelly Soup</strong><br>
-      外帶 Take Out 480mL 40元 ／ 內用 Dine In 240mL 20元
-  </li>
-</ol>
-
-    <hr style="margin: 2em 0;">
-
-    <h2 style="color: #6d4c41;">☕ 咖啡coffee<span style="font-size: 1rem; color: #000;">外帶自備悲劇折 10 元！</span></h2>
-    <p>風味為香氣呈現，全無糖、不提供糖，冰／熱可調。<br>Flavor is expressed through aroma. No sugar is added or provided. Available hot or iced.</p>
-
-    <p><strong>先選風味：Step 1: Choose Your Flavor</strong></p>
-    <ol>
-      <li>經典Classic（烘焙 33%，咖啡因 75mg）</li>
-      <li>低因經典Classic Decaf（烘焙 33%，咖啡因 2mg）</li>
-      <li>香草Vanilla（烘焙 58%，咖啡因 68mg）</li>
-      <li>花果Floral &amp; Fruity（烘焙 16%，咖啡因 69mg）</li>
-      <li>胡椒Spicy（烘焙 75%，咖啡因 55mg）</li>
-    </ol>
-
-    <p><strong>再選作法：Step 2: Choose Your Style</strong></p>
-    <ol>
-      <li><strong>美式Americano</strong>：<br>內用Dine In 240mL 35元 ／ 外帶Take Out 480mL 60元</li>
-      <li><strong>拿鐵Caffè Latte</strong>：<br>內用Dine In 240mL 55元 ／ 外帶Take Out 480mL 95元</li>
-      <li><strong>萌翻拿鐵</strong>：<br>240mL  65元 （奶泡撒上萌虎造型巧克力粉，限定內用）
-      </li>
-    </ol>
-
-    </div>
-</section>
-
-<!-- ✅ 瀏覽人次區塊：使用 vercount.one，穩定顯示人次 -->
-<div style="text-align: center; margin: 2em 0; font-size: 14px;">
-  🐾 來訪萌友第 <span id="busuanzi_value_site_pv">載入中...</span> 位！
+<!-- ===== BAR ===== -->
+<div class="topbar">
+  <div class="title">萌虎燒</div>
+  <button id="toggleBtn" class="toggle-btn">↪︎ 菜單</button>
 </div>
 
-<script async="" src="https://vercount.one/js"></script>
+<!-- ===== 店家資訊（原文完整保留） ===== -->
+<div id="pageInfo" class="page active">
+<div class="content">
 
-  
+<h2>萌虎燒 店家資訊</h2>
 
+<p>
+<strong>地址：</strong>
+<a href="https://maps.app.goo.gl/B6KTsppsNF3jqvfC9" target="_blank">苗栗市中山路203號</a><br>
+<em>單向雙線道，汽車停車位設置在右側，我們在左側，機/腳踏車可以停在騎樓(暫時)。</em>
+</p>
 
+<p>
+<strong>電話：</strong>
+<a href="tel:0912457104">0912457104</a>
+<em> (拒接隱藏來電號碼)</em>
+</p>
 
+<p>
+<strong>官方LINE：</strong>
+<a href="https://reurl.cc/qZAE2y" target="_blank">點我加入</a>
+<em> (回覆速度較快)</em>
+</p>
 
+<p>
+<strong>官 方 F B ：</strong>
+<a href="https://m.me/menghushao" target="_blank">Facebook 粉專</a>
+</p>
 
-<!-- === 點餐 / 購物車 v1.7.5 === -->
-<button id="mh-fab" class="mh-fab" title="打開點餐面板">🧾 點餐</button>
-<button id="mh-cart-fab" title="開啟購物車">🛒 購物車<span id="mh-cart-fab-badge">0</span></button>
+<p>
+<strong>營業時間：</strong><br>
+<em>
+週日固定休息<br>
+週一 ~ 五 的11:00 ~ 22:00<br>
+週六 的10:00 ~ 23:59
+</em>
+</p>
 
-<aside id="mh-cart" class="mh-cart" aria-label="購物車">
-  <h4>購物車 <small id="mh-cart-count" class="mh-badge">0</small> <button id="mh-cart-close" class="mh-close">收合</button></h4>
-  <div id="mh-cart-list" class="mh-cart-list"></div>
-  <div id="mh-cart-empty" class="mh-cart-empty">尚無品項</div>
+<p>
+<strong>非固定休息日：</strong><br>
+<em style="color:red;">2026 02/16(一) ~ 02/21(六)</em>
+</p>
 
-  <div class="mh-total" id="mh-summary">
-    <div id="mh-summary-line">訂單金額 — 元；滿份折 0 份 0 元；結帳金額 — 元；點數發放 — 點</div>
-  </div>
+<p><strong>Wi-Fi 密碼：</strong>0912457104</p>
 
-  <div class="mh-field"><label for="mh-when">取餐/送達時間（可留空）</label><input id="mh-when" type="datetime-local" class="mh-input"></div>
-  <div class="mh-field"><label for="mh-addr">外送地址（留空＝到店取餐）</label><input id="mh-addr" type="text" class="mh-input" placeholder="苗栗市..."></div>
-  <div class="mh-row-2">
-    <div class="mh-field"><label for="mh-sign">招牌</label><input id="mh-sign" type="text" class="mh-input" placeholder="某某機關、單位"></div>
-    <div class="mh-field"><label for="mh-name">稱呼</label><input id="mh-name" type="text" class="mh-input" placeholder="某先生 / 小姐"></div>
-  </div>
-  <div class="mh-field"><label for="mh-phone">電話</label><input id="mh-phone" type="tel" class="mh-input" placeholder="0912-345678"></div>
+<p>
+📄 有統編章可供公司行號核銷點心費用，可使用現金、行動支付結帳。
+</p>
 
-  <div class="mh-field">
-    <label for="mh-channel">送出後會複製購物車內容，且自動開啟通訊軟體，請在通訊軟體中"貼上"跟老闆訂餐</label>
-    <select id="mh-channel" class="mh-select">
-      <option value="LINE|https://reurl.cc/qZAE2y">LINE</option>
-      <option value="FB|https://m.me/menghushao">FB</option>
-    </select>
-  </div>
+<p>
+⏱️ 餐點都是現點現做，可透過電話或通訊軟體提前預訂，避免現場等待。<br>
+🕓 若有營業時間外的訂單需求，可以提前跟老闆聯繫商量。
+</p>
 
-  <div class="mh-panel-actions">
-    <button id="mh-copy" class="mh-btn">複製</button>
-    <button id="mh-send" class="mh-btn primary">送出</button>
-    <button id="mh-clear" class="mh-btn">清空</button>
-  </div>
-</aside>
+<p>
+🛵 滿300元苗栗市門牌可外送，不滿可透過
+<a href="https://www.ubereats.com/tw/store/%E8%90%8C%E8%99%8E%E7%87%92-%E7%94%9C%E9%BB%9E-%E4%B8%8B%E5%8D%88%E8%8C%B6-%E9%BB%9E%E5%BF%83-%E9%9B%9E%E8%9B%8B%E7%B3%95/C-zADMIpWq-_9Pep-1uOVQ" target="_blank">UBER Eats</a>
+點餐，市外建議透過
+<a href="https://maps.app.goo.gl/B6KTsppsNF3jqvfC9" target="_blank">GOOGLE地圖</a>
+避開收費路段，取得與萌虎燒的距離 (公里)，再填入下方欄位估算保送門檻。
+</p>
 
-<section id="mh-panel" class="mh-panel" aria-hidden="true">
-  <div class="mh-panel-head">
-    <strong>建立訂單小卡</strong>
-    <button id="mh-close" class="mh-btn">關閉</button>
-  </div>
-  <div class="mh-panel-body">
-    
-<div class="mh-row-2 mh-type-qty">
-  <div class="mh-field">
-    <label for="mh-type">品項</label>
-    <select id="mh-type" class="mh-select"><option value="">請選擇</option></select>
-  </div>
-  <div class="mh-field">
-    <label for="mh-qty">數量</label>
-    <input id="mh-qty" class="mh-number" type="number" min="1" step="1" value="1">
+<p>
+距離（公里）：
+<input type="number" id="distanceInput" min="0" step="0.1">
+<span id="deliveryMsg" class="warn"></span>
+</p>
+
+<p class="warn">
+（外送量大請至少前一天與老闆聯繫，避免使用外送平台，否則極有可能因為備料不足無法承接）
+</p>
+
+<p>
+⚠️ 偶有麵糊沒完全熟透的情況，這無法完全避免，若發生了請告訴我們，我們將直接退回餐點費用。
+</p>
+
+<p>
+🛍️ <a href="https://reurl.cc/Aym5rE" target="_blank">[萌虎燒-石虎小貓貓] LINE 貼圖</a>
+</p>
+
+<li>
+<em>霜淇淋由於客流量不高，所以多數都是倒掉，為避免浪費故暫時不會販售。若對機器有興趣，可以跟老闆聯繫商談。</em>
+</li>
+
+</div>
+</div>
+
+<!-- ===== 菜單頁（之後接原系統） ===== -->
+<div id="pageMenu" class="page">
+  <div class="content">
+    <p>（菜單與點餐系統接在這裡）</p>
   </div>
 </div>
 
-    <div class="mh-row-2">
-      <div class="mh-field">
-        <label for="mh-a">商品</label>
-        <select id="mh-a" class="mh-select"><option value="">商品</option></select>
-      </div>
-      <div class="mh-field" id="mh-b-wrap">
-        <label for="mh-b">商品</label>
-        <select id="mh-b" class="mh-select"><option value="">商品</option></select>
-      </div>
-    </div>
-    <div class="mh-field">
-      <label class="mh-label">附項（最多 6）</label>
-      <div class="mh-row-3">
-        <select class="mh-select mh-acc"><option value="">附</option></select>
-        <select class="mh-select mh-acc"><option value="">附</option></select>
-        <select class="mh-select mh-acc"><option value="">附</option></select>
-        <select class="mh-select mh-acc"><option value="">附</option></select>
-        <select class="mh-select mh-acc"><option value="">附</option></select>
-        <select class="mh-select mh-acc"><option value="">附</option></select>
-      </div>
-    </div>
-    <div class="mh-actions-inline">
-      <button id="mh-add-inline" class="mh-btn primary">加入購物車</button>
-      <button id="mh-bulk-combo" class="mh-btn">隨便啦!!</button>
-      <button id="mh-reset-inline" class="mh-btn">清空</button>
-    </div>
-  
-</div></section>
-
-
-
 <script>
-(function(){
-  const DATA_URL = "https://raw.githubusercontent.com/menghushao/Order-management-product/main/gridData.plain.json";
-  const PAY = "現金";
-  const MONEY_PER_POINT = 60;
-  const MAX_LEFTOVER_POINTS = 9;
-  const CYCLE_SET = 12;
+/* 切頁 */
+const btn = document.getElementById('toggleBtn');
+const info = document.getElementById('pageInfo');
+const menu = document.getElementById('pageMenu');
+let isInfo = true;
 
-  // State
-  let grid=[], rows=[], typeToItems=new Map(), itemToAccs=new Map();
-  let cart=[];
-  let editIndex = -1; // <— currently editing cart index (-1 = new)
+btn.onclick = () => {
+  isInfo = !isInfo;
+  info.classList.toggle('active', isInfo);
+  menu.classList.toggle('active', !isInfo);
+  btn.textContent = isInfo ? '↪︎ 菜單' : '↪︎ 店家資訊';
+};
 
-  // DOM shortcuts
-  const menuRoot = document.querySelector('#menu-root, main .markdown-body, main, article, .content, .post, .wrap, .container');
-  const orderFab = document.getElementById('mh-fab');       // 🧾 點餐
-  const cartFab  = document.getElementById('mh-cart-fab');  // 🛒 購物車
-  const cartFabBadge = document.getElementById('mh-cart-fab-badge');
-  const panel = document.getElementById('mh-panel');
-  const closeBtn = document.getElementById('mh-close');
-  const typeSel = document.getElementById('mh-type');
-  const aSel = document.getElementById('mh-a');
-  const bSel = document.getElementById('mh-b');
-  const bWrap = document.getElementById('mh-b-wrap');
-  const accSelects = Array.from(document.querySelectorAll('.mh-acc'));
-  const qtyInput = document.getElementById('mh-qty');
-  const addInline = document.getElementById('mh-add-inline');
-  const resetInline = document.getElementById('mh-reset-inline');
+/* 外送距離計算（原邏輯） */
+const distanceInput = document.getElementById("distanceInput");
+const deliveryMsg = document.getElementById("deliveryMsg");
 
-  const cartEl = document.getElementById('mh-cart');
-  const cartList = document.getElementById('mh-cart-list');
-  const cartEmpty = document.getElementById('mh-cart-empty');
-  const cartCount = document.getElementById('mh-cart-count');
-  const clearBtn = document.getElementById('mh-clear');
-  const summaryLine = document.getElementById('mh-summary-line');
-
-  const whenInput = document.getElementById('mh-when');
-  const addrInput = document.getElementById('mh-addr');
-  const signInput = document.getElementById('mh-sign');
-  const nameInput = document.getElementById('mh-name');
-  const phoneInput = document.getElementById('mh-phone');
-  const channelSel = document.getElementById('mh-channel');
-  const copyBtn = document.getElementById('mh-copy');
-  const sendBtn = document.getElementById('mh-send');
-
-  // Desktop placement
-  function placeAtMenuEdge(el, top){
-    const rect = menuRoot?.getBoundingClientRect?.();
-    if (rect && window.matchMedia('(min-width:1024px)').matches){
-      el.style.left = (rect.right + 12) + 'px';
-      el.style.top = (top||14) + 'px';
-      el.style.right='auto'; el.style.bottom='auto'; el.style.transform='none'; el.style.position='fixed';
-    }
-  }
-  function placeDesktop(){
-    if (!window.matchMedia('(min-width:1024px)').matches) return;
-    placeAtMenuEdge(orderFab, 14);
-    placeAtMenuEdge(cartFab, 58);
-    placeAtMenuEdge(cartEl, 64);
-  }
-  window.addEventListener('resize', placeDesktop);
-  window.addEventListener('scroll', placeDesktop);
-
-  // Toggle panel & cart
-  function openPanel(){ panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); }
-  function closePanel(){ panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); }
-  function toggleCart(force){
-    if (typeof force==='boolean'){ cartEl.classList.toggle('open', force); }
-    else { cartEl.classList.toggle('open'); }
-    if (window.matchMedia('(min-width:1024px)').matches && cartEl.classList.contains('open')){ placeDesktop(); }
-  }
-  orderFab.addEventListener('click', openPanel);
-  closeBtn.addEventListener('click', closePanel);
-  cartFab.addEventListener('click', ()=> toggleCart());
-  document.getElementById('mh-cart-close')?.addEventListener('click', ()=> toggleCart(false));
-
-  // Helpers
-  function opt(label,value){ const o=document.createElement('option'); o.textContent=label; o.value=(value??label); return o; }
-  function uniq(a){ return [...new Set(a.filter(Boolean))]; }
-  function is2D(x){ return Array.isArray(x)&&x.every(r=>Array.isArray(r)); }
-  function normalize(data){ if(is2D(data)) return data; if(data&&is2D(data.data)) return data.data; if(data&&is2D(data.grid)) return data.grid; if(data&&is2D(data.values)) return data.values; throw new Error("資料格式錯誤"); }
-
-  function buildMaps(){
-    rows = grid.slice(10, 106);
-    typeToItems.clear(); itemToAccs.clear();
-    for(const r of rows){
-      const type=(r?.[0]||'').trim(), item=(r?.[1]||'').trim();
-      if(!type||!item) continue;
-      if(!typeToItems.has(type)) typeToItems.set(type, []);
-      typeToItems.get(type).push(item);
-      const accs = uniq((r.slice(5,15)||[]).map(x=> (x||'').toString().trim()).filter(Boolean));
-      if(accs.length) itemToAccs.set(item, accs);
-    }
-    for(const [k,v] of typeToItems.entries()) typeToItems.set(k, uniq(v));
-  }
-  function fillType(){ typeSel.innerHTML=''; typeSel.append(opt('請選擇','')); [...typeToItems.keys()].forEach(t=> typeSel.append(opt(t,t))); }
-  function fillAB(type){
-    const items = typeToItems.get(type)||[];
-    aSel.innerHTML=''; bSel.innerHTML=''; aSel.append(opt('商品','')); bSel.append(opt('商品',''));
-    items.forEach(i=>{ aSel.append(opt(i,i)); bSel.append(opt(i,i)); });
-    if(type==='雞蛋糕'){ bWrap.style.display='block'; } else { bWrap.style.display='none'; bSel.value=''; }
-    updateAccessoryOptions();
-  }
-  function updateAccessoryOptions(){
-    const finalName = bSel.value || aSel.value || '';
-    const options = uniq(itemToAccs.get(finalName)||[]);
-    accSelects.forEach(sel=>{
-      const keep = sel.value; sel.innerHTML=''; sel.append(opt('附','')); options.forEach(x=> sel.append(opt(x,x)));
-      if(keep && options.includes(keep)) sel.value = keep;
-    });
-  }
-  typeSel.addEventListener('change', e=> fillAB(e.target.value));
-  aSel.addEventListener('change', updateAccessoryOptions);
-  bSel.addEventListener('change', updateAccessoryOptions);
-
-  // Price helpers
-  function cashPriceForRow(row){ const hdr=(grid[6]||[]).slice(15,30); const idx=hdr.indexOf(PAY); const arr=row.slice(15,30); const v=parseFloat(arr[idx]||0); return isFinite(v)?v:0; }
-  function portionSizeForRow(row){ const v=parseFloat(row[30]||0); return (isFinite(v)&&v>0)? v:1; }
-  function canJoinFullSet(row){ return ((row[31]||'')+'').trim()==='是'; }
-
-  // === Debug Logger (console only) ===
-  function promoLog(...args){
-    try { console.log('[PROMO]', ...args); } catch(e){}
-  }
-
-
-  // === Promo (website simplified): read rules from grid row0..row2 (all columns) ===
-  let promoMap = new Map(); // tag -> {qty, price}
-  
-  function buildPromoMap(){
-    try{
-      promoMap.clear();
-      const row0 = grid[0] || [];
-      const row1 = grid[1] || [];
-      const row2 = grid[2] || [];
-      const maxLen = Math.max(row0.length, row1.length, row2.length);
-      for (let j=0; j<maxLen; j++){
-        const tag = ((row0[j] ?? '') + '').trim();
-        const qty = parseInt(row1[j], 10) || 0;
-        const price = parseFloat(row2[j]) || 0;
-        if (!tag) continue;
-        if (qty>0 && price>0) promoMap.set(tag, {qty, price});
-      }
-      const summary = Array.from(promoMap.entries()).map(([k,v])=> `${k} → ${v.qty}份/${v.price}元`).join('； ') || '(無)';
-      promoLog('已載入特價規則：', summary);
-    }catch(e){
-      console.warn('buildPromoMap error:', e);
-      promoMap.clear();
-    }
-  }
-
-
-  
-
-function applyPromos(portions){
-
-  // New algorithm step 2 is handled in calcTotals (v1.7.56). Keep no-op for legacy calls.
-  return portions;
-
-  }
-
-function expandPortions(){
-
-  // New algorithm builds portions directly in calcTotals (v1.7.56). Keep empty output here.
-  return [];
-
-  }
-
-  function calcTotals(){
-
-    // === New cart pricing algorithm (v1.7.56) ===
-    function itemRowByName(name){
-      return rows.find(r => (r?.[1]||'').trim() === name);
-    }
-    function priceOfRow(row){ return cashPriceForRow(row); }
-    function normalUnitsOfRow(row){
-      const u = portionSizeForRow(row);
-      return (u && u>0) ? u : 1;
-    }
-    function tagOfRow(row){ return ((row?.[3]||'')+'').trim(); }
-
-    // Step 1: build unit items
-    const unitItems = [];
-    for (const it of cart){
-      const {type,a,b,qty} = it;
-      if (type === '雞蛋糕'){
-        const aRow = a ? itemRowByName(a) : null;
-        const bRow = b ? itemRowByName(b) : null;
-        const aPrice = aRow ? priceOfRow(aRow) : 0;
-        const bPrice = bRow ? priceOfRow(bRow) : 0;
-        const aTag = aRow ? tagOfRow(aRow) : '';
-        const bTag = bRow ? tagOfRow(bRow) : '';
-        for (let i=0;i<qty;i++){
-          if (a && b){
-            unitItems.push({name:a, price:aPrice, tag:aTag});
-            unitItems.push({name:b, price:bPrice, tag:bTag});
-          } else if (a){
-            unitItems.push({name:a, price:aPrice, tag:aTag});
-            unitItems.push({name:a, price:aPrice, tag:aTag});
-          } else if (b){
-            unitItems.push({name:b, price:bPrice, tag:bTag});
-            unitItems.push({name:b, price:bPrice, tag:bTag});
-          }
-        }
-      } else {
-        const name = a || b || '';
-        if (!name) continue;
-        const row = itemRowByName(name);
-        const price = row ? priceOfRow(row) : 0;
-        const tag = row ? tagOfRow(row) : '';
-        for (let i=0;i<qty;i++){
-          unitItems.push({name, price, tag});
-        }
-      }
-    }
-
-    // Step 2: specials by tag
-    const specialPortions = [];
-    const normalPool = [];
-
-    const tagRules = new Map(promoMap);
-    const tagBuckets = new Map();
-    for (const u of unitItems){
-      if (u.tag && tagRules.has(u.tag)){
-        if (!tagBuckets.has(u.tag)) tagBuckets.set(u.tag, []);
-        tagBuckets.get(u.tag).push(u);
-      } else {
-        normalPool.push(u);
-      }
-    }
-    for (const [tag, arr] of tagBuckets.entries()){
-      const rule = tagRules.get(tag);
-      if (!rule || !rule.qty || !rule.price){ normalPool.push(...arr); continue; }
-      arr.sort((a,b)=> b.price - a.price);
-      const groups = Math.floor(arr.length / rule.qty);
-      let idx = 0;
-      for (let g=0; g<groups; g++){
-        const groupSlice = arr.slice(idx, idx + rule.qty);
-        idx += rule.qty;
-        specialPortions.push({price: rule.price});
-        try{ promoLog(`[SPEC] tag=${tag} group=${g+1} => ${rule.qty}份, 價格=${rule.price}`); }catch(e){}
-      }
-      const leftovers = arr.slice(idx);
-      if (leftovers.length) normalPool.push(...leftovers);
-    }
-
-    // Step 3: normal area grouping
-    const normalPortions = [];
-    // Bucket by portion size to respect AE（1份的數量）
-    const byPortionSize = new Map(); // key: portionSize(int) -> array of units {price}
-    for (const u of normalPool){
-      const row = itemRowByName(u.name);
-      const portionSize = row ? normalUnitsOfRow(row) : 1;
-      if (!byPortionSize.has(portionSize)) byPortionSize.set(portionSize, []);
-      byPortionSize.get(portionSize).push({price: u.price});
-    }
-    for (const [portionSize, units] of byPortionSize.entries()){
-      if (portionSize <= 0){
-        units.forEach(u => normalPortions.push({price: u.price}));
-        continue;
-      }
-      // 3.1 先以相同價格為 1 份區分
-      const priceBuckets = new Map(); // unitPrice -> count
-      units.forEach(u => priceBuckets.set(u.price, (priceBuckets.get(u.price)||0) + 1));
-      const remainders = [];
-      for (const [unitPrice, cnt] of priceBuckets.entries()){
-        const full = Math.floor(cnt / portionSize);
-        const rem  = cnt % portionSize;
-        for (let i=0;i<full;i++){ normalPortions.push({price: unitPrice * portionSize}); }
-        for (let i=0;i<rem;i++){ remainders.push(unitPrice); }
-      }
-      // 3.2 將剩餘的以價格高→低排序後再分
-      remainders.sort((a,b)=> b-a);
-      while (remainders.length >= portionSize){
-        const grp = remainders.splice(0, portionSize);
-        const sum = grp.reduce((s,v)=> s+v, 0);
-        normalPortions.push({price: sum});
-      }
-      // 3.3 若仍不足份，將剩餘全部當作 1 份來算（價格=其加總）
-      if (remainders.length > 0){
-        const sum = remainders.reduce((s,v)=> s+v, 0);
-        normalPortions.push({price: sum});
-      }
-    }
-    // Step 4: merge and apply 12th free
-    const portions = [...specialPortions, ...normalPortions];
-    const pricesDesc = portions.map(p=>p.price).filter(v=>v>0).sort((a,b)=> b-a);
-    const totalPortions = pricesDesc.length;
-    const orderAmt = pricesDesc.reduce((s,v)=> s+v, 0);
-    const discountGroups = Math.floor(totalPortions / 12);
-    let discountAmt = 0;
-    for (let g=1; g<=discountGroups; g++){
-      const idx = g*12 - 1; // 12th, 24th, ...
-      discountAmt += pricesDesc[idx];
-    }
-    try{ promoLog(`[SET] 份數=${totalPortions}，折扣組數=${discountGroups}`); }catch(e){}
-    const payAmt = orderAmt - discountAmt;
-
-    const cycles = Math.floor(totalPortions / CYCLE_SET);
-    const leftoverPrices = pricesDesc.slice(cycles * CYCLE_SET);
-    const leftoverCount = leftoverPrices.length;
-    const leftoverAmt = leftoverPrices.reduce((s,p)=> s + p, 0);
-
-    const cyclePoints = cycles * 1;
-    let leftoverPoints = Math.floor(leftoverAmt / MONEY_PER_POINT);
-    if (leftoverCount >= 6) leftoverPoints = leftoverPoints * 2;
-    leftoverPoints = Math.min(MAX_LEFTOVER_POINTS, leftoverPoints);
-    const totalPoints = cyclePoints + leftoverPoints;
-
-    return {orderAmt, cycles, discountAmt, payAmt, totalPoints};
-
-  }
-
-  function renderSummary(){
-    const {orderAmt, cycles, discountAmt, payAmt, totalPoints} = calcTotals();
-    summaryLine.textContent = `訂單金額 ${orderAmt.toFixed(0)} 元；滿份折 ${cycles} 份 ${discountAmt.toFixed(0)} 元；結帳金額 ${payAmt.toFixed(0)} 元；點數發放 ${totalPoints} 點`;
-  }
-
-  function summarizeName(type,a,b,accs){
-    let base='';
-    if(type==='雞蛋糕'){
-      if(a && b) base = [a,b].sort().join('+');
-      else if(a && !b) base = a + '+' + a;
-      else if(!a && b) base = b + '+' + b;
-      else base = '';
-    }else{
-      base = a || b || '';
-    }
-    const ext = accs.length ? '('+accs.join('+')+')' : '';
-    return base + ext;
-  }
-
-  function setSubmitLabel(){ addInline.textContent = (editIndex>=0? '更新項目' : '加入購物車'); }
-
-  function enterEdit(idx){
-    const it = cart[idx]; if (!it) return;
-    openPanel();
-    typeSel.value = it.type; fillAB(it.type);
-    aSel.value = it.a || ''; bSel.value = it.b || ''; updateAccessoryOptions();
-    qtyInput.value = it.qty;
-    accSelects.forEach((s,i)=> s.value = it.accs?.[i] || '');
-    editIndex = idx;
-    setSubmitLabel();
-  }
-
-  function renderCart(){
-    cartCount.textContent = String(cart.length);
-    if (cartFabBadge){
-      if (cart.length > 0){ cartFabBadge.textContent = String(cart.length); cartFabBadge.style.display='inline-flex'; }
-      else { cartFabBadge.style.display='none'; }
-    }
-    cartList.innerHTML = '';
-    if(!cart.length){ cartEmpty.style.display=''; renderSummary(); return; }
-    cartEmpty.style.display='none';
-    cart.forEach((it, idx)=>{
-      const row = document.createElement('div'); row.className='mh-cart-item';
-      const title = document.createElement('div'); title.className='mh-name'; title.textContent = `${it.title} × ${it.qty}`;
-      const edit = document.createElement('button'); edit.className='mh-edit'; edit.textContent='編輯';
-      edit.addEventListener('click', ()=> enterEdit(idx));
-      const del = document.createElement('button'); del.className='mh-del'; del.textContent='刪除';
-      del.addEventListener('click', ()=>{ cart.splice(idx,1); if (editIndex===idx) editIndex=-1; renderCart(); setSubmitLabel(); });
-      row.append(title, edit, del); cartList.appendChild(row);
-    });
-    renderSummary();
-  }
-
-  function resetForm(){
-    typeSel.value=''; fillAB(''); qtyInput.value=1; aSel.value=''; bSel.value=''; accSelects.forEach(s=> s.value='');
-    editIndex = -1; setSubmitLabel();
-  }
-
-  function submitCurrent(){
-    const type = typeSel.value.trim();
-    const qty = Math.max(1, parseInt(qtyInput.value||'1',10));
-    const a = aSel.value.trim(); const b=bSel.value.trim();
-    if(!type || (!a && !b)){ alert('請至少選擇「品項」與「商品」其一。'); return; }
-    const accs = accSelects.map(s => s.value.trim()).filter(Boolean);
-    const title = summarizeName(type,a,b,accs);
-    const item = { type, qty, a, b, accs, title };
-    if (editIndex >= 0){
-      cart[editIndex] = item;
-      editIndex = -1;
-    } else {
-      cart.push(item);
-    }
-    renderCart();
-    if (window.matchMedia('(max-width:1023.98px)').matches){ cartEl.classList.add('open'); }
-    resetForm();
-    setSubmitLabel();
-  }
-
-  addInline.addEventListener('click', submitCurrent);
-  resetInline.addEventListener('click', resetForm);
-  clearBtn.addEventListener('click', ()=>{ cart=[]; renderCart(); resetForm(); });
-
-  // Copy / Send
-  // v1.7.60 — 修正：外送地址有填但招牌空白時，仍應帶出地址；並且「地址有值」時強制要求時間/稱呼/電話皆必填，否則不得複製/送出。
-  function formatDate(dt){ try{ const d=new Date(dt); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const day=String(d.getDate()).padStart(2,'0'); const hh=String(d.getHours()).padStart(2,'0'); const mm=String(d.getMinutes()).padStart(2,'0'); return `${y}/${m}/${day} ${hh}:${mm}`; }catch(e){ return ''; } }
-  function orderItemsText(){ return cart.map(it => `${it.title} × ${it.qty}`).join('；'); }
-
-  function validateBeforeCopySend(){
-    const addr = addrInput.value.trim();
-    if (!addr) return true; // 到店取餐：不強制
-    const when = whenInput.value.trim();
-    const name = nameInput.value.trim();
-    const phone = phoneInput.value.trim();
-    // 地址有值 → 時間/稱呼/電話 必填；招牌非必要
-    if (!when || !name || !phone){
-      alert('外送請將日期/時間、稱呼、電話資訊附上');
-      return false;
-    }
-    return true;
-  }
-
-  function buildMessage(){
-    const itemsText = orderItemsText() || '（尚未選擇商品）';
-    const whenText = whenInput.value ? ` ${formatDate(whenInput.value)}` : '';
-    const addr = addrInput.value.trim();
-    const sign = signInput.value.trim();
-    const name = nameInput.value.trim();
-    const phone = phoneInput.value.trim();
-
-    if (addr){
-      // 外送：招牌可留空，但地址必須帶出；格式依照是否有招牌決定是否加上
-      const place = sign ? `(${addr})(${sign})` : `(${addr})`;
-      return `老闆你好，我要 ${itemsText} ，請幫我外送到${place}(${name})(${phone})` + (whenText? ` 請在${whenText} 送達`:'') + `，謝謝。`;
-    } else {
-      const who = [name, phone].filter(Boolean).join(' / ');
-      return `老闆你好，我要 ${itemsText}` + (who? ` ，${who}`:'') + (whenText? ` ，預計${whenText} 取餐`:'') + `，謝謝。`;
-    }
-  }
-
-  async function copyMessage(alertText){
-    const msg = buildMessage();
-    try{
-      await navigator.clipboard.writeText(msg);
-      alert(alertText || '已複製訂單。');
-    }catch(e){
-      const ta=document.createElement('textarea'); ta.value=msg; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
-      alert(alertText || '已複製訂單。');
-    }
-  }
-
-  copyBtn.addEventListener('click', ()=>{
-    if (!validateBeforeCopySend()) return;
-    copyMessage('已複製訂單內容');
-  });
-
-  sendBtn.addEventListener('click', async ()=>{
-    if (!validateBeforeCopySend()) return;
-    await copyMessage('已複製訂單內容，稍後將自動開啟通訊軟體，請親手貼上送出。');
-    const [t,url]=channelSel.value.split('|');
-    window.open(url,'_blank');
-  });
-
-// Init
-  (async function init(){
-    try{
-      const res = await fetch(DATA_URL, {cache:'no-store'});
-      const raw = await res.json(); grid = normalize(raw); buildMaps(); try{ window.mh_typeToItems = new Map(typeToItems); }catch(e){} buildPromoMap(); fillType(); fillAB(''); placeDesktop(); setSubmitLabel(); renderCart();
-    }catch(err){ console.error(err); alert('載入菜單資料失敗：' + (err.message||'')); }
-  })();
-})();
+distanceInput.addEventListener("input", () => {
+  const km = Math.ceil(parseFloat(distanceInput.value) || 0);
+  let amount = 0;
+  if (km <= 3) amount = 300;
+  else if (km <= 15) amount = 300 + (km - 3) * 100;
+  else amount = 300 + (km - 3) * 150;
+  deliveryMsg.textContent = ` 需滿 ${amount} 元，請先聯繫店家評估`;
+});
 </script>
 
-
-
-<script>
-// v1.7.13: place order panel right next to the cart (desktop)
-(function(){
-  const panel = document.getElementById('mh-panel');
-  const cartEl = document.getElementById('mh-cart');
-  const orderFab = document.getElementById('mh-fab');
-
-  function placePanelNextToCart(){
-    if (!panel || !cartEl) return;
-    if (!window.matchMedia('(min-width:1024px)').matches) return;
-    const r = cartEl.getBoundingClientRect();
-    const W = 420;
-    let left = r.right + 12; // snug to the cart
-    // clamp to viewport
-    const maxLeft = Math.max(12, window.innerWidth - W - 12);
-    if (left > maxLeft) left = maxLeft;
-    panel.style.setProperty('--mh-panel-left', left + 'px');
-  }
-
-  // Run when panel opens and on resize/scroll
-  const _open = (function(){
-    return function(){ panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); placePanelNextToCart(); }
-  })();
-  // Replace existing openPanel if defined
-  if (window.openPanel) {
-    window.openPanel = _open;
-  } else {
-    // fallback hook on 點餐按鈕
-    orderFab?.addEventListener('click', _open);
-  }
-
-  window.addEventListener('resize', ()=>{ if (panel.classList.contains('open')) placePanelNextToCart(); });
-  window.addEventListener('scroll', ()=>{ if (panel.classList.contains('open')) placePanelNextToCart(); });
-})();
-</script>
-
-
-<script>
-// v1.7.14: desktop align panel next to cart and equal height; fix open/close
-(function(){
-  const panel  = document.getElementById('mh-panel');
-  const cartEl = document.getElementById('mh-cart');
-  const orderFab = document.getElementById('mh-fab');
-  const closeBtn = document.getElementById('mh-close');
-
-  function placePanelToCart(){
-    if (!panel || !cartEl) return;
-    if (!window.matchMedia('(min-width:1024px)').matches) return;
-    const r = cartEl.getBoundingClientRect();
-    const left = Math.max(12, Math.min(r.right + 12, window.innerWidth - 420 - 12));
-    panel.style.setProperty('--mh-panel-left', left + 'px');
-    panel.style.setProperty('--mh-panel-top',  r.top + 'px');
-    panel.style.setProperty('--mh-panel-height', r.height + 'px');
-  }
-
-  function openPanel(){
-    panel.classList.add('open');
-    panel.setAttribute('aria-hidden','false');
-    placePanelToCart();
-  }
-  function closePanel(){
-    panel.classList.remove('open');
-    panel.setAttribute('aria-hidden','true');
-  }
-
-  // Wire buttons
-  orderFab?.addEventListener('click', openPanel);
-  closeBtn?.addEventListener('click', closePanel);
-
-  // Reposition while open
-  function maybeReposition(){
-    if (panel.classList.contains('open')) placePanelToCart();
-  }
-  window.addEventListener('resize', maybeReposition);
-  window.addEventListener('scroll', maybeReposition);
-})();
-</script>
-
-
-
-<script>
-// v1.7.17 — move buttons & drawers inside #menu-root and make 點餐 button toggle open/close
-(function(){
-  const menuRoot = document.getElementById('menu-root');
-  const orderFab = document.getElementById('mh-fab');
-  const cartFab  = document.getElementById('mh-cart-fab');
-  const cartEl   = document.getElementById('mh-cart');
-  const panel    = document.getElementById('mh-panel');
-  const cartClose= document.getElementById('mh-cart-close');
-  const panelClose= document.getElementById('mh-close');
-
-  if (menuRoot){
-    // wrap both buttons into a single floating container inside the menu frame
-    const wrap = document.createElement('div');
-    wrap.id = 'mh-floating';
-    // append buttons
-    if (orderFab) wrap.appendChild(orderFab);
-    if (cartFab)  wrap.appendChild(cartFab);
-    // attach
-    menuRoot.appendChild(wrap);
-
-    // move drawers inside the menu so they follow scroll with the menu
-    if (cartEl)  menuRoot.appendChild(cartEl);
-    if (panel)   menuRoot.appendChild(panel);
-  }
-
-  // disable previous desktop placement logic if present
-  try{
-    window.removeEventListener('resize', window.placeDesktop || (()=>{}));
-    window.removeEventListener('scroll',  window.placeDesktop || (()=>{}));
-  }catch(e){}
-
-  function isOpen(el){ return el && el.classList.contains('open'); }
-  function toggle(el, force){
-    if (!el) return;
-    const on = (typeof force === 'boolean') ? force : !isOpen(el);
-    el.classList.toggle('open', on);
-    el.setAttribute('aria-hidden', on ? 'false' : 'true');
-  }
-
-  // 點餐：點同一顆可開/收
-  orderFab?.addEventListener('click', (ev)=>{ ev.preventDefault(); toggle(panel); });
-  panelClose?.addEventListener('click', (ev)=>{ ev.preventDefault(); toggle(panel, false); });
-
-  // 購物車：維持原本點同一顆可開/收，並保留內部收合鈕
-  cartFab?.addEventListener('click', (ev)=>{ ev.preventDefault(); toggle(cartEl); });
-  cartClose?.addEventListener('click', (ev)=>{ ev.preventDefault(); toggle(cartEl, false); });
-})();
-</script>
-
-
-<script>
-// v1.7.18 — robust toggle (capture-phase) to avoid older handlers breaking clicks
-(function(){
-  const $ = (id)=>document.getElementById(id);
-  const menuRoot = $('menu-root');
-  const orderFab = $('mh-fab');
-  const cartFab  = $('mh-cart-fab');
-  const cartEl   = $('mh-cart');
-  const panel    = $('mh-panel');
-  const cartClose= $('mh-cart-close');
-  const panelClose= $('mh-close');
-
-  // Ensure elements live under #menu-root so they scroll with the menu
-  if (menuRoot){
-    // Create container once
-    let wrap = document.getElementById('mh-floating');
-    if (!wrap){
-      wrap = document.createElement('div');
-      wrap.id = 'mh-floating';
-      menuRoot.appendChild(wrap);
-    }
-    if (orderFab && orderFab.parentElement !== wrap) wrap.appendChild(orderFab);
-    if (cartFab  && cartFab.parentElement !== wrap)  wrap.appendChild(cartFab);
-    if (cartEl   && cartEl.parentElement  !== menuRoot) menuRoot.appendChild(cartEl);
-    if (panel    && panel.parentElement   !== menuRoot) menuRoot.appendChild(panel);
-  }
-
-  function isOpen(el){ return el?.classList.contains('open'); }
-  function show(el){ if(!el) return; el.classList.add('open'); el.setAttribute('aria-hidden','false'); }
-  function hide(el){ if(!el) return; el.classList.remove('open'); el.setAttribute('aria-hidden','true'); }
-  function toggle(el){ if(!el) return; (isOpen(el)?hide:show)(el); }
-
-  // Capture-phase to run before legacy listeners; also stopImmediatePropagation to prevent double handling
-  orderFab?.addEventListener('click', (ev)=>{ ev.preventDefault(); ev.stopImmediatePropagation(); ev.stopPropagation(); toggle(panel); }, true);
-  panelClose?.addEventListener('click', (ev)=>{ ev.preventDefault(); ev.stopImmediatePropagation(); ev.stopPropagation(); hide(panel); }, true);
-
-  cartFab?.addEventListener('click', (ev)=>{ ev.preventDefault(); ev.stopImmediatePropagation(); ev.stopPropagation(); toggle(cartEl); }, true);
-  cartClose?.addEventListener('click', (ev)=>{ ev.preventDefault(); ev.stopImmediatePropagation(); ev.stopPropagation(); hide(cartEl); }, true);
-})();
-</script>
-
-
-<script>
-// v1.7.19 — make buttons & drawers follow scroll on small screens by switching to fixed and aligning to menu's right edge
-(function(){
-  const $ = (id)=>document.getElementById(id);
-  const menuRoot = $('menu-root');
-  const wrap     = $('mh-floating') || (function(){ const d=document.createElement('div'); d.id='mh-floating'; return d; })();
-  const orderFab = $('mh-fab');
-  const cartFab  = $('mh-cart-fab');
-  const cartEl   = $('mh-cart');
-  const panel    = $('mh-panel');
-  const cartClose= $('mh-cart-close');
-  const panelClose= $('mh-close');
-
-  // Ensure structure
-  if (menuRoot){
-    if (!wrap.parentElement) menuRoot.appendChild(wrap);
-    if (orderFab && orderFab.parentElement !== wrap) wrap.appendChild(orderFab);
-    if (cartFab  && cartFab.parentElement !== wrap)  wrap.appendChild(cartFab);
-    if (cartEl   && cartEl.parentElement  !== menuRoot) menuRoot.appendChild(cartEl);
-    if (panel    && panel.parentElement   !== menuRoot) menuRoot.appendChild(panel);
-  }
-
-  // Helpers
-  const root = document.documentElement;
-  function isOpen(el){ return el?.classList.contains('open'); }
-  function show(el){ if(!el) return; el.classList.add('open'); el.setAttribute('aria-hidden','false'); }
-  function hide(el){ if(!el) return; el.classList.remove('open'); el.setAttribute('aria-hidden','true'); }
-  function toggle(el){ if(!el) return; (isOpen(el)?hide:show)(el); }
-
-  // Clicks (capture-phase) to guarantee toggling
-  orderFab?.addEventListener('click', (ev)=>{ ev.preventDefault(); ev.stopImmediatePropagation(); ev.stopPropagation(); toggle(panel); }, true);
-  panelClose?.addEventListener('click', (ev)=>{ ev.preventDefault(); ev.stopImmediatePropagation(); ev.stopPropagation(); hide(panel); }, true);
-  cartFab?.addEventListener('click', (ev)=>{ ev.preventDefault(); ev.stopImmediatePropagation(); ev.stopPropagation(); toggle(cartEl); }, true);
-  cartClose?.addEventListener('click', (ev)=>{ ev.preventDefault(); ev.stopImmediatePropagation(); ev.stopPropagation(); hide(cartEl); }, true);
-
-  // Layout: on small screens / scrollable contexts, use fixed + align to menu's right edge
-  function needsFollow(){
-    // If content taller than viewport, we consider it a scrolling (mobile-like) context
-    const doc = document.documentElement;
-    const scrolly = (doc.scrollHeight - window.innerHeight) > 8;
-    // Or if menu taller than viewport
-    const mr = menuRoot?.getBoundingClientRect();
-    const menuTooTall = !!mr && (mr.height - window.innerHeight) > 8;
-    // Or if viewport width is small
-    const vwSmall = window.matchMedia('(max-width: 1024px)').matches;
-    return scrolly || menuTooTall || vwSmall;
-  }
-
-  function place(){
-    const mr = menuRoot?.getBoundingClientRect();
-    if (!mr) return;
-
-    const btnH = wrap.getBoundingClientRect().height || 44;
-    const gutter = 12;
-
-    if (needsFollow()){
-      // Switch to fixed mode
-      root.classList.add('fixed-drawer');
-
-      // Align buttons to menu's right-inside edge
-      const wrapW = wrap.getBoundingClientRect().width;
-      let left = Math.round(mr.right - wrapW - gutter);
-      if (left < mr.left + gutter) left = mr.left + gutter;
-      wrap.style.left = left + 'px';
-      wrap.style.right = 'auto';
-      wrap.style.bottom = gutter + 'px';
-      wrap.style.top = 'auto';
-      wrap.style.position = 'fixed';
-
-      // Drawers: width close to menu, slightly inset
-      const leftInset = Math.round(mr.left + gutter);
-      const rightInset = Math.round(window.innerWidth - mr.right + gutter);
-      const bottomBase = gutter + btnH + 8;
-      [cartEl, panel].forEach((el)=>{
-        if (!el) return;
-        el.style.position = 'fixed';
-        el.style.left  = leftInset + 'px';
-        el.style.right = rightInset + 'px';
-        el.style.bottom= bottomBase + 'px';
-        el.style.top   = 'auto';
-        el.style.width = 'auto';
-        el.style.maxWidth = 'none';
-      });
-    } else {
-      // Desktop (no scroll): keep inside the menu as absolute
-      root.classList.remove('fixed-drawer');
-      wrap.style.position = 'absolute';
-      wrap.style.right = '12px';
-      wrap.style.left = 'auto';
-      wrap.style.bottom = '12px';
-      wrap.style.top = 'auto';
-
-      [cartEl, panel].forEach((el)=>{
-        if (!el) return;
-        el.style.position = 'absolute';
-        el.style.left = '12px';
-        el.style.right = '12px';
-        el.style.bottom = 'calc(12px + 44px + 8px)';
-        el.style.top = 'auto';
-      });
-    }
-  }
-
-  // Initial placement after current frame to let layout settle
-  requestAnimationFrame(()=>{ place(); });
-  window.addEventListener('resize', place, {passive:true});
-  window.addEventListener('scroll', place, {passive:true});
-})();
-</script>
-
-
-
-
-<script>
-// v1.7.28 — Non-invasive clamp with fixed tiny gap = 0.5px
-(function(){
-  const menuRoot = document.querySelector('#menu-root');
-  if (!menuRoot) return;
-
-  const $ = (sel) => document.querySelector(sel);
-  const cartEl = $('.mh-cart');
-  const panel  = $('.mh-panel');
-
-  function frameBox(){
-    const mr = menuRoot.getBoundingClientRect();
-    const cs = getComputedStyle(menuRoot);
-    const padL = parseFloat(cs.paddingLeft)  || 0;
-    const padR = parseFloat(cs.paddingRight) || 0;
-    const left  = mr.left  + padL;
-    const right = mr.right - padR;
-    return {left, right};
-  }
-
-  function clamp(el){
-    if (!el) return;
-    const st = getComputedStyle(el);
-    if (st.position !== 'fixed') return; // 只在浮動狀態才鉗制
-    const fb = frameBox();
-    const GAP = 0.5; // 你指定的 0.5px 視覺間距
-    const EPS = 0.5; // 防止浮點/實體像素取整外溢
-
-    const left = fb.left + GAP;
-    const width = Math.max(0, (fb.right - fb.left) - GAP*2 - EPS);
-
-    el.style.setProperty('left', left + 'px', 'important');
-    el.style.setProperty('right', 'auto', 'important');
-    el.style.setProperty('width', width + 'px', 'important');
-    el.style.setProperty('max-width', width + 'px', 'important');
-    el.style.setProperty('min-width', '0px', 'important');
-    el.style.setProperty('margin-left', '0px', 'important');
-    el.style.setProperty('margin-right', '0px', 'important');
-    el.style.setProperty('box-sizing', 'border-box', 'important');
-  }
-
-  function run(){
-    clamp(cartEl);
-    clamp(panel);
-  }
-
-  if (typeof window.place === 'function'){
-    const orig = window.place;
-    window.place = function(){
-      const r = orig.apply(this, arguments);
-      requestAnimationFrame(run);
-      return r;
-    };
-  }
-
-  let raf = null;
-  const queue = () => { if (!raf) raf = requestAnimationFrame(()=>{ raf = null; run(); }); };
-  const mo = new MutationObserver(queue);
-  mo.observe(document.documentElement, { attributes:true, childList:true, subtree:true });
-
-  window.addEventListener('scroll', queue, {passive:true});
-  window.addEventListener('resize', queue);
-  window.addEventListener('orientationchange', queue);
-  window.addEventListener('load', queue);
-
-  queue();
-})();
-</script>
-
-
-
-
-
-
-<!-- Bulk Combo Dialog --><div id="mh-bulk-dialog" style="display:none; position: fixed; inset: 0; z-index: 10060; align-items: center; justify-content: center;">
-  <div style="position:absolute; inset:0; background: rgba(0,0,0,.35);" data-close="1"></div>
-  <div style="position: relative; width: min(720px, 92vw); max-height: 82vh; overflow:auto; background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:14px; box-shadow:0 10px 30px rgba(0,0,0,.24);">
-    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
-      <strong>批次建立雞蛋糕組合</strong>
-      <button id="mh-bulk-close" class="mh-btn">關閉</button>
-    </div>
-    <div class="mh-row-2">
-      <div class="mh-field">
-        <label>目標份數</label>
-        <input id="mh-bulk-total" type="number" class="mh-number" min="1" step="1" value="20">
-      </div>
-      <div class="mh-field">
-        <label>分配策略</label>
-        <select id="mh-bulk-strategy" class="mh-select">
-          <option value="even">平均分配</option>
-          <option value="random">隨機分配</option>
-        </select>
-      </div>
-    </div>
-    <div class="mh-field">
-      <label></label>
-      <div id="mh-bulk-list" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:12px;"></div>
-    </div>
-    <div class="mh-actions-inline" style="margin-top:8px;">
-      <button id="mh-bulk-checkall" class="mh-btn">全選/全不選</button>
-      <button id="mh-bulk-ok" class="mh-btn primary">加入購物車</button>
-    </div>
-  </div>
-</div>
-
-
-
-<script>
-// bulk-combo v2.1 — 依分隔線分欄；把純「-----」當作分隔而非選項；中文介面
-(function(){
-  function ready(fn){ if (document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
-  ready(function(){
-    const openBtn = document.getElementById('mh-bulk-combo');
-    const dialog  = document.getElementById('mh-bulk-dialog');
-    if (!openBtn || !dialog) return;
-
-    const listBox = document.getElementById('mh-bulk-list');
-    const totalEl = document.getElementById('mh-bulk-total');
-    const strategyEl = document.getElementById('mh-bulk-strategy');
-    const okBtn   = document.getElementById('mh-bulk-ok');
-    const closeBtn= document.getElementById('mh-bulk-close');
-    const toggleAllBtn = document.getElementById('mh-bulk-checkall');
-
-    const typeSel = document.getElementById('mh-type');
-    const aSel = document.getElementById('mh-a');
-    const bSel = document.getElementById('mh-b');
-    const qtyInput = document.getElementById('mh-qty') || document.querySelector('input[name="qty"]');
-    const addInline = document.getElementById('mh-add-inline') || document.querySelector('#mh-add-inline');
-
-    const isDividerText = (t)=> {  if (!t) return false;  const s = String(t).trim();  if (!s) return false;  // divider if only separators: dashes, dots, middots, bullets, underscores, spaces
-  return /^[\s\-–—_\.\·•．。・]+$/.test(s);};
-    const isPlaceholder = (v)=> !v || v==='商品';
-
-    // 回傳分組，每格成員為 {text, value}
-    function getEggGroups(){
-      // DOM 主路徑：用 option 的 text 判斷分隔線。value 保留用來選取。
-      const prev = typeSel.value;
-      const evt = new Event('change', {bubbles:true});
-      typeSel.value = '雞蛋糕'; typeSel.dispatchEvent(evt);
-      const opts = Array.from(aSel.options);
-      // 還原
-      typeSel.value = prev; typeSel.dispatchEvent(evt);
-
-      const groups = []; let cur = [];
-      for (const o of opts){
-        const text = (o.textContent||o.label||o.value||'').trim();
-        const value = o.value;
-        if (isPlaceholder(value)) continue;
-        if (isDividerText(text)){
-          if (cur.length) { groups.push(cur); cur=[]; }
-          continue; // 不要把分隔線當選項
-        }
-        cur.push({text, value});
-      }
-      if (cur.length) groups.push(cur);
-      return groups;
-    }
-
-    function addToCartPair(aValue, bValue, qty){
-      if (!typeSel || !aSel || !bSel || !addInline) return;
-      const prevType = typeSel.value;
-      typeSel.value = '雞蛋糕';
-      typeSel.dispatchEvent(new Event('change', {bubbles:true}));
-
-      aSel.value = aValue || '';
-      bSel.value = bValue || '';
-      aSel.dispatchEvent(new Event('change', {bubbles:true}));
-      bSel.dispatchEvent(new Event('change', {bubbles:true}));
-
-      if (qtyInput){ qtyInput.value = String(qty||1); }
-      addInline.click();
-    }
-
-    function openDialog(){
-      const groups = getEggGroups(); // [ [{text,value}...] , ... ]
-      listBox.innerHTML = '';
-      groups.forEach((g)=>{
-        const col = document.createElement('div');
-        col.style.display='flex'; col.style.flexDirection='column'; col.style.gap='6px';
-        g.forEach(({text, value})=>{
-          const id = 'chk_' + btoa(unescape(encodeURIComponent(value))).replace(/=/g,'').slice(0,12);
-          const row = document.createElement('label');
-          row.style.display='flex'; row.style.alignItems='center'; row.style.gap='6px';
-          row.innerHTML = `<input type="checkbox" class="mh-bulk-chk" data-val="${value}" id="${id}" checked> <span>${text}</span>`;
-          col.appendChild(row);
-        });
-        listBox.appendChild(col);
-      });
-      dialog.style.display='flex';
-    }
-    function closeDialog(){ dialog.style.display='none'; }
-
-    function combinations(values){
-      const out=[]; for(let i=0;i<values.length;i++){ for(let j=i+1;j<values.length;j++){ out.push([values[i], values[j]]); } } return out;
-    }
-    function distributeEven(pairs, total){
-      const n = pairs.length; if (n===0) return [];
-      const base = Math.floor(total / n);
-      let rem = total % n;
-      const plan = pairs.map(p=> ({pair:p, qty: base}));
-      for (let i=0; i<rem; i++){ plan[i % n].qty += 1; }
-      return plan.filter(x=> x.qty>0);
-    }
-    function distributeRandom(pairs, total){
-      const plan = pairs.map(p=> ({pair:p, qty:0}));
-      for (let i=0;i<total;i++){ plan[Math.floor(Math.random()*pairs.length)].qty += 1; }
-      return plan.filter(x=> x.qty>0);
-    }
-
-    toggleAllBtn.addEventListener('click', ()=>{
-      const boxes = Array.from(listBox.querySelectorAll('.mh-bulk-chk'));
-      const allChecked = boxes.every(b=> b.checked);
-      boxes.forEach(b=> b.checked = !allChecked);
-    });
-
-    openBtn.addEventListener('click', openDialog);
-    closeBtn.addEventListener('click', closeDialog);
-    dialog.addEventListener('click', (e)=>{ if (e.target && e.target.getAttribute('data-close')) closeDialog(); });
-
-    okBtn.addEventListener('click', ()=>{
-      const total = Math.max(1, parseInt(totalEl.value||'1',10));
-      const selectedValues = Array.from(listBox.querySelectorAll('.mh-bulk-chk'))
-        .filter(b=> b.checked)
-        .map(b=> b.getAttribute('data-val'))
-        .filter(Boolean);
-      if (selectedValues.length < 2){ alert('請至少勾選兩個口味'); return; }
-      const pairs = combinations(selectedValues);
-      const plan = (strategyEl.value==='random') ? distributeRandom(pairs, total) : distributeEven(pairs, total);
-      plan.forEach(it=> addToCartPair(it.pair[0], it.pair[1], it.qty));
-      closeDialog();
-    });
-  });
-})();
-</script>
-
-
-
-
-<script>
-// v1.7.56 — 根據視窗與#menu-root可用高度，動態計算購物車清單的max-height，避免堆高
-(function(){
-  function sizeCart(){
-    try{
-      var root   = document.getElementById('menu-root');
-      var cart   = document.getElementById('mh-cart');
-      var list   = document.getElementById('mh-cart-list');
-      if (!cart || !list) return;
-
-      var wrap   = document.getElementById('mh-floating');
-      var btnH   = wrap ? (wrap.getBoundingClientRect().height + 8) : 52;
-      var topPad = 12, bottomPad = 12;
-
-      var rootRect = root ? root.getBoundingClientRect() : null;
-      var avail = (rootRect ? rootRect.height : window.innerHeight) - btnH - topPad - bottomPad;
-      // 以視窗0.9倍與容器可用高度的較小值為上限
-      var hardCap = Math.floor(Math.min(window.innerHeight * 0.9, avail));
-      hardCap = Math.max(160, hardCap); // 給最小高度，避免極端情況
-
-      cart.style.setProperty('--mh-cart-max', hardCap + 'px');
-
-      // 扣除非滾動區塊的高度
-      var used = 0;
-      var blocks = [];
-      var head = cart.querySelector('h4');
-      if (head) blocks.push(head);
-      var extras = cart.querySelectorAll('.mh-total, .mh-field, .mh-panel-actions');
-      extras.forEach ? extras.forEach(function(el){ blocks.push(el); }) : null;
-      for (var i=0;i<blocks.length;i++){
-        var r = blocks[i].getBoundingClientRect();
-        used += r ? r.height : 0;
-      }
-      // 內邊距估計
-      var pad = 16;
-      var listMax = hardCap - used - pad;
-      listMax = Math.max(120, listMax);
-
-      cart.style.setProperty('--mh-cart-list-max', listMax + 'px');
-    }catch(e){ /* no-op */ }
-  }
-
-  // 在內容變動、尺寸改變、開關抽屜時都重新計算
-  function setupObservers(){
-    var cart = document.getElementById('mh-cart');
-    var list = document.getElementById('mh-cart-list');
-    if (!cart || !list) return;
-
-    // 監看清單子節點變化
-    var mo = new MutationObserver(sizeCart);
-    mo.observe(list, { childList: true });
-
-    // 監看購物車開關
-    var mo2 = new MutationObserver(sizeCart);
-    mo2.observe(cart, { attributes: true, attributeFilter: ['class'] });
-
-    window.addEventListener('resize', sizeCart, { passive: true });
-    window.addEventListener('orientationchange', sizeCart);
-    window.addEventListener('scroll', function(){
-      // 僅當購物車在視口內時再算，避免多餘計算
-      sizeCart();
-    }, { passive: true });
-
-    // 初次計算
-    sizeCart();
-  }
-
-  if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', setupObservers);
-  }else{
-    setupObservers();
-  }
-})();
-</script>
-
-
-<script>
-// v1.7.56 — 只計算外層 .mh-cart 的可用高度為上限，統一由外層滾動
-(function(){
-  function sizeCart(){
-    try{
-      var root = document.getElementById('menu-root');
-      var cart = document.getElementById('mh-cart');
-      if (!cart) return;
-
-      var wrap   = document.getElementById('mh-floating');
-      var btnH   = wrap ? (wrap.getBoundingClientRect().height + 8) : 52;
-      var topPad = 12, bottomPad = 12;
-
-      var rootRect = root ? root.getBoundingClientRect() : null;
-      var avail = (rootRect ? rootRect.height : window.innerHeight) - btnH - topPad - bottomPad;
-      var hardCap = Math.floor(Math.min(window.innerHeight * 0.9, avail));
-      hardCap = Math.max(220, hardCap);
-      cart.style.setProperty('--mh-cart-max', hardCap + 'px');
-    }catch(e){ /* no-op */ }
-  }
-
-  function setup(){
-    var cart = document.getElementById('mh-cart');
-    if (!cart) return;
-    new MutationObserver(sizeCart).observe(cart, { childList:true, subtree:true, attributes:true });
-    window.addEventListener('resize', sizeCart, { passive:true });
-    window.addEventListener('orientationchange', sizeCart);
-    sizeCart();
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setup);
-  } else {
-    setup();
-  }
-})();
-</script>
-
-
-<script>
-// v1.7.56 — 外層高度自適應 + 有品項時離開確認
-(function(){
-  function sizeCart(){
-    try{
-      var root = document.getElementById('menu-root');
-      var cart = document.getElementById('mh-cart');
-      if (!cart) return;
-      var wrap   = document.getElementById('mh-floating');
-      var btnH   = wrap ? (wrap.getBoundingClientRect().height + 8) : 52;
-      var rootRect = root ? root.getBoundingClientRect() : null;
-      var avail = (rootRect ? rootRect.height : window.innerHeight) - btnH - 24;
-      var cap = Math.floor(Math.min(window.innerHeight * 0.9, avail));
-      cart.style.setProperty('--mh-cart-max', Math.max(220, cap) + 'px');
-    }catch(e){}
-  }
-  function setupSize(){
-    var cart = document.getElementById('mh-cart');
-    if (!cart) return;
-    new MutationObserver(sizeCart).observe(cart, { childList:true, subtree:true, attributes:true });
-    window.addEventListener('resize', sizeCart, { passive:true });
-    window.addEventListener('orientationchange', sizeCart);
-    sizeCart();
-  }
-
-  // 離開前確認
-  var needConfirm=false;
-  function updateNeed(){
-    var list = document.getElementById('mh-cart-list');
-    var count = list ? list.children.length : 0;
-    needConfirm = count > 0;
-  }
-  function setupUnload(){
-    var list = document.getElementById('mh-cart-list');
-    if (list){
-      new MutationObserver(updateNeed).observe(list, { childList:true });
-    }
-    updateNeed();
-    window.addEventListener('beforeunload', function(e){
-      if(!needConfirm) return;
-      e.preventDefault();
-      e.returnValue='';
-    });
-  }
-
-  if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', function(){
-      setupSize(); setupUnload();
-    });
-  }else{
-    setupSize(); setupUnload();
-  }
-})();
-</script>
-<script>
-  (function(){
-    // 設定要記憶的欄位 ID 列表
-    const fieldsToRemember = ['mh-addr', 'mh-sign', 'mh-name', 'mh-phone'];
-
-    // 函數：儲存欄位值到瀏覽器的 localStorage
-    function saveFields() {
-      fieldsToRemember.forEach(id => {
-        const input = document.getElementById(id);
-        if (input) {
-          try {
-            // 使用特定的 key (mh-cart-欄位ID) 來儲存值
-            localStorage.setItem(`mh-cart-${id}`, input.value);
-          } catch (e) {
-            // 處理無法存取的錯誤，例如瀏覽器隱私設定
-            console.warn(`無法儲存欄位 ${id} 到 localStorage:`, e);
-          }
-        }
-      });
-    }
-
-    // 函數：從瀏覽器的 localStorage 載入欄位值
-    function loadFields() {
-      fieldsToRemember.forEach(id => {
-        const input = document.getElementById(id);
-        if (input) {
-          try {
-            const savedValue = localStorage.getItem(`mh-cart-${id}`);
-            if (savedValue !== null) {
-              // 載入儲存的值
-              input.value = savedValue;
-            }
-          } catch (e) {
-            console.warn(`無法從 localStorage 載入欄位 ${id}:`, e);
-          }
-        }
-      });
-    }
-
-    // 1. 頁面載入後，立即載入先前儲存的資料
-    window.addEventListener('load', loadFields);
-
-    // 2. 監聽欄位輸入事件，每當欄位內容改變時就儲存
-    document.addEventListener('DOMContentLoaded', () => {
-      fieldsToRemember.forEach(id => {
-        const input = document.getElementById(id);
-        if (input) {
-          // 使用 input 事件確保每次輸入都即時儲存
-          input.addEventListener('input', saveFields);
-        }
-      });
-    });
-
-  })();
-</script>
-
-<script>
-  (function(){
-    // 取得相關元素
-    const panel = document.getElementById('mh-panel'); // 建立訂單小卡面板
-    const cart = document.getElementById('mh-cart');   // 購物車介面
-    const addInlineBtn = document.getElementById('mh-add-inline'); // 小卡內的加入購物車按鈕
-    const bulkOkBtn = document.getElementById('mh-bulk-ok');       // 批次組合的加入購物車按鈕
-
-    // 如果找不到任一元素，則不執行後續邏輯
-    if (!panel || !cart) return;
-
-    // 輔助函式：關閉主訂單小卡面板
-    function hidePanel(){
-      panel.classList.remove('open');
-      panel.setAttribute('aria-hidden', 'true');
-    }
-
-    // 輔助函式：開啟購物車介面 (假設是加上 'open' class 來顯示)
-    function showCart(){
-      cart.classList.add('open');
-      cart.setAttribute('aria-hidden', 'false');
-    }
-
-    // 主要動作函式：收合小卡並打開購物車
-    function handleCartAction(){
-      // 1. 收合「建立訂單小卡」
-      hidePanel();
-      
-      // 2. 打開購物車介面
-      showCart();
-    }
-
-    // 1. 監聽「建立訂單小卡」內的「加入購物車/更新項目」按鈕
-    if (addInlineBtn) {
-      addInlineBtn.addEventListener('click', handleCartAction);
-    }
-
-    // 2. 監聽「批次建立雞蛋糕組合」內的「加入購物車」按鈕
-    if (bulkOkBtn) {
-      bulkOkBtn.addEventListener('click', handleCartAction);
-    }
-  })();
-</script>
-
-</body></html>
+</body>
+</html>
