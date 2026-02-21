@@ -6,7 +6,6 @@
 <title>萌虎燒 官方網頁| 雞蛋糕・甜點・下午茶</title>
 
 <style>
-/* ========= 主題色 ========= */
 :root{
   --board:#1f2f2b;
   --board-dark:#182420;
@@ -15,9 +14,8 @@
   --text:#f4f1e9;
 }
 
-/* ========= 全站基礎 ========= */
+/* ===== 基礎 ===== */
 *{ box-sizing:border-box; }
-
 body{
   margin:0;
   background:var(--board-dark);
@@ -34,26 +32,33 @@ body{
   line-height:1.75;
 }
 
-/* ========= Top Bar ========= */
+/* ===== 內容限寬置中 ===== */
+.wrap{
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 18px;
+}
+
+/* ===== Top Bar ===== */
 .topbar{
   position:sticky;
   top:0;
   z-index:10;
   height:68px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 18px;
   background:var(--board);
   border:8px solid var(--wood);
   border-bottom-color:var(--wood-dark);
 }
-
+.topbar .wrap{
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
 .title{
   font-size:20px;
   font-weight:700;
 }
-
 .toggle-btn{
   background:none;
   border:2px solid var(--text);
@@ -63,29 +68,29 @@ body{
   min-height:36px;
 }
 
-/* ========= Page ========= */
+/* ===== Page ===== */
 .page{
   display:none;
   min-height:100vh;
-  padding:40px 20px;
+  padding:0;
   background:
     radial-gradient(circle at 20% 30%, rgba(255,255,255,.04), transparent 45%),
     radial-gradient(circle at 80% 70%, rgba(255,255,255,.03), transparent 45%),
     var(--board);
-  border-left:12px solid var(--wood);
-  border-right:12px solid var(--wood);
 }
-
 .page.active{ display:block; }
 
-.content{
-  max-width:900px;
-  margin:auto;
+/* 木框只包內容區 */
+.frame{
+  border-left:12px solid var(--wood);
+  border-right:12px solid var(--wood);
+  background: inherit;                 /* 確保框內也是黑板底色 */
+  min-height: calc(100vh - 68px);      /* 讓左右木框至少撐滿一個視窗高度（扣掉BAR） */
+  padding: 40px 0;                     /* 內容上下留白（取代 .page 的 padding） */
 }
 
 a{ color:#ffe9b0; }
 
-/* ========= 區塊 ========= */
 .section{ margin-bottom:28px; }
 .section h2{
   font-size:20px;
@@ -109,13 +114,16 @@ input[type=number]{
 
 <!-- ===== BAR ===== -->
 <div class="topbar">
-  <div class="title">萌虎燒</div>
-  <button id="toggleBtn" class="toggle-btn">↪︎ 菜單</button>
+  <div class="wrap">
+    <div class="title">萌虎燒</div>
+    <button id="toggleBtn" class="toggle-btn">↪︎ 菜單</button>
+  </div>
 </div>
 
-<!-- ===== 店家資訊（原文完整保留） ===== -->
+<!-- ===== 店家資訊 ===== -->
 <div id="pageInfo" class="page active">
-<div class="content">
+  <div class="frame">
+    <div class="wrap">
 
 <h2>萌虎燒 店家資訊</h2>
 
@@ -197,18 +205,20 @@ input[type=number]{
 <em>霜淇淋由於客流量不高，所以多數都是倒掉，為避免浪費故暫時不會販售。若對機器有興趣，可以跟老闆聯繫商談。</em>
 </li>
 
-</div>
+    </div>
+  </div>
 </div>
 
-<!-- ===== 菜單頁（之後接原系統） ===== -->
+<!-- ===== 菜單頁 ===== -->
 <div id="pageMenu" class="page">
-  <div class="content">
-    <p>（菜單與點餐系統接在這裡）</p>
+  <div class="frame">
+    <div class="wrap">
+      <p>（菜單與點餐系統接在這裡）</p>
+    </div>
   </div>
 </div>
 
 <script>
-/* 切頁 */
 const btn = document.getElementById('toggleBtn');
 const info = document.getElementById('pageInfo');
 const menu = document.getElementById('pageMenu');
@@ -221,7 +231,6 @@ btn.onclick = () => {
   btn.textContent = isInfo ? '↪︎ 菜單' : '↪︎ 店家資訊';
 };
 
-/* 外送距離計算（原邏輯） */
 const distanceInput = document.getElementById("distanceInput");
 const deliveryMsg = document.getElementById("deliveryMsg");
 
