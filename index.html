@@ -478,6 +478,27 @@ input[type=number]{
 }
 
 </style>
+
+<style>
+  /* --- cart assist safety layering --- */
+  .topbar{ position:sticky; top:0; z-index:100000 !important; }
+  #cartAssistBtn{ position:relative; z-index:100001 !important; pointer-events:auto !important; }
+  /* Floating fallback button (always clickable) */
+  #cartAssistFab{
+    position:fixed; right:16px; bottom:18px;
+    z-index:100002;
+    border:2px solid rgba(244,241,233,.35);
+    background:rgba(0,0,0,.25);
+    color:var(--text);
+    border-radius:999px;
+    padding:10px 14px;
+    font-weight:900;
+    box-shadow:0 10px 24px rgba(0,0,0,.35);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+</style>
+
 </head>
 
 <body>
@@ -1535,7 +1556,7 @@ try{
 
 
 <!-- CART_DATA_BEGIN -->
-<script id="cartDataJson" type="application/json">{"schema":"cart.v1","generated_at":"2026-02-22T15:08:29.523Z","products":[]}<\/script>
+<script id="cartDataJson" type="application/json">{"schema":"cart.v1","generated_at":"2026-02-22T15:16:43.414Z","products":[]}<\/script>
 <!-- CART_DATA_END -->
 
 
@@ -1994,6 +2015,31 @@ try{
       return;
     }
   });
+})();
+</script>
+
+
+<button id="cartAssistFab" onclick="window.__cartAssistOpen && window.__cartAssistOpen()" ontouchstart="window.__cartAssistOpen && window.__cartAssistOpen()">
+  線上訂餐
+</button>
+
+
+<script>
+(function(){
+  // Capture click/touch anywhere: if user hits the button/fab (or inside), open.
+  function matchesCartBtn(t){
+    if(!t) return false;
+    if(t.id === 'cartAssistBtn' || t.id === 'cartAssistFab') return true;
+    return !!(t.closest && t.closest('#cartAssistBtn,#cartAssistFab'));
+  }
+  function handler(ev){
+    const t = ev.target;
+    if(matchesCartBtn(t)){
+      if(window.__cartAssistOpen){ window.__cartAssistOpen(); }
+    }
+  }
+  document.addEventListener('click', handler, true);
+  document.addEventListener('touchstart', handler, true);
 })();
 </script>
 
