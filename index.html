@@ -266,6 +266,21 @@ input[type=number]{
   #mobileOrb{ display:block; }
 }
 
+
+/* =========================================================
+   桌機閱讀字級調整（只影響桌機/滑鼠）
+   - 提升正文可讀性
+   - 不影響手機（coarse pointer）
+   ========================================================= */
+@media (pointer:fine) and (min-width: 900px){
+  body{ font-size:18px; }
+  .title{ font-size:22px; }
+  .toggle-btn{ font-size:16px; }
+  .section h2, h2{ font-size:22px; }
+  .note{ font-size:15px; }
+  input[type=number]{ font-size:16px; }
+}
+
 </style>
 </head>
 
