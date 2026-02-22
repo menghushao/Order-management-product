@@ -859,6 +859,10 @@ distanceInput.addEventListener("input", () => {
     pointer.x = x; pointer.y = y; pointer.t = performance.now();
     pointer.active = true; pointer.type = type;
   };
+  const clearPointer = () => {
+    pointer.active = false;
+    pointer.type = "none";
+  };
 
   // 只在「滑鼠正在移動」的短時間窗內，才讓虎頭有追獵反應
   const isMouseMoving = () => {
@@ -912,15 +916,14 @@ distanceInput.addEventListener("input", () => {
   };
 
   // ===== 觸碰點「撲擊」：手機用（點哪撲哪） =====
+  // 一次性撲擊：只給速度脈衝，不把「目標點」鎖住（放手後會立刻回到逛街）
   const pounceAt = (agent, x, y) => {
     if(!agent || !agent.st) return;
     const s = agent.st;
     if(s.dragging) return;
 
+    // 不改變 wander 目標：撲完就回到原本的自走軌跡
     s.pauseMs = 0;
-    s.targetX = x;
-    s.targetY = y;
-    s.nextPickMs = 900; // 讓目標至少維持一小段時間
 
     const dx = x - s.x;
     const dy = y - s.y;
@@ -928,7 +931,7 @@ distanceInput.addEventListener("input", () => {
     const nx = dx / dist;
     const ny = dy / dist;
 
-    s.pounceMs = 320; // 觸控撲擊窗口
+    s.pounceMs = 220; // 觸控撲擊窗口（一次性）
     s.vx = nx * 0.75;
     s.vy = ny * 0.75;
 
@@ -1140,19 +1143,15 @@ distanceInput.addEventListener("input", () => {
       root.style.setProperty("--cursor-spin-speed", NORMAL_SPEED);
     };
 
-    // 觸控任意位置都會吸引
+    // 觸控任意位置：點一下撲一次（不持續追著最後觸點）
     window.addEventListener("touchstart", (e) => {
       if(!e.touches || !e.touches.length) return;
       const t = e.touches[0];
-      setPointer(t.clientX, t.clientY, "touch");
       // 點哪撲哪：不需要拖到虎頭本體
       pounceAt(M, t.clientX, t.clientY);
     }, { passive:true });
-    window.addEventListener("touchmove", (e) => {
-      if(!e.touches || !e.touches.length) return;
-      const t = e.touches[0];
-      setPointer(t.clientX, t.clientY, "touch");
-    }, { passive:true });
+    window.addEventListener("touchend", clearPointer, { passive:true });
+    window.addEventListener("touchcancel", clearPointer, { passive:true });
 
     // 拖曳（保留原邏輯手感）
     const onDownM = (e) => {
