@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>萌虎燒 官方網頁| 雞蛋糕・甜點・下午茶</title>
+<title>萌虎燒 官方網頁| 雞蛋糕・甜點・下午茶 (含線上訂餐輔助)</title>
 
 <meta name="description" content="萌虎燒是苗栗市的現點現做雞蛋糕專賣店，提供多種創意口味，支援外送與線上點餐。">
 <meta name="keywords" content="萌虎燒,雞蛋糕,苗栗雞蛋糕,甜點,下午茶,苗栗點心,萌虎燒菜單,萌虎燒訂購">
@@ -477,6 +477,226 @@ input[type=number]{
   100% { opacity: 0;    transform: translate(-50%, -50%) scaleX(var(--sx, 1)) rotate(var(--rot, 0deg)) scale(1.06); }
 }
 
+
+
+/* =========================================================
+   線上訂餐輔助（手機優先的購物車 Bottom Sheet）
+   - 不含成本、不含支付；只產生可複製的訂購文字
+   ========================================================= */
+.order-assist{
+  border-color:#ffe9b0;
+  color:#ffe9b0;
+  padding:6px 12px;
+}
+.order-assist.active{
+  background: rgba(255,233,176,.12);
+}
+#cartSheetOverlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 999997;
+  display: none;
+}
+#cartSheet{
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  max-height: 92vh;
+  background: var(--board);
+  border-top: 10px solid var(--wood);
+  border-left: 10px solid var(--wood);
+  border-right: 10px solid var(--wood);
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  z-index: 999998;
+  transform: translateY(100%);
+  transition: transform 180ms ease-out;
+  display:flex;
+  flex-direction: column;
+}
+#cartSheet.open{ transform: translateY(0); }
+.cartHead{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap:10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(244,241,233,.18);
+}
+.cartHead .titleTxt{
+  font-size: 16px;
+  font-weight: 800;
+}
+.cartClose{
+  background:none;
+  border:1px solid rgba(244,241,233,.7);
+  color: var(--text);
+  padding: 6px 10px;
+  border-radius: 12px;
+  cursor:pointer;
+}
+.cartBody{
+  overflow:auto;
+  padding: 12px;
+}
+.cartTabs{
+  display:flex;
+  gap:10px;
+  margin-bottom: 10px;
+}
+.cartTab{
+  flex:1;
+  background: rgba(0,0,0,.14);
+  border:1px solid rgba(244,241,233,.24);
+  color: var(--text);
+  padding: 8px 10px;
+  border-radius: 14px;
+  cursor:pointer;
+}
+.cartTab.active{
+  border-color: rgba(255,233,176,.85);
+  background: rgba(255,233,176,.10);
+}
+.cartSearch{
+  width:100%;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border:1px solid rgba(244,241,233,.35);
+  background: rgba(0,0,0,.10);
+  color: var(--text);
+  margin: 6px 0 12px;
+}
+.cartSection{
+  border: 1px solid rgba(244,241,233,.16);
+  border-radius: 18px;
+  padding: 10px 10px;
+  background: rgba(0,0,0,.10);
+  margin-bottom: 12px;
+}
+.cartSection h3{
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+.cartItem{
+  border-top: 1px dashed rgba(244,241,233,.16);
+  padding: 10px 0;
+}
+.cartItem:first-child{ border-top:0; padding-top:0; }
+.cartItem .row1{
+  display:flex;
+  align-items:flex-start;
+  justify-content: space-between;
+  gap:10px;
+}
+.cartItem .nm{ font-weight: 800; }
+.cartItem .pr{ opacity: .9; white-space: nowrap; }
+.stepper{
+  display:flex; align-items:center; gap:8px;
+  margin-top: 6px;
+}
+.stepper button{
+  width:34px; height:34px;
+  border-radius: 12px;
+  border:1px solid rgba(244,241,233,.45);
+  background: rgba(0,0,0,.14);
+  color: var(--text);
+  cursor:pointer;
+}
+.stepper .q{
+  min-width: 30px;
+  text-align:center;
+  font-weight:800;
+}
+.optList{
+  margin-top: 8px;
+  display:flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.optPill{
+  border: 1px solid rgba(244,241,233,.28);
+  border-radius: 999px;
+  padding: 6px 10px;
+  cursor:pointer;
+  user-select:none;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  background: rgba(0,0,0,.10);
+}
+.optPill input{ transform: scale(1.05); }
+.optPill.on{
+  border-color: rgba(255,233,176,.9);
+  background: rgba(255,233,176,.10);
+}
+.cartFoot{
+  border-top: 1px solid rgba(244,241,233,.18);
+  padding: 10px 12px;
+  background: rgba(0,0,0,.08);
+}
+.cartFoot .sumRow{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap:10px;
+  margin-bottom: 8px;
+}
+.cartFoot .sumRow strong{ font-size: 16px; }
+.cartPrimary{
+  width:100%;
+  border-radius: 14px;
+  border: 2px solid rgba(255,233,176,.9);
+  background: rgba(255,233,176,.12);
+  color: var(--text);
+  padding: 10px 12px;
+  font-weight: 900;
+  cursor:pointer;
+}
+.formGrid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+.formGrid label{
+  display:block;
+  font-size: 12px;
+  opacity:.9;
+  margin-bottom: 6px;
+  font-weight: 800;
+}
+.formGrid input, .formGrid textarea{
+  width:100%;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border:1px solid rgba(244,241,233,.35);
+  background: rgba(0,0,0,.10);
+  color: var(--text);
+}
+.formGrid textarea{ min-height: 90px; resize: vertical; }
+.copyBtn{
+  width:100%;
+  margin-top: 10px;
+  border-radius: 14px;
+  border:1px solid rgba(244,241,233,.55);
+  background: rgba(0,0,0,.14);
+  color: var(--text);
+  padding: 10px 12px;
+  font-weight: 900;
+  cursor:pointer;
+}
+.smallHint{ font-size: 12px; opacity: .85; margin-top: 6px; }
+
+/* 桌機：讓 bottom sheet 不佔滿（但仍可用） */
+@media (pointer:fine){
+  #cartSheet{
+    left: 50%;
+    transform: translate(-50%, 100%);
+    width: min(720px, 92vw);
+    border-radius: 18px;
+  }
+  #cartSheet.open{ transform: translate(-50%, 0); }
+}
+
 </style>
 </head>
 
@@ -485,10 +705,80 @@ input[type=number]{
 <!-- ===== BAR ===== -->
 <div class="topbar">
   <div class="wrap">
+    <button id="orderAssistBtn" class="toggle-btn order-assist">線上訂餐輔助</button>
     <div class="title"><div id="logoStrip" class="logo-strip" aria-label="logo strip"></div></div>
     <button id="toggleBtn" class="toggle-btn">↪︎ 菜單</button>
   </div>
 </div>
+
+
+<!-- ===== 線上訂餐輔助：遮罩 + Bottom Sheet ===== -->
+<div id="cartSheetOverlay" aria-hidden="true"></div>
+<div id="cartSheet" aria-hidden="true">
+  <div class="cartHead">
+    <div class="titleTxt">線上訂餐輔助（不含付款）</div>
+    <button id="cartCloseBtn" class="cartClose">關閉</button>
+  </div>
+  <div class="cartBody">
+    <div class="cartTabs">
+      <button id="tabOrder" class="cartTab active">點餐</button>
+      <button id="tabInfo" class="cartTab">填資料</button>
+    </div>
+
+    <div id="panelOrder">
+      <input id="cartSearch" class="cartSearch" placeholder="搜尋品名 / 品項 / 標籤…">
+      <div id="cartList"></div>
+      <div class="smallHint">提示：同一個「擇一」群組的附加狀態，只能選一個。</div>
+    </div>
+
+    <div id="panelInfo" style="display:none;">
+      <div class="formGrid">
+        <div>
+          <label>稱謂（必填）</label>
+          <input id="custName" placeholder="例如：王小姐 / 公司行號名稱">
+        </div>
+        <div>
+          <label>電話（必填）</label>
+          <input id="custPhone" inputmode="tel" placeholder="例如：0912xxxxxx">
+        </div>
+        <div>
+          <label>地址（可留空；自取可不填）</label>
+          <input id="custAddr" placeholder="例如：苗栗市…">
+        </div>
+        <div>
+          <label>取餐/送達日期（必填）</label>
+          <input id="pickDate" type="date">
+        </div>
+        <div>
+          <label>取餐/送達時間（必填）</label>
+          <input id="pickTime" type="time">
+        </div>
+        <div>
+          <label>備註（可留空）</label>
+          <textarea id="custNote" placeholder="例如：不要太甜 / 要分裝 / 先電話…"></textarea>
+        </div>
+        <div>
+          <label>訂單內容（可複製貼到 LINE / FB / 簡訊）</label>
+          <textarea id="orderText" readonly></textarea>
+          <button id="copyOrderBtn" class="copyBtn">複製訂單文字</button>
+          <div class="smallHint">這裡不做付款，只是協助你整理訂單文字。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cartFoot">
+    <div class="sumRow">
+      <div>小計</div>
+      <strong id="cartTotal">$0</strong>
+    </div>
+    <button id="goInfoBtn" class="cartPrimary">下一步：填資料 / 複製訂單</button>
+  </div>
+</div>
+
+<!-- CART_DATA_BEGIN -->
+<script id="cartDataJson" type="application/json">{"schema":"cart.v1","generated_at":"2026-02-22T14:45:19.533Z","products":[]}<\/script>
+<!-- CART_DATA_END -->
 
 <!-- ===== 店家資訊 ===== -->
 <div id="pageInfo" class="page active">
@@ -1528,6 +1818,422 @@ try{
   window.addEventListener("mousemove", (e) => {
     stampRat(e.clientX, e.clientY);
   }, { passive:true });
+})();
+</script>
+
+
+
+<script>
+/* =========================================================
+   線上訂餐輔助（官網端）
+   - 讀取 #cartDataJson（由 work_system 回存 GitHub 時自動更新）
+   - 手機友善 bottom sheet
+   - 不含成本/不含支付：只產生訂購文字
+   ========================================================= */
+(function(){
+  const $ = (id)=>document.getElementById(id);
+
+  const btn = $("orderAssistBtn");
+  const overlay = $("cartSheetOverlay");
+  const sheet = $("cartSheet");
+  const closeBtn = $("cartCloseBtn");
+
+  const tabOrder = $("tabOrder");
+  const tabInfo = $("tabInfo");
+  const panelOrder = $("panelOrder");
+  const panelInfo = $("panelInfo");
+
+  const listEl = $("cartList");
+  const searchEl = $("cartSearch");
+  const totalEl = $("cartTotal");
+  const goInfoBtn = $("goInfoBtn");
+
+  const nameEl = $("custName");
+  const phoneEl = $("custPhone");
+  const addrEl = $("custAddr");
+  const dateEl = $("pickDate");
+  const timeEl = $("pickTime");
+  const noteEl = $("custNote");
+  const orderTextEl = $("orderText");
+  const copyBtn = $("copyOrderBtn");
+
+  function safeJsonParse(text){
+    try{ return JSON.parse(text); }catch(_){ return null; }
+  }
+
+  function loadData(){
+    const node = $("cartDataJson");
+    if(!node) return { products: [] };
+    const j = safeJsonParse(node.textContent || "");
+    if(!j || !Array.isArray(j.products)) return { products: [] };
+    return j;
+  }
+
+  const state = {
+    data: loadData(),
+    // cartLines: { [productId]: { qty:number, opts: { [optKey]: true } } }
+    cartLines: Object.create(null)
+  };
+
+  function money(n){
+    const x = Math.round((+n || 0) * 100) / 100;
+    if(Math.abs(x - Math.round(x)) < 1e-9) return String(Math.round(x));
+    return String(x);
+  }
+
+  function openSheet(){
+    overlay.style.display = "block";
+    sheet.classList.add("open");
+    btn.classList.add("active");
+    document.body.style.overflow = "hidden";
+    render();
+  }
+  function closeSheet(){
+    sheet.classList.remove("open");
+    btn.classList.remove("active");
+    overlay.style.display = "none";
+    document.body.style.overflow = "";
+  }
+
+  function setTab(which){
+    const isOrder = (which === "order");
+    tabOrder.classList.toggle("active", isOrder);
+    tabInfo.classList.toggle("active", !isOrder);
+    panelOrder.style.display = isOrder ? "" : "none";
+    panelInfo.style.display = isOrder ? "none" : "";
+    if(!isOrder) buildOrderText();
+  }
+
+  function ensureLine(pid){
+    if(!state.cartLines[pid]) state.cartLines[pid] = { qty: 0, opts: Object.create(null) };
+    return state.cartLines[pid];
+  }
+
+  function getLineQty(pid){ return (state.cartLines[pid]?.qty || 0); }
+
+  function setQty(pid, qty){
+    const line = ensureLine(pid);
+    line.qty = Math.max(0, qty|0);
+    if(line.qty === 0){
+      // qty=0 就順便清空選項（避免殘留）
+      line.opts = Object.create(null);
+    }
+    renderTotals();
+    if(panelInfo.style.display !== "none") buildOrderText();
+  }
+
+  function toggleOpt(pid, optIdx){
+    const p = state.data.products.find(x=>x && x.id === pid);
+    if(!p) return;
+    const opt = (p.states || [])[optIdx];
+    if(!opt) return;
+
+    const line = ensureLine(pid);
+    if(line.qty <= 0) line.qty = 1;
+
+    const key = String(optIdx);
+    const willOn = !line.opts[key];
+
+    // 擇一：xor 同值（且非空）只能留一個
+    const xor = (opt.xor != null) ? String(opt.xor).trim() : "";
+    if(willOn && xor){
+      (p.states || []).forEach((s, i)=>{
+        if(i === optIdx) return;
+        const x = (s && s.xor != null) ? String(s.xor).trim() : "";
+        if(x && x === xor){
+          delete line.opts[String(i)];
+        }
+      });
+    }
+
+    if(willOn) line.opts[key] = true;
+    else delete line.opts[key];
+
+    render();
+    if(panelInfo.style.display !== "none") buildOrderText();
+  }
+
+  function calcLineTotal(p, line){
+    const qty = line.qty || 0;
+    if(qty <= 0) return 0;
+    let unit = (+p.price || 0);
+    (p.states||[]).forEach((s, i)=>{
+      if(line.opts[String(i)]){
+        const d = (+s.delta || 0);
+        const q = (+s.qty || 1);
+        unit += d * q;
+      }
+    });
+    return unit * qty;
+  }
+
+  function calcTotal(){
+    let sum = 0;
+    (state.data.products||[]).forEach(p=>{
+      if(!p || !p.id) return;
+      const line = state.cartLines[p.id];
+      if(!line || !line.qty) return;
+      sum += calcLineTotal(p, line);
+    });
+    return sum;
+  }
+
+  function renderTotals(){
+    const t = calcTotal();
+    totalEl.textContent = "$" + money(t);
+  }
+
+  function groupProducts(products){
+    const by = new Map();
+    products.forEach(p=>{
+      const k = (p.item || "未分類").trim() || "未分類";
+      if(!by.has(k)) by.set(k, []);
+      by.get(k).push(p);
+    });
+    // 讓分類順序穩定：依字串
+    return Array.from(by.entries()).sort((a,b)=>a[0].localeCompare(b[0], "zh-Hant"));
+  }
+
+  function matches(p, q){
+    if(!q) return true;
+    const hay = [
+      p.name||"", p.short||"", p.item||"",
+      Array.isArray(p.tags)? p.tags.join(" ") : ""
+    ].join(" ").toLowerCase();
+    return hay.includes(q);
+  }
+
+  function render(){
+    state.data = loadData(); // 每次開啟都讀最新（避免你更新 GitHub 後還用舊資料）
+    const q = (searchEl.value || "").trim().toLowerCase();
+
+    const products = (state.data.products || []).filter(p=>p && p.id && matches(p, q));
+    const groups = groupProducts(products);
+
+    listEl.innerHTML = "";
+
+    if(products.length === 0){
+      const empty = document.createElement("div");
+      empty.className = "cartSection";
+      empty.innerHTML = "<div style='opacity:.9;'>目前沒有可用的購物車商品。<br>（要先在 work_system 的最終產品資料庫勾選「購物車」。附加狀態也要勾「購物車」。）</div>";
+      listEl.appendChild(empty);
+      renderTotals();
+      buildOrderText();
+      return;
+    }
+
+    groups.forEach(([itemName, arr])=>{
+      const sec = document.createElement("div");
+      sec.className = "cartSection";
+      const h = document.createElement("h3");
+      h.textContent = itemName;
+      sec.appendChild(h);
+
+      arr.forEach((p)=>{
+        const pid = p.id;
+        const line = ensureLine(pid);
+
+        const it = document.createElement("div");
+        it.className = "cartItem";
+
+        const row1 = document.createElement("div");
+        row1.className = "row1";
+        row1.innerHTML = `
+          <div>
+            <div class="nm">${escapeHtml(p.name || "")}</div>
+            ${p.short ? `<div style="opacity:.8; font-size:12px;">${escapeHtml(p.short)}</div>` : ""}
+          </div>
+          <div class="pr">$${money(p.price || 0)}</div>
+        `;
+        it.appendChild(row1);
+
+        const step = document.createElement("div");
+        step.className = "stepper";
+        const bMinus = document.createElement("button");
+        bMinus.textContent = "−";
+        bMinus.onclick = ()=>setQty(pid, getLineQty(pid)-1);
+
+        const qEl = document.createElement("div");
+        qEl.className = "q";
+        qEl.textContent = String(getLineQty(pid));
+
+        const bPlus = document.createElement("button");
+        bPlus.textContent = "+";
+        bPlus.onclick = ()=>setQty(pid, getLineQty(pid)+1);
+
+        step.appendChild(bMinus);
+        step.appendChild(qEl);
+        step.appendChild(bPlus);
+        it.appendChild(step);
+
+        const opts = (p.states || []).filter(s=>s && (s.name||"").trim());
+        if(opts.length){
+          const optList = document.createElement("div");
+          optList.className = "optList";
+          opts.forEach((s, idx)=>{
+            const pill = document.createElement("label");
+            const on = !!line.opts[String(idx)];
+            pill.className = "optPill" + (on ? " on" : "");
+            const delta = (+s.delta || 0);
+            const qty = (+s.qty || 1);
+            const add = delta ? (delta>0? ` +$${money(delta*qty)}` : ` -$${money(Math.abs(delta*qty))}`) : "";
+            pill.innerHTML = `
+              <input type="checkbox" ${on ? "checked" : ""}>
+              <span>${escapeHtml(s.name)}${add}</span>
+            `;
+            pill.onclick = (e)=>{
+              // label 點擊會連動 checkbox；我們統一用 toggle 控制（避免兩次觸發）
+              e.preventDefault();
+              toggleOpt(pid, idx);
+            };
+            optList.appendChild(pill);
+          });
+          it.appendChild(optList);
+        }
+
+        sec.appendChild(it);
+      });
+
+      listEl.appendChild(sec);
+    });
+
+    renderTotals();
+    buildOrderText();
+  }
+
+  function escapeHtml(s){
+    return String(s||"")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#39;");
+  }
+
+  function buildOrderText(){
+    const lines = [];
+    const now = new Date();
+    const d = (dateEl && dateEl.value) ? dateEl.value : "";
+    const t = (timeEl && timeEl.value) ? timeEl.value : "";
+
+    const name = (nameEl.value || "").trim();
+    const phone = (phoneEl.value || "").trim();
+    const addr = (addrEl.value || "").trim();
+    const note = (noteEl.value || "").trim();
+
+    lines.push("【萌虎燒｜線上訂餐輔助】");
+    lines.push(`稱謂：${name || "（未填）"}`);
+    lines.push(`電話：${phone || "（未填）"}`);
+    lines.push(`地址：${addr || "（未填）"}`);
+    lines.push(`日期時間：${(d||"（未填）")} ${(t||"")}`.trim());
+    lines.push("");
+
+    lines.push("【品項】");
+    let hasAny = false;
+
+    (state.data.products||[]).forEach(p=>{
+      if(!p || !p.id) return;
+      const line = state.cartLines[p.id];
+      if(!line || !line.qty) return;
+      hasAny = true;
+
+      const picked = [];
+      (p.states||[]).forEach((s, idx)=>{
+        if(line.opts[String(idx)]){
+          const delta = (+s.delta||0);
+          const qty = (+s.qty||1);
+          const add = delta ? (delta>0 ? ` +$${money(delta*qty)}` : ` -$${money(Math.abs(delta*qty))}`) : "";
+          picked.push(`${s.name}${add}`);
+        }
+      });
+
+      const optTxt = picked.length ? `（${picked.join("、")}）` : "";
+      lines.push(`- ${p.name}${optTxt} x${line.qty}`);
+    });
+
+    if(!hasAny) lines.push("（尚未選擇商品）");
+
+    lines.push("");
+    lines.push(`小計：$${money(calcTotal())}`);
+
+    if(note){
+      lines.push("");
+      lines.push("【備註】");
+      lines.push(note);
+    }
+
+    orderTextEl.value = lines.join("\n");
+  }
+
+  function validateInfo(){
+    const name = (nameEl.value || "").trim();
+    const phone = (phoneEl.value || "").trim();
+    const d = (dateEl.value || "").trim();
+    const t = (timeEl.value || "").trim();
+    if(!name || !phone || !d || !t) return false;
+    return true;
+  }
+
+  // ===== Events =====
+  btn && btn.addEventListener("click", ()=>{
+    // data 可能剛更新，先 reload
+    state.data = loadData();
+    openSheet();
+    setTab("order");
+  });
+
+  overlay && overlay.addEventListener("click", closeSheet);
+  closeBtn && closeBtn.addEventListener("click", closeSheet);
+
+  tabOrder && tabOrder.addEventListener("click", ()=>setTab("order"));
+  tabInfo && tabInfo.addEventListener("click", ()=>setTab("info"));
+
+  goInfoBtn && goInfoBtn.addEventListener("click", ()=>{
+    setTab("info");
+    // 若還沒填日期時間，給一組合理預設（今天 + 30 分鐘，四捨五入到 10 分）
+    if(dateEl && !dateEl.value){
+      const d = new Date();
+      dateEl.value = d.toISOString().slice(0,10);
+    }
+    if(timeEl && !timeEl.value){
+      const d = new Date(Date.now() + 30*60*1000);
+      const hh = String(d.getHours()).padStart(2,"0");
+      const mm0 = d.getMinutes();
+      const mm = String(Math.round(mm0/10)*10).padStart(2,"0");
+      timeEl.value = `${hh}:${mm === "60" ? "00" : mm}`;
+    }
+    buildOrderText();
+  });
+
+  searchEl && searchEl.addEventListener("input", ()=>render());
+
+  [nameEl, phoneEl, addrEl, dateEl, timeEl, noteEl].forEach(el=>{
+    if(!el) return;
+    el.addEventListener("input", ()=>buildOrderText());
+    el.addEventListener("change", ()=>buildOrderText());
+  });
+
+  copyBtn && copyBtn.addEventListener("click", async ()=>{
+    buildOrderText();
+    const txt = orderTextEl.value || "";
+    if(!txt.trim()){
+      alert("目前沒有可複製的內容。");
+      return;
+    }
+    try{
+      await navigator.clipboard.writeText(txt);
+      alert("已複製到剪貼簿。\n請貼到 LINE / FB / 簡訊送出即可。");
+    }catch(e){
+      // fallback
+      orderTextEl.focus();
+      orderTextEl.select();
+      document.execCommand("copy");
+      alert("已嘗試複製（若失敗，請手動全選複製）。");
+    }
+  });
+
+  // 初次：不主動打開，只建立一次小計
+  renderTotals();
 })();
 </script>
 
