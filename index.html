@@ -983,8 +983,9 @@ window.addEventListener("mousedown", holdOn);
 <script>
 /* =========================================================
    貓腳印軌跡（改成幾何腳印，不抓外部圖）
-   - 腳掌：圓角正三角形
-   - 腳趾：4 個直立橢圓（大小一致），位置在腳掌上方，不會蓋到腳掌
+   - 腳掌：圓角正三角形（更圓、且縮小為 0.75 倍）
+   - 腳趾：4 個直立橢圓（大小一致），彼此更分開，且高度跟著坡度走
+   - 旋轉方向：三角形頂點會朝「移動方向」
    - 桌機：滑鼠移動產生
    - 手機：拖曳漂浮虎頭（mobileOrb）時產生
    ========================================================= */
@@ -992,17 +993,24 @@ window.addEventListener("mousedown", holdOn);
   const host = document.getElementById("pawTrail");
   if(!host) return;
 
-  const pawSrc = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E %3Cg fill='rgba(244,241,233,0.92)'%3E %3C!-- toes (4 vertical ovals), kept ABOVE pad so they don't overlap --%3E %3Cellipse cx='18' cy='16' rx='4.2' ry='7.2'/%3E %3Cellipse cx='28' cy='12.5' rx='4.2' ry='7.2'/%3E %3Cellipse cx='38' cy='12.5' rx='4.2' ry='7.2'/%3E %3Cellipse cx='48' cy='16' rx='4.2' ry='7.2'/%3E %3C!-- pad: rounded equilateral-ish triangle --%3E %3Cpath d='M32 26 L14.5 54 Q14 55 15.5 56 Q32 62 48.5 56 Q50 55 49.5 54 L32 26 Z'/%3E %3C/g%3E %3C/svg%3E";
+  const pawSrc = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E %3Cg fill='rgba(244,241,233,0.92)'%3E %3C!-- toes (4 vertical ovals): spaced further apart and follow slope --%3E %3Cellipse cx='16.5' cy='18.5' rx='4.2' ry='7.2'/%3E %3Cellipse cx='27.5' cy='13.2' rx='4.2' ry='7.2'/%3E %3Cellipse cx='36.5' cy='13.2' rx='4.2' ry='7.2'/%3E %3Cellipse cx='47.5' cy='18.5' rx='4.2' ry='7.2'/%3E %3C!-- pad: rounded triangle, scaled to 0.75 around center --%3E %3Cg transform='translate(32 44) scale(0.75) translate(-32 -44)'%3E %3Cpath d=' M32 26 Q29.8 28.2 28.2 30.2 L18.2 48.0 Q16.0 51.8 18.8 54.0 Q32 62 45.2 54.0 Q48.0 51.8 45.8 48.0 L35.8 30.2 Q34.2 28.2 32 26 Z'/%3E %3C/g%3E %3C/g%3E %3C/svg%3E";
 
-  // 節流：距離/時間達門檻才蓋一個腳印（避免太密）
   let lastX = 0, lastY = 0, lastT = 0;
-  const minDist = 26;     // 腳印間距
-  const minMs   = 38;     // 最小間隔
-  const maxStamps = 90;   // 場上最多腳印（超過就移除最舊）
+  const minDist = 26;
+  const minMs   = 38;
+  const maxStamps = 90;
 
   function dist(x1,y1,x2,y2){
     const dx=x1-x2, dy=y1-y2;
     return Math.sqrt(dx*dx+dy*dy);
+  }
+
+  function dirDeg(x, y){
+    if(lastT === 0) return 0;
+    const dx = x - lastX;
+    const dy = y - lastY;
+    if(Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001) return 0;
+    return (Math.atan2(dy, dx) * 180 / Math.PI) + 90;
   }
 
   function stamp(x, y, force=false){
@@ -1014,22 +1022,25 @@ window.addEventListener("mousedown", holdOn);
       }
     }
 
-    lastX = x; lastY = y; lastT = now;
-
     const img = document.createElement("img");
     img.className = "paw-stamp";
     img.alt = "";
     img.draggable = false;
     img.src = pawSrc;
 
-    // 讓腳印左右/角度有一點自然感
     const jitter = (Math.random() * 8) - 4;
-    const rot = (Math.random() * 20) - 10; // -10~10 deg
+
+    const baseRot = dirDeg(x, y);
+    const rotJit  = (Math.random() * 12) - 6;
+    const rot = baseRot + rotJit;
+
     img.style.left = (x + jitter) + "px";
     img.style.top  = (y + jitter) + "px";
     img.style.setProperty("--rot", rot + "deg");
 
     host.appendChild(img);
+
+    lastX = x; lastY = y; lastT = now;
 
     while(host.children.length > maxStamps){
       host.removeChild(host.firstChild);
@@ -1040,7 +1051,6 @@ window.addEventListener("mousedown", holdOn);
     }, { once:true });
   }
 
-  /* ===== 桌機：滑鼠移動 ===== */
   const isFine = window.matchMedia && window.matchMedia("(pointer:fine)").matches;
   if(isFine){
     window.addEventListener("mousemove", (e) => {
@@ -1048,21 +1058,14 @@ window.addEventListener("mousedown", holdOn);
     }, { passive:true });
   }
 
-  /* ===== 手機：拖曳漂浮虎頭時才出現腳印 ===== */
   const orb = document.getElementById("mobileOrb");
   if(orb){
     let dragging = false;
 
-    const orbCenterFromEvent = (clientX, clientY) => {
-      // 用事件點當中心，手感最好；拖曳時手指就在虎頭上
-      return [clientX, clientY];
-    };
-
     orb.addEventListener("pointerdown", (e) => {
       if(e.pointerType === "mouse") return;
       dragging = true;
-      const [x,y] = orbCenterFromEvent(e.clientX, e.clientY);
-      stamp(x,y,true);
+      stamp(e.clientX, e.clientY, true);
     }, { passive:false });
 
     window.addEventListener("pointermove", (e) => {
@@ -1079,7 +1082,6 @@ window.addEventListener("mousedown", holdOn);
     window.addEventListener("pointerup", endDrag, { passive:true });
     window.addEventListener("pointercancel", endDrag, { passive:true });
 
-    // Touch fallback
     orb.addEventListener("touchstart", (e) => {
       if(!e.touches || !e.touches.length) return;
       dragging = true;
@@ -1100,6 +1102,5 @@ window.addEventListener("mousedown", holdOn);
   }
 })();
 </script>
-
 </body>
 </html>
