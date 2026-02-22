@@ -38,8 +38,8 @@ body{
   letter-spacing:0.6px;
   line-height:1.75;
 
-  /* ===== 自訂旋轉游標：隱藏系統游標 ===== */
-  cursor:none;
+  /* ===== 游標：桌機用正常游標（虎頭改為自走角色） ===== */
+  cursor:auto;
 }
 
 /* ===== 內容限寬置中 ===== */
@@ -165,8 +165,8 @@ input[type=number]{
   height: 34px;
   transform: translate(-50%, -50%);
   z-index: 999999;
-  pointer-events: none; /* 不要擋點擊/拖曳 */
-  display: none;        /* 等滑鼠進來才顯示 */
+  pointer-events: auto; /* 需要可點選拖曳 */
+  display: none; /* 桌機 fine pointer 才顯示（由 JS 控制顯示） */
 }
 
 /* 外層：晃動專用 */
@@ -458,6 +458,21 @@ input[type=number]{
   filter: drop-shadow(0 0 2px rgba(0,0,0,.35));
   animation: pawFade 1.35s ease-out forwards;
 }
+
+/* ===== 滑鼠軌跡：🐀（只在桌機 pointer:fine 生效）===== */
+.rat-stamp{
+
+  position: absolute;
+  transform: translate(-50%, -50%) rotate(var(--rot, 0deg));
+  opacity: 0.85;
+  font-size: 20px;
+  line-height: 1;
+  filter: drop-shadow(0 0 2px rgba(0,0,0,.35));
+  animation: pawFade 1.35s ease-out forwards; /* 沿用現有淡出動畫 */
+  user-select: none;
+  transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) 
+}
+
 @keyframes pawFade{
   0%   { opacity: 0.80; transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) scale(1); }
   100% { opacity: 0;    transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) scale(1.06); }
@@ -777,202 +792,395 @@ distanceInput.addEventListener("input", () => {
   renderStrip();
 })();
 
-/* ===== 旋轉游標（在官網內一直轉 + 按住放大 + 左右晃動） ===== */
+/* ===== 自走虎頭（桌機/手機共用邏輯） =====
+   - 桌機：虎頭不是游標，而是一個會自己亂走的角色；滑鼠靠近會「更偏向」走向滑鼠位置
+   - 桌機可用滑鼠點住虎頭拖曳（按住效果＝原本左鍵按住的放大/晃動）
+   - 手機：沿用原本可拖曳虎頭，但增加「自己亂走 + 觸碰點吸引」邏輯
+*/
 (function(){
   const CURSOR_URL = "tiger.png";
-  const c = document.getElementById("spinCursor");
-  const img = document.getElementById("spinCursorImg");
-  if(!c || !img) return;
 
-  img.src = CURSOR_URL;
+  const root = document.documentElement;
 
-  const isFinePointer = window.matchMedia && window.matchMedia("(pointer:fine)").matches;
-  const isCoarsePointer = window.matchMedia && window.matchMedia("(pointer:coarse)").matches;
-
-  if(!isFinePointer){
-    // 手機/平板：不做桌機「跟隨游標」，改用漂浮虎頭（可拖曳 + 按住效果）
-    document.body.style.cursor = "auto";
-
-    if(isCoarsePointer){
-      const orb = document.getElementById("mobileOrb");
-      const orbImg = document.getElementById("mobileOrbImg");
-
-      if(orb && orbImg){
-        orbImg.src = CURSOR_URL;
-
-        const __rootM = document.documentElement;
-        const __getVarM = (k, fallback) => {
-          try{
-            const v = getComputedStyle(__rootM).getPropertyValue(k).trim();
-            return v || fallback;
-          }catch(e){ return fallback; }
-        };
-        const __NORMAL_SPEED_M = __getVarM("--cursor-spin-speed", "2.4s");
-        const __HOLD_SPEED_M   = __getVarM("--cursor-spin-speed-hold", "0.6s");
-
-        const holdOnM = () => {
-          orb.classList.add("hold");
-          __rootM.style.setProperty("--cursor-spin-speed", __HOLD_SPEED_M);
-        };
-        const holdOffM = () => {
-          orb.classList.remove("hold");
-          __rootM.style.setProperty("--cursor-spin-speed", __NORMAL_SPEED_M);
-        };
-
-        let dragging = false;
-        let offsetX = 0, offsetY = 0;
-        let orbW = 56, orbH = 56;
-
-        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-        const updateSize = () => {
-          const r = orb.getBoundingClientRect();
-          orbW = r.width || orbW;
-          orbH = r.height || orbH;
-        };
-        updateSize();
-        window.addEventListener("resize", updateSize, { passive:true });
-
-        // Pointer (Android Chrome OK)
-        orb.addEventListener("pointerdown", (e) => {
-          if(e.pointerType === "mouse") return;
-          e.preventDefault();
-          updateSize();
-          holdOnM();
-
-          const r = orb.getBoundingClientRect();
-          offsetX = e.clientX - r.left;
-          offsetY = e.clientY - r.top;
-
-          dragging = true;
-        }, { passive:false });
-
-        const onPointerMove = (e) => {
-          if(!dragging) return;
-          if(e.pointerType === "mouse") return;
-          e.preventDefault();
-          updateSize();
-
-          const x = clamp(e.clientX - offsetX, 0, window.innerWidth  - orbW);
-          const y = clamp(e.clientY - offsetY, 0, window.innerHeight - orbH);
-
-          orb.style.left = x + "px";
-          orb.style.top  = y + "px";
-          orb.style.bottom = "auto";
-          orb.style.right  = "auto";
-        };
-
-        const endPointerDrag = (e) => {
-          if(!dragging) return;
-          if(e && e.pointerType === "mouse") return;
-          dragging = false;
-          holdOffM();
-        };
-
-        window.addEventListener("pointermove", onPointerMove, { passive:false });
-        window.addEventListener("pointerup", endPointerDrag, { passive:true });
-        window.addEventListener("pointercancel", endPointerDrag, { passive:true });
-
-        // Touch fallback（保險）
-        let tDragging = false;
-        let tOffsetX = 0, tOffsetY = 0;
-
-        orb.addEventListener("touchstart", (e) => {
-          if(!e.touches || !e.touches.length) return;
-          e.preventDefault();
-          updateSize();
-          holdOnM();
-
-          const r = orb.getBoundingClientRect();
-          const t = e.touches[0];
-          tOffsetX = t.clientX - r.left;
-          tOffsetY = t.clientY - r.top;
-          tDragging = true;
-        }, { passive:false });
-
-        const onTouchMove = (e) => {
-          if(!tDragging) return;
-          if(!e.touches || !e.touches.length) return;
-          e.preventDefault();
-          updateSize();
-
-          const t = e.touches[0];
-          const x = clamp(t.clientX - tOffsetX, 0, window.innerWidth  - orbW);
-          const y = clamp(t.clientY - tOffsetY, 0, window.innerHeight - orbH);
-
-          orb.style.left = x + "px";
-          orb.style.top  = y + "px";
-          orb.style.bottom = "auto";
-          orb.style.right  = "auto";
-        };
-
-        const endTouchDrag = () => {
-          if(!tDragging) return;
-          tDragging = false;
-          holdOffM();
-        };
-
-        window.addEventListener("touchmove", onTouchMove, { passive:false });
-        window.addEventListener("touchend", endTouchDrag, { passive:true });
-        window.addEventListener("touchcancel", endTouchDrag, { passive:true });
-
-        window.addEventListener("blur", () => { dragging = false; tDragging = false; holdOffM(); });
-      }
-    }
-
-    return;
-  }
-
-  let shown = false;
-
-  function show(){
-    if(shown) return;
-    shown = true;
-    c.style.display = "block";
-  }
-  function hide(){
-    shown = false;
-    c.style.display = "none";
-    c.classList.remove("hold");
-  }
-
-  window.addEventListener("mousemove", (e) => {
-    show();
-    c.style.left = e.clientX + "px";
-    c.style.top  = e.clientY + "px";
-  }, { passive:true });
-
-  window.addEventListener("mouseenter", show, { passive:true });
-  window.addEventListener("mouseleave", hide, { passive:true });
-  // ===== ✅ 按著就一直放大 + 晃動（旋轉照常）=====
-  const __root = document.documentElement;
-  const __getVar = (k, fallback) => {
+  // ===== 取 CSS 變數（旋轉速度）=====
+  const getVar = (k, fallback) => {
     try{
-      const v = getComputedStyle(__root).getPropertyValue(k).trim();
+      const v = getComputedStyle(root).getPropertyValue(k).trim();
       return v || fallback;
     }catch(e){ return fallback; }
   };
-  const __NORMAL_SPEED = __getVar("--cursor-spin-speed", "2.4s");
-  const __HOLD_SPEED   = __getVar("--cursor-spin-speed-hold", "0.6s");
+  const NORMAL_SPEED = getVar("--cursor-spin-speed", "3.6s");
+  const HOLD_SPEED   = getVar("--cursor-spin-speed-hold", "0s");
 
-  function holdOn(){
-    c.classList.add("hold");
-    __root.style.setProperty("--cursor-spin-speed", __HOLD_SPEED);
+  // ===== 角色狀態（共用）=====
+  const makeAgent = (el, imgEl, opts={}) => {
+    const st = {
+      el, imgEl,
+      x: opts.x ?? 120,
+      y: opts.y ?? 120,
+      vx: 0, vy: 0,
+      targetX: opts.x ?? 120,
+      targetY: opts.y ?? 120,
+      pauseMs: 0,
+      nextPickMs: 0,
+      pounceMs: 0,
+      dragging: false,
+      dragOffX: 0,
+      dragOffY: 0,
+      visible: false,
+      w: 34, h: 34,
+    };
+
+    if(imgEl) imgEl.src = CURSOR_URL;
+
+    const updateSize = () => {
+      const r = el.getBoundingClientRect();
+      st.w = r.width || st.w;
+      st.h = r.height || st.h;
+    };
+    updateSize();
+    window.addEventListener("resize", updateSize, { passive:true });
+
+    const show = () => {
+      if(st.visible) return;
+      st.visible = true;
+      el.style.display = "block";
+    };
+
+    const setPos = (x, y) => {
+      st.x = x; st.y = y;
+      el.style.left = x + "px";
+      el.style.top  = y + "px";
+    };
+
+    return { st, show, setPos, updateSize };
+  };
+
+  // ===== 指標（滑鼠/觸控）吸引點 =====
+  const pointer = { x: 0, y: 0, t: 0, active: false, type: "none" };
+  const setPointer = (x,y,type) => {
+    pointer.x = x; pointer.y = y; pointer.t = performance.now();
+    pointer.active = true; pointer.type = type;
+  };
+
+  // 只在「滑鼠正在移動」的短時間窗內，才讓虎頭有追獵反應
+  const isMouseMoving = () => {
+    if(!pointer.active) return false;
+    if(pointer.type !== "mouse") return false;
+    return (performance.now() - pointer.t) <= 220; // 220ms 內算正在移動
+  };
+
+  // ===== 亂走目標產生 =====
+  const pickWanderTarget = (agent) => {
+    const pad = 24;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    // 避免靠邊
+    const tx = pad + Math.random() * Math.max(1, (w - pad*2));
+    const ty = pad + Math.random() * Math.max(1, (h - pad*2));
+    agent.st.targetX = tx;
+    agent.st.targetY = ty;
+
+    // 隨機停下 0.4s~2.2s
+    agent.st.pauseMs = 400 + Math.random() * 1800;
+    // 下一次挑新目標：先走一段再停
+    agent.st.nextPickMs = 650 + Math.random() * 1400;
+  };
+
+  // ===== 力場：偏向 pointer 的權重（只在滑鼠正在移動時生效；積極性更高）=====
+  const pointerBias = (ax, ay) => {
+    // 只對滑鼠「正在移動」時才追
+    if(!isMouseMoving()) return 0;
+
+    const age = performance.now() - pointer.t; // 0~220ms
+    const dx = pointer.x - ax;
+    const dy = pointer.y - ay;
+    const d  = Math.sqrt(dx*dx + dy*dy);
+
+    // 越新越強（0ms 最強），越近越強
+    const freshness = Math.max(0, 1 - age / 220);
+    const near = Math.max(0, 1 - d / 700);
+
+    // 上限拉高（更「積極」）
+    return Math.min(0.95, 0.28 + 0.95 * freshness * (0.35 + 0.65 * near));
+  };
+
+  const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+
+  // ===== 讓腳印系統可被呼叫（如果有載入）=====
+  const pawStamp = (x,y,force=false) => {
+    if(typeof window.__pawStamp === "function"){
+      window.__pawStamp(x,y,force);
+    }
+  };
+
+  // ===== 主更新迴圈（同一套物理，用於桌機或手機 agent）=====
+  const stepAgent = (agent, dt) => {
+    const s = agent.st;
+    if(!s.visible) agent.show();
+
+    // 拖曳中：位置由指標控制，不做自走
+    if(s.dragging){
+      agent.setPos(s.x, s.y);
+      pawStamp(s.x, s.y, false);
+      return;
+    }
+
+    // 暫停
+    if(s.pauseMs > 0){
+      s.pauseMs -= dt;
+      agent.setPos(s.x, s.y);
+      return;
+    }
+
+    // 走動目標更新
+    s.nextPickMs -= dt;
+    if(s.nextPickMs <= 0){
+      pickWanderTarget(agent);
+    }
+
+    // 合成目標：wander + pointer（有偏向但不是瞬間追）
+    const b = pointerBias(s.x, s.y);
+    const tx = (1-b)*s.targetX + b*pointer.x;
+    const ty = (1-b)*s.targetY + b*pointer.y;
+
+    // 朝目標加速度（帶一點阻尼）
+    const dx = tx - s.x;
+    const dy = ty - s.y;
+
+    const dist = Math.sqrt(dx*dx+dy*dy) || 1;
+    const nx = dx / dist;
+    const ny = dy / dist;
+
+    // ===== 捕獵撲擊：只有滑鼠正在移動時才觸發；靠近一定距離就瞬間加速撲過去 =====
+    const hunting = isMouseMoving();
+    const dToMouse = Math.sqrt((pointer.x - s.x) ** 2 + (pointer.y - s.y) ** 2);
+
+    // 進入撲擊：靠近就「瞬間」給一個速度脈衝，並在短時間內提高 accel/maxV
+    if(hunting && !s.dragging && dToMouse < 260 && s.pounceMs <= 0){
+      s.pounceMs = 220 + Math.random() * 160; // 0.22~0.38s 的撲擊窗口
+      // 速度脈衝：立刻朝向滑鼠
+      s.vx = nx * 0.62;
+      s.vy = ny * 0.62;
+    }
+
+    // 撲擊倒數
+    if(s.pounceMs > 0) s.pounceMs -= dt;
+
+    // 速度上限：一般巡航 vs 捕獵撲擊（只在滑鼠移動且靠近時觸發）
+    const cruiseMaxV = 0.22;     // px/ms
+    const cruiseAccel = 0.00055; // px/ms^2
+    const pounceMaxV  = 0.70;    // 撲擊瞬間速度
+    const pounceAccel = 0.0036;  // 撲擊瞬間加速度
+    const usingPounce = (s.pounceMs > 0);
+    const maxV = usingPounce ? pounceMaxV : cruiseMaxV;
+    const accel = usingPounce ? pounceAccel : cruiseAccel;
+
+    s.vx += nx * accel * dt;
+    s.vy += ny * accel * dt;
+
+    // 阻尼
+    const damp = (s.pounceMs > 0) ? 0.993 : 0.985;
+    s.vx *= damp;
+    s.vy *= damp;
+
+    // 限速
+    const v = Math.sqrt(s.vx*s.vx + s.vy*s.vy);
+    if(v > maxV){
+      s.vx = s.vx / v * maxV;
+      s.vy = s.vy / v * maxV;
+    }
+
+    // 更新位置
+    s.x += s.vx * dt;
+    s.y += s.vy * dt;
+
+    // 邊界（留一點 padding）
+    const pad = 18;
+    s.x = clamp(s.x, pad, window.innerWidth  - pad);
+    s.y = clamp(s.y, pad, window.innerHeight - pad);
+
+    agent.setPos(s.x, s.y);
+
+    // 到目標附近就準備停一下
+    if(dist < 24){
+      s.pauseMs = 450 + Math.random()*1400;
+      // 走到目標後再過一段時間才換下個
+      s.nextPickMs = 700 + Math.random()*1400;
+    }
+
+    // 輕量腳印：走動時也留一點（不會太密，腳印自身會節流）
+    pawStamp(s.x, s.y, false);
+  };
+
+  // ===== 桌機：spinCursor 當作角色 =====
+  const spin = document.getElementById("spinCursor");
+  const spinImg = document.getElementById("spinCursorImg");
+
+  const isFine = window.matchMedia && window.matchMedia("(pointer:fine)").matches;
+  if(isFine && spin && spinImg){
+    const A = makeAgent(spin, spinImg, { x: Math.min(180, window.innerWidth-40), y: 120 });
+    pickWanderTarget(A);
+    A.show();
+
+    // 讓它可點選拖曳
+    spin.style.pointerEvents = "auto";
+    spin.style.cursor = "grab";
+
+    const holdOn = () => {
+      spin.classList.add("hold");
+      root.style.setProperty("--cursor-spin-speed", HOLD_SPEED);
+    };
+    const holdOff = () => {
+      spin.classList.remove("hold");
+      root.style.setProperty("--cursor-spin-speed", NORMAL_SPEED);
+    };
+
+    const onDown = (e) => {
+      // 左鍵/觸控
+      if(e.pointerType === "mouse" && e.button !== 0) return;
+      e.preventDefault();
+      const r = spin.getBoundingClientRect();
+      A.st.dragging = true;
+      A.st.dragOffX = e.clientX - (r.left + r.width/2);
+      A.st.dragOffY = e.clientY - (r.top  + r.height/2);
+      holdOn();
+      spin.style.cursor = "grabbing";
+      pawStamp(A.st.x, A.st.y, true);
+      try{ spin.setPointerCapture(e.pointerId); }catch(err){}
+    };
+
+    const onMove = (e) => {
+      // 更新吸引點（滑鼠移動，虎頭更偏向你）
+      setPointer(e.clientX, e.clientY, "mouse");
+
+      if(!A.st.dragging) return;
+      const x = e.clientX - A.st.dragOffX;
+      const y = e.clientY - A.st.dragOffY;
+      A.setPos(x, y);
+      A.st.x = x; A.st.y = y;
+      pawStamp(x, y, false);
+    };
+
+    const onUp = (e) => {
+      if(!A.st.dragging) return;
+      A.st.dragging = false;
+      holdOff();
+      spin.style.cursor = "grab";
+      // 放手後讓它從目前位置繼續自走
+      A.st.vx *= 0.35;
+      A.st.vy *= 0.35;
+    };
+
+    spin.addEventListener("pointerdown", onDown, { passive:false });
+    window.addEventListener("pointermove", onMove, { passive:true });
+    window.addEventListener("pointerup", onUp, { passive:true });
+    window.addEventListener("pointercancel", onUp, { passive:true });
+
+    // 初始位置
+    A.setPos(A.st.x, A.st.y);
+
+    // 迴圈
+    let last = performance.now();
+    const loop = (t) => {
+      const dt = Math.min(34, t - last);
+      last = t;
+      stepAgent(A, dt);
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  }else{
+    // 非桌機：不要隱藏游標
+    document.body.style.cursor = "auto";
+    if(spin) spin.style.display = "none";
   }
-  function holdOff(){
-    c.classList.remove("hold");
-    __root.style.setProperty("--cursor-spin-speed", __NORMAL_SPEED);
+
+  // ===== 手機：mobileOrb 也變成自走 + 觸碰點吸引（仍可拖曳）=====
+  const orb = document.getElementById("mobileOrb");
+  const orbImg = document.getElementById("mobileOrbImg");
+  const isCoarse = window.matchMedia && window.matchMedia("(pointer:coarse)").matches;
+
+  if(isCoarse && orb && orbImg){
+    orbImg.src = CURSOR_URL;
+    orb.style.display = "block";
+
+    const M = makeAgent(orb, orbImg, { x: 64, y: window.innerHeight - 88 });
+    pickWanderTarget(M);
+    M.show();
+
+    const holdOnM = () => {
+      orb.classList.add("hold");
+      root.style.setProperty("--cursor-spin-speed", HOLD_SPEED);
+    };
+    const holdOffM = () => {
+      orb.classList.remove("hold");
+      root.style.setProperty("--cursor-spin-speed", NORMAL_SPEED);
+    };
+
+    // 觸控任意位置都會吸引
+    window.addEventListener("touchstart", (e) => {
+      if(!e.touches || !e.touches.length) return;
+      const t = e.touches[0];
+      setPointer(t.clientX, t.clientY, "touch");
+    }, { passive:true });
+    window.addEventListener("touchmove", (e) => {
+      if(!e.touches || !e.touches.length) return;
+      const t = e.touches[0];
+      setPointer(t.clientX, t.clientY, "touch");
+    }, { passive:true });
+
+    // 拖曳（保留原邏輯手感）
+    const onDownM = (e) => {
+      // 觸控才算
+      if(e.pointerType === "mouse") return;
+      e.preventDefault();
+      const r = orb.getBoundingClientRect();
+      M.st.dragging = true;
+      M.st.dragOffX = e.clientX - (r.left + r.width/2);
+      M.st.dragOffY = e.clientY - (r.top  + r.height/2);
+      holdOnM();
+      pawStamp(M.st.x, M.st.y, true);
+      try{ orb.setPointerCapture(e.pointerId); }catch(err){}
+    };
+    const onMoveM = (e) => {
+      if(e.pointerType === "mouse") return;
+      setPointer(e.clientX, e.clientY, "touch");
+      if(!M.st.dragging) return;
+      const x = e.clientX - M.st.dragOffX;
+      const y = e.clientY - M.st.dragOffY;
+      M.setPos(x, y);
+      M.st.x = x; M.st.y = y;
+      pawStamp(x, y, false);
+    };
+    const onUpM = (e) => {
+      if(e && e.pointerType === "mouse") return;
+      if(!M.st.dragging) return;
+      M.st.dragging = false;
+      holdOffM();
+      M.st.vx *= 0.35;
+      M.st.vy *= 0.35;
+    };
+
+    orb.addEventListener("pointerdown", onDownM, { passive:false });
+    window.addEventListener("pointermove", onMoveM, { passive:true });
+    window.addEventListener("pointerup", onUpM, { passive:true });
+    window.addEventListener("pointercancel", onUpM, { passive:true });
+
+    // 初始位置
+    M.setPos(M.st.x, M.st.y);
+
+    // 迴圈
+    let lastM = performance.now();
+    const loopM = (t) => {
+      const dt = Math.min(34, t - lastM);
+      lastM = t;
+      stepAgent(M, dt);
+      requestAnimationFrame(loopM);
+    };
+    requestAnimationFrame(loopM);
+  }else{
+    if(orb) orb.style.display = "none";
   }
-window.addEventListener("mousedown", holdOn);
-  window.addEventListener("mouseup", holdOff);
-
-  // 避免卡住（按住拖出視窗 / alt-tab）
-  window.addEventListener("blur", holdOff);
-  window.addEventListener("mouseleave", holdOff);
-
-  // 切到別的分頁先隱藏，避免回來位置怪
-  document.addEventListener("visibilitychange", () => {
-    if(document.hidden) hide();
-  });
 })();
 </script>
 
@@ -982,18 +1190,17 @@ window.addEventListener("mousedown", holdOn);
 
 <script>
 /* =========================================================
-   貓腳印軌跡（改成幾何腳印，不抓外部圖）
-   - 腳掌：圓角正三角形（更圓、且縮小為 0.75 倍）
-   - 腳趾：4 個直立橢圓（大小一致），彼此更分開，且高度跟著坡度走
-   - 旋轉方向：三角形頂點會朝「移動方向」
-   - 桌機：滑鼠移動產生
-   - 手機：拖曳漂浮虎頭（mobileOrb）時產生
+   貓腳印軌跡（給虎頭自走/拖曳用）
+   - 不綁滑鼠/觸控事件
+   - 只提供 window.__pawStamp(x,y,force) 讓虎頭呼叫
    ========================================================= */
 (function(){
   const host = document.getElementById("pawTrail");
   if(!host) return;
 
-  const pawSrc = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E %3Cg fill='rgba(244,241,233,0.92)'%3E %3C!-- toes (4 vertical ovals): spaced further apart and follow slope --%3E %3Cellipse cx='16.5' cy='18.5' rx='4.2' ry='7.2'/%3E %3Cellipse cx='27.5' cy='13.2' rx='4.2' ry='7.2'/%3E %3Cellipse cx='36.5' cy='13.2' rx='4.2' ry='7.2'/%3E %3Cellipse cx='47.5' cy='18.5' rx='4.2' ry='7.2'/%3E %3C!-- pad: rounded triangle, scaled to 0.75 around center --%3E %3Cg transform='translate(32 44) scale(0.75) translate(-32 -44)'%3E %3Cpath d=' M32 26 Q29.8 28.2 28.2 30.2 L18.2 48.0 Q16.0 51.8 18.8 54.0 Q32 62 45.2 54.0 Q48.0 51.8 45.8 48.0 L35.8 30.2 Q34.2 28.2 32 26 Z'/%3E %3C/g%3E %3C/g%3E %3C/svg%3E";
+  // 幾何腳印（沿用 v14 的外觀：更圓更小）
+  const pawSvg = `%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='rgba(244,241,233,0.92)'%3E%3Cellipse cx='16.5' cy='18.5' rx='4.2' ry='7.2'/%3E%3Cellipse cx='27.5' cy='13.2' rx='4.2' ry='7.2'/%3E%3Cellipse cx='36.5' cy='13.2' rx='4.2' ry='7.2'/%3E%3Cellipse cx='47.5' cy='18.5' rx='4.2' ry='7.2'/%3E%3Cg transform='translate(32 44) scale(0.75) translate(-32 -44)'%3E%3Cpath d='M32 26 Q29.8 28.2 28.2 30.2 L18.2 48.0 Q16.0 51.8 18.8 54.0 Q32 62 45.2 54.0 Q48.0 51.8 45.8 48.0 L35.8 30.2 Q34.2 28.2 32 26 Z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E`;
+  const pawSrc = `data:image/svg+xml;charset=utf-8,${pawSvg}`;
 
   let lastX = 0, lastY = 0, lastT = 0;
   const minDist = 26;
@@ -1010,6 +1217,7 @@ window.addEventListener("mousedown", holdOn);
     const dx = x - lastX;
     const dy = y - lastY;
     if(Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001) return 0;
+    // 三角形頂點預設朝上，+90 讓它指向移動方向
     return (Math.atan2(dy, dx) * 180 / Math.PI) + 90;
   }
 
@@ -1029,7 +1237,6 @@ window.addEventListener("mousedown", holdOn);
     img.src = pawSrc;
 
     const jitter = (Math.random() * 8) - 4;
-
     const baseRot = dirDeg(x, y);
     const rotJit  = (Math.random() * 12) - 6;
     const rot = baseRot + rotJit;
@@ -1051,56 +1258,76 @@ window.addEventListener("mousedown", holdOn);
     }, { once:true });
   }
 
-  const isFine = window.matchMedia && window.matchMedia("(pointer:fine)").matches;
-  if(isFine){
-    window.addEventListener("mousemove", (e) => {
-      stamp(e.clientX, e.clientY, false);
-    }, { passive:true });
-  }
-
-  const orb = document.getElementById("mobileOrb");
-  if(orb){
-    let dragging = false;
-
-    orb.addEventListener("pointerdown", (e) => {
-      if(e.pointerType === "mouse") return;
-      dragging = true;
-      stamp(e.clientX, e.clientY, true);
-    }, { passive:false });
-
-    window.addEventListener("pointermove", (e) => {
-      if(!dragging) return;
-      if(e.pointerType === "mouse") return;
-      stamp(e.clientX, e.clientY, false);
-    }, { passive:true });
-
-    const endDrag = (e) => {
-      if(!dragging) return;
-      if(e && e.pointerType === "mouse") return;
-      dragging = false;
-    };
-    window.addEventListener("pointerup", endDrag, { passive:true });
-    window.addEventListener("pointercancel", endDrag, { passive:true });
-
-    orb.addEventListener("touchstart", (e) => {
-      if(!e.touches || !e.touches.length) return;
-      dragging = true;
-      const t = e.touches[0];
-      stamp(t.clientX, t.clientY, true);
-    }, { passive:true });
-
-    window.addEventListener("touchmove", (e) => {
-      if(!dragging) return;
-      if(!e.touches || !e.touches.length) return;
-      const t = e.touches[0];
-      stamp(t.clientX, t.clientY, false);
-    }, { passive:true });
-
-    window.addEventListener("touchend", () => { dragging = false; }, { passive:true });
-    window.addEventListener("touchcancel", () => { dragging = false; }, { passive:true });
-    window.addEventListener("blur", () => { dragging = false; }, { passive:true });
-  }
+  window.__pawStamp = stamp;
 })();
 </script>
+<script>
+/* =========================================================
+   滑鼠軌跡：🐀（只算滑鼠，不影響虎頭腳印）
+   ========================================================= */
+(function(){
+  const isFine = window.matchMedia && window.matchMedia("(pointer:fine)").matches;
+  if(!isFine) return;
+
+  const host = document.getElementById("pawTrail");
+  if(!host) return;
+
+  let lastX = 0, lastY = 0, lastT = 0;
+  const minDist = 24;
+  const minMs   = 34;
+  const maxStamps = 70;
+
+  function dist(x1,y1,x2,y2){
+    const dx=x1-x2, dy=y1-y2;
+    return Math.sqrt(dx*dx+dy*dy);
+  }
+  function dirDeg(x, y){
+    if(lastT === 0) return 0;
+    const dx = x - lastX;
+    const dy = y - lastY;
+    if(Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001) return 0;
+    // 🐀 emoji 預設朝左，補 +180 度校正
+    return (Math.atan2(dy, dx) * 180 / Math.PI) + 180;
+  }
+
+  function stampRat(x, y){
+    const now = performance.now();
+    if(lastT !== 0){
+      if((now - lastT) < minMs) return;
+      if(dist(x,y,lastX,lastY) < minDist) return;
+    }
+
+    const el = document.createElement("span");
+    el.className = "rat-stamp";
+    el.textContent = "🐀";
+
+    const jitter = (Math.random() * 8) - 4;
+    const baseRot = dirDeg(x, y);
+    const rotJit  = (Math.random() * 10) - 5;
+    const rot = baseRot + rotJit;
+
+    el.style.left = (x + jitter) + "px";
+    el.style.top  = (y + jitter) + "px";
+    el.style.setProperty("--rot", rot + "deg");
+
+    host.appendChild(el);
+
+    lastX = x; lastY = y; lastT = now;
+
+    while(host.children.length > maxStamps){
+      host.removeChild(host.firstChild);
+    }
+
+    el.addEventListener("animationend", () => {
+      if(el && el.parentNode) el.parentNode.removeChild(el);
+    }, { once:true });
+  }
+
+  window.addEventListener("mousemove", (e) => {
+    stampRat(e.clientX, e.clientY);
+  }, { passive:true });
+})();
+</script>
+
 </body>
 </html>
