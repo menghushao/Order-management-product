@@ -434,6 +434,37 @@ input[type=number]{
   }
 }
 
+
+
+/* =========================================================
+   滑鼠/觸控「貓腳印軌跡」
+   - 桌機：滑鼠移動產生腳印
+   - 手機：拖曳漂浮虎頭時產生腳印
+   ========================================================= */
+#pawTrail{
+  position: fixed;
+  left: 0; top: 0;
+  width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 999998; /* 在游標(999999)下面 */
+  display: block;
+}
+.paw-stamp{
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  transform: translate(-50%, -50%) rotate(var(--rot, 0deg));
+  opacity: 0.80;
+  filter: drop-shadow(0 0 2px rgba(0,0,0,.35));
+  animation: pawFade 1.35s ease-out forwards;
+}
+@keyframes pawFade{
+  0%   { opacity: 0.80; transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) scale(1); }
+  100% { opacity: 0;    transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) scale(1.06); }
+}
+100% { opacity: 0;    transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) scale(1.05); }
+}
+
 </style>
 </head>
 
@@ -555,12 +586,12 @@ input[type=number]{
     <ol>
       <li data-stock="">巧克力 chocolate</li>
       <li data-stock="">奶油 Milk</li>
-      <li data-stock="">鹹蛋黃 Savory Egg Yolk</li>
-      <li data-stock="">抹茶 Matcha</li>
-      <li data-stock="">紅豆 Red Bean</li>
-      <li data-stock="">芝麻 Sesame</li>
+      <li data-stock="7">鹹蛋黃 Savory Egg Yolk</li>
+      <li data-stock="0">抹茶 Matcha</li>
+      <li data-stock="0">紅豆 Red Bean</li>
+      <li data-stock="3">芝麻 Sesame</li>
       <li data-stock="">蒜香 Garlic</li>
-      <li data-stock="">梅子花生 Plum Peanuts</li>
+      <li data-stock="2">梅子花生 Plum Peanuts</li>
       <li data-stock="">草莓 Strawberry</li>
     </ol>
 </div>
@@ -942,6 +973,131 @@ window.addEventListener("mousedown", holdOn);
   document.addEventListener("visibilitychange", () => {
     if(document.hidden) hide();
   });
+})();
+</script>
+
+
+<!-- ===== 桌機：貓腳印軌跡容器 ===== -->
+<div id="pawTrail" aria-hidden="true"></div>
+
+<script>
+/* =========================================================
+   貓腳印軌跡（改成幾何腳印，不抓外部圖）
+   - 腳掌：圓角正三角形
+   - 腳趾：4 個直立橢圓（大小一致），位置在腳掌上方，不會蓋到腳掌
+   - 桌機：滑鼠移動產生
+   - 手機：拖曳漂浮虎頭（mobileOrb）時產生
+   ========================================================= */
+(function(){
+  const host = document.getElementById("pawTrail");
+  if(!host) return;
+
+  const pawSrc = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E %3Cg fill='rgba(244,241,233,0.92)'%3E %3C!-- toes (4 vertical ovals), kept ABOVE pad so they don't overlap --%3E %3Cellipse cx='18' cy='16' rx='4.2' ry='7.2'/%3E %3Cellipse cx='28' cy='12.5' rx='4.2' ry='7.2'/%3E %3Cellipse cx='38' cy='12.5' rx='4.2' ry='7.2'/%3E %3Cellipse cx='48' cy='16' rx='4.2' ry='7.2'/%3E %3C!-- pad: rounded equilateral-ish triangle --%3E %3Cpath d='M32 26 L14.5 54 Q14 55 15.5 56 Q32 62 48.5 56 Q50 55 49.5 54 L32 26 Z'/%3E %3C/g%3E %3C/svg%3E";
+
+  // 節流：距離/時間達門檻才蓋一個腳印（避免太密）
+  let lastX = 0, lastY = 0, lastT = 0;
+  const minDist = 26;     // 腳印間距
+  const minMs   = 38;     // 最小間隔
+  const maxStamps = 90;   // 場上最多腳印（超過就移除最舊）
+
+  function dist(x1,y1,x2,y2){
+    const dx=x1-x2, dy=y1-y2;
+    return Math.sqrt(dx*dx+dy*dy);
+  }
+
+  function stamp(x, y, force=false){
+    const now = performance.now();
+    if(!force){
+      if(lastT !== 0){
+        if((now - lastT) < minMs) return;
+        if(dist(x,y,lastX,lastY) < minDist) return;
+      }
+    }
+
+    lastX = x; lastY = y; lastT = now;
+
+    const img = document.createElement("img");
+    img.className = "paw-stamp";
+    img.alt = "";
+    img.draggable = false;
+    img.src = pawSrc;
+
+    // 讓腳印左右/角度有一點自然感
+    const jitter = (Math.random() * 8) - 4;
+    const rot = (Math.random() * 20) - 10; // -10~10 deg
+    img.style.left = (x + jitter) + "px";
+    img.style.top  = (y + jitter) + "px";
+    img.style.setProperty("--rot", rot + "deg");
+
+    host.appendChild(img);
+
+    while(host.children.length > maxStamps){
+      host.removeChild(host.firstChild);
+    }
+
+    img.addEventListener("animationend", () => {
+      if(img && img.parentNode) img.parentNode.removeChild(img);
+    }, { once:true });
+  }
+
+  /* ===== 桌機：滑鼠移動 ===== */
+  const isFine = window.matchMedia && window.matchMedia("(pointer:fine)").matches;
+  if(isFine){
+    window.addEventListener("mousemove", (e) => {
+      stamp(e.clientX, e.clientY, false);
+    }, { passive:true });
+  }
+
+  /* ===== 手機：拖曳漂浮虎頭時才出現腳印 ===== */
+  const orb = document.getElementById("mobileOrb");
+  if(orb){
+    let dragging = false;
+
+    const orbCenterFromEvent = (clientX, clientY) => {
+      // 用事件點當中心，手感最好；拖曳時手指就在虎頭上
+      return [clientX, clientY];
+    };
+
+    orb.addEventListener("pointerdown", (e) => {
+      if(e.pointerType === "mouse") return;
+      dragging = true;
+      const [x,y] = orbCenterFromEvent(e.clientX, e.clientY);
+      stamp(x,y,true);
+    }, { passive:false });
+
+    window.addEventListener("pointermove", (e) => {
+      if(!dragging) return;
+      if(e.pointerType === "mouse") return;
+      stamp(e.clientX, e.clientY, false);
+    }, { passive:true });
+
+    const endDrag = (e) => {
+      if(!dragging) return;
+      if(e && e.pointerType === "mouse") return;
+      dragging = false;
+    };
+    window.addEventListener("pointerup", endDrag, { passive:true });
+    window.addEventListener("pointercancel", endDrag, { passive:true });
+
+    // Touch fallback
+    orb.addEventListener("touchstart", (e) => {
+      if(!e.touches || !e.touches.length) return;
+      dragging = true;
+      const t = e.touches[0];
+      stamp(t.clientX, t.clientY, true);
+    }, { passive:true });
+
+    window.addEventListener("touchmove", (e) => {
+      if(!dragging) return;
+      if(!e.touches || !e.touches.length) return;
+      const t = e.touches[0];
+      stamp(t.clientX, t.clientY, false);
+    }, { passive:true });
+
+    window.addEventListener("touchend", () => { dragging = false; }, { passive:true });
+    window.addEventListener("touchcancel", () => { dragging = false; }, { passive:true });
+    window.addEventListener("blur", () => { dragging = false; }, { passive:true });
+  }
 })();
 </script>
 
