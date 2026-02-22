@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>萌虎燒 官方網頁| 雞蛋糕・甜點・下午茶V28</title>
+<title>萌虎燒 官方網頁| 雞蛋糕・甜點・下午茶V31</title>
 
 <meta name="description" content="萌虎燒是苗栗市的現點現做雞蛋糕專賣店，提供多種創意口味，支援外送與線上點餐。">
 <meta name="keywords" content="萌虎燒,雞蛋糕,苗栗雞蛋糕,甜點,下午茶,苗栗點心,萌虎燒菜單,萌虎燒訂購">
@@ -795,7 +795,7 @@ distanceInput.addEventListener("input", () => {
    - 手機：沿用原本可拖曳虎頭，但增加「自己亂走 + 觸碰點吸引」邏輯
 */
 (function(){
-  const CURSOR_URL = "tiger.png";  const BUILD = "v28";
+  const CURSOR_URL = "tiger.png";  const BUILD = "v31";
 
   const root = document.documentElement;
 
@@ -889,8 +889,9 @@ distanceInput.addEventListener("input", () => {
   // 桌機維持原本會停一下的手感
   const isMobile = (window.matchMedia && window.matchMedia("(pointer:coarse)").matches);
   if(isMobile){
-    agent.st.pauseMs = 0;
-    agent.st.nextPickMs = 520 + Math.random() * 880;
+    // 手機：走一段 → 停一下（但停留不能太久，避免又回到卡點）
+    agent.st.pauseMs = 220 + Math.random() * 780;      // 0.22s~1.00s
+    agent.st.nextPickMs = 820 + Math.random() * 1500;  // 0.82s~2.32s
   }else{
     agent.st.pauseMs = 400 + Math.random() * 1800;
     agent.st.nextPickMs = 650 + Math.random() * 1400;
@@ -1038,8 +1039,8 @@ function __getViewportRect(){
 // ✅ 手機巡航速度/加速度提高，避免像卡住的小碎步
 const isMobile = (window.matchMedia && window.matchMedia("(pointer:coarse)").matches);
 
-const cruiseMaxV = isMobile ? 0.36 : 0.22;        // px/ms
-const cruiseAccel = isMobile ? 0.00105 : 0.00055; // px/ms^2
+const cruiseMaxV = isMobile ? 0.24 : 0.22;        // px/ms（手機閒逛慢一點）
+const cruiseAccel = isMobile ? 0.00068 : 0.00055; // px/ms^2 // px/ms^2
 
 const pounceMaxV  = 0.70;    // 撲擊瞬間速度
 const pounceAccel = 0.0036;  // 撲擊瞬間加速度
@@ -1065,9 +1066,9 @@ const accel = usingPounce ? pounceAccel : cruiseAccel;
 
 
 // ===== 最小巡航速度（手機）+ 卡點脫困 =====
-if(!usingPounce && s.noPause && !s.dragging && !s.touchPounce){
-  const minCruiseV = 0.085; // px/ms
-  if(dist > 40){
+if(!usingPounce && (window.matchMedia && window.matchMedia("(pointer:coarse)").matches) && !s.dragging && !s.touchPounce){
+  const minCruiseV = 0.050; // px/ms（手機較柔和）
+  if(s.pauseMs <= 0 && dist > 55){
     const vv = Math.sqrt(s.vx*s.vx + s.vy*s.vy) || 0;
     if(vv < minCruiseV){
       s.vx = nx * minCruiseV;
@@ -1084,11 +1085,11 @@ if(!usingPounce && s.noPause && !s.dragging && !s.touchPounce){
   else s._stuckMs = 0;
   s._lastSX = s.x; s._lastSY = s.y;
 
-  if(s._stuckMs > 520){
+  if(s._stuckMs > 1100){
     s._stuckMs = 0;
     pickWanderTarget(agent);
-    s.vx += (Math.random()*2 - 1) * 0.22;
-    s.vy += (Math.random()*2 - 1) * 0.22;
+    s.vx += (Math.random()*2 - 1) * 0.12;
+    s.vy += (Math.random()*2 - 1) * 0.12;
   }
 }
     // 更新位置
@@ -1134,17 +1135,34 @@ if(dist < 24){
   if(s.touchPounce){
     // 撲到就結束，回到逛街（不要在這裡 pause）
     s.pounceMs = 0;
-  }else if(s.noPause){
-    // ✅ 手機：不做停留，立刻換目標繼續走
-    s.pauseMs = 0;
-    s.nextPickMs = 160;
-    pickWanderTarget(agent);
   }else{
-    // 桌機：停一下再走
-    s.pauseMs = 450 + Math.random()*1400;
-    s.nextPickMs = 700 + Math.random()*1400;
+    const isMobile2 = (window.matchMedia && window.matchMedia("(pointer:coarse)").matches);
+    if(isMobile2){
+      // 手機：停一下再走，但靠近可視邊界不要停（避免貼牆磨步）
+      const vp2 = __getViewportRect();
+      const edge = 54;
+      const nearEdge =
+        (s.x < vp2.ox + edge) ||
+        (s.x > vp2.ox + vp2.w - edge) ||
+        (s.y < vp2.oy + edge) ||
+        (s.y > vp2.oy + vp2.h - edge);
+
+      if(nearEdge){
+        s.pauseMs = 0;
+        s.nextPickMs = 160;
+        pickWanderTarget(agent);
+      }else{
+        s.pauseMs = 220 + Math.random()*780;     // 0.22s~1.00s
+        s.nextPickMs = 820 + Math.random()*1500; // 0.82s~2.32s
+      }
+    }else{
+      // 桌機：停一下再走
+      s.pauseMs = 450 + Math.random()*1400;
+      s.nextPickMs = 700 + Math.random()*1400;
+    }
   }
-}// 觸控撲擊結束：還原逛街目標，並讓它繼續走（不要抽筋卡住）
+}
+// 觸控撲擊結束：還原逛街目標，並讓它繼續走（不要抽筋卡住）
     if(s.touchPounce && s.pounceMs <= 0){
       s.touchPounce = false;
       if(s._saved){
@@ -1256,7 +1274,7 @@ if(dist < 24){
     orb.style.display = "block";
 
     const M = makeAgent(orb, orbImg, { x: 64, y: window.innerHeight - 88 });
-    M.st.noPause = true; // 手機：不做停留
+    M.st.noPause = false; // 手機：允許短暫停頓
     M.st._stuckMs = 0;
     M.st._lastSX = M.st.x;
     M.st._lastSY = M.st.y;
