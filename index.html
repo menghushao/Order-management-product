@@ -796,7 +796,7 @@ distanceInput.addEventListener("input", () => {
 */
 (function(){
   const CURSOR_URL = "tiger.png";
-  const BUILD = "v24";
+  const BUILD = "v25";
 
   const root = document.documentElement;
 
@@ -829,6 +829,10 @@ distanceInput.addEventListener("input", () => {
       dragOffY: 0,
       visible: false,
       w: 34, h: 34,
+      stuckMs: 0,
+      _lastSX: 0,
+      _lastSY: 0,
+
     };
 
     if(imgEl) imgEl.src = CURSOR_URL;
@@ -876,20 +880,24 @@ distanceInput.addEventListener("input", () => {
 
   // ===== 亂走目標產生 =====
   const pickWanderTarget = (agent) => {
-    const pad = 24;
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    // 避免靠邊
-    const tx = pad + Math.random() * Math.max(1, (w - pad*2));
-    const ty = pad + Math.random() * Math.max(1, (h - pad*2));
-    agent.st.targetX = tx;
-    agent.st.targetY = ty;
+  const pad = 26;
+  const vp = __getViewportRect();
+  const w = vp.w;
+  const h = vp.h;
+  const ox = vp.ox;
+  const oy = vp.oy;
 
-    // 隨機停下 0.4s~2.2s
-    agent.st.pauseMs = 400 + Math.random() * 1800;
-    // 下一次挑新目標：先走一段再停
-    agent.st.nextPickMs = 650 + Math.random() * 1400;
-  };
+  // 避免靠邊（含可視區偏移）
+  const tx = ox + pad + Math.random() * Math.max(1, (w - pad*2));
+  const ty = oy + pad + Math.random() * Math.max(1, (h - pad*2));
+  agent.st.targetX = tx;
+  agent.st.targetY = ty;
+
+  // 隨機停下（手機上停太久容易被誤認為卡點，所以縮短）
+  agent.st.pauseMs = 180 + Math.random() * 520;  // 0.18s~0.70s
+  // 下一次挑新目標：先走一段再停
+  agent.st.nextPickMs = 520 + Math.random() * 920;
+};
 
   // ===== 力場：偏向 pointer 的權重（只在滑鼠正在移動時生效；積極性更高）=====
   const pointerBias = (ax, ay) => {
@@ -910,6 +918,39 @@ distanceInput.addEventListener("input", () => {
   };
 
   const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+
+// ===== 視窗可視範圍（手機位址列/工具列會讓 innerHeight 變動；用 visualViewport 避免假牆卡點）=====
+function __getViewportRect(){
+  const vv = window.visualViewport;
+  if(vv){
+    // 對 fixed 元素來說，座標系仍是 layout viewport；vv.offset* 代表可視區在 layout viewport 的偏移
+    return {
+      w: vv.width || window.innerWidth,
+      h: vv.height || window.innerHeight,
+      ox: vv.offsetLeft || 0,
+      oy: vv.offsetTop  || 0
+    };
+  }
+  return { w: window.innerWidth, h: window.innerHeight, ox: 0, oy: 0 };
+}
+
+// 當可視區變動時，把角色推回可視區內（避免因工具列伸縮造成一直撞牆抽動）
+function __keepInsideViewport(agent){
+  if(!agent || !agent.st) return;
+  const s = agent.st;
+  const vp = __getViewportRect();
+  const pad = 18;
+  const padX = pad + (s.w ? s.w/2 : 0);
+  const padY = pad + (s.h ? s.h/2 : 0);
+  const minX = vp.ox + padX, maxX = vp.ox + vp.w - padX;
+  const minY = vp.oy + padY, maxY = vp.oy + vp.h - padY;
+  let changed = false;
+  if(s.x < minX){ s.x = minX; s.vx = Math.max(0, s.vx); changed = true; }
+  else if(s.x > maxX){ s.x = maxX; s.vx = Math.min(0, s.vx); changed = true; }
+  if(s.y < minY){ s.y = minY; s.vy = Math.max(0, s.vy); changed = true; }
+  else if(s.y > maxY){ s.y = maxY; s.vy = Math.min(0, s.vy); changed = true; }
+  if(changed) agent.setPos(s.x, s.y);
+}
 
   // ===== 讓腳印系統可被呼叫（如果有載入）=====
   const pawStamp = (x,y,force=false) => {
@@ -1042,16 +1083,39 @@ distanceInput.addEventListener("input", () => {
     s.x += s.vx * dt;
     s.y += s.vy * dt;
 
-    // 邊界（留一點 padding，並考慮元素尺寸避免「卡出框外」）
-    // 改成「碰牆反彈」而不是硬 clamp，避免在邊界因為視窗高度/捲動變動而抖動卡住
-    const pad = 18;
-    const padX = pad + (s.w ? s.w/2 : 0);
-    const padY = pad + (s.h ? s.h/2 : 0);
 
-    const minX = padX, maxX = window.innerWidth  - padX;
-    const minY = padY, maxY = window.innerHeight - padY;
+// ===== 卡點保險：若長時間幾乎沒位移（但又不是 pause/拖曳/撲擊），直接改目標並給一個小踢力 =====
+if(!s.dragging && !s.touchPounce && s.pauseMs <= 0){
+  const moved = Math.abs(s.x - (s._lastSX || 0)) + Math.abs(s.y - (s._lastSY || 0));
+  if(moved < 0.35){
+    s.stuckMs += dt;
+  }else{
+    s.stuckMs = 0;
+  }
+  s._lastSX = s.x; s._lastSY = s.y;
 
-    const bounce = 0.72; // 反彈係數（越小越「軟」）
+  if(s.stuckMs > 650){
+    s.stuckMs = 0;
+    pickWanderTarget(agent);
+    // 小踢力，避免一直貼著牆磨擦
+    s.vx += (Math.random()*2 - 1) * 0.18;
+    s.vy += (Math.random()*2 - 1) * 0.18;
+  }
+}else{
+  s.stuckMs = 0;
+  s._lastSX = s.x; s._lastSY = s.y;
+}
+    
+// 邊界（留一點 padding，並考慮元素尺寸避免「卡出框外」）
+// ✅ 改用 visualViewport（可視區）避免手機位址列伸縮造成的假牆卡點
+const vp = __getViewportRect();
+
+const pad = 18;
+const padX = pad + (s.w ? s.w/2 : 0);
+const padY = pad + (s.h ? s.h/2 : 0);
+
+const minX = vp.ox + padX, maxX = vp.ox + vp.w - padX;
+const minY = vp.oy + padY, maxY = vp.oy + vp.h - padY;const bounce = 0.72; // 反彈係數（越小越「軟」）
     const stopEps = 0.012; // 太小就直接停掉避免抖
 
     if(s.x < minX){
@@ -1083,9 +1147,24 @@ distanceInput.addEventListener("input", () => {
         s.pounceMs = 0;
       }else{
         // 正常逛街：停一下再走
-        s.pauseMs = 450 + Math.random()*1400;
-        s.nextPickMs = 700 + Math.random()*1400;
-      }
+// ✅ 靠近可視邊界時不要停，避免「停在牆上」反覆抖動
+(function(){
+  const vp = __getViewportRect();
+  const edge = 46;
+  const nearEdge =
+    (s.x < vp.ox + edge) ||
+    (s.x > vp.ox + vp.w - edge) ||
+    (s.y < vp.oy + edge) ||
+    (s.y > vp.oy + vp.h - edge);
+
+  if(nearEdge){
+    s.pauseMs = 0;
+    s.nextPickMs = 120; // 立刻挑新目標走開
+  }else{
+    s.pauseMs = 220 + Math.random()*680;
+    s.nextPickMs = 520 + Math.random()*920;
+  }
+})();}
     }
 
     // 觸控撲擊結束：還原逛街目標，並讓它繼續走（不要抽筋卡住）
@@ -1175,6 +1254,14 @@ distanceInput.addEventListener("input", () => {
     // 初始位置
     A.setPos(A.st.x, A.st.y);
 
+
+// 可視區變動（手機不會走這段，但保險）也保持在框內
+try{
+  if(window.visualViewport){
+    window.visualViewport.addEventListener("resize", () => __keepInsideViewport(A), { passive:true });
+    window.visualViewport.addEventListener("scroll", () => __keepInsideViewport(A), { passive:true });
+  }
+}catch(e){}
     // 迴圈
     let last = performance.now();
     const loop = (t) => {
@@ -1263,6 +1350,14 @@ distanceInput.addEventListener("input", () => {
     // 初始位置
     M.setPos(M.st.x, M.st.y);
 
+
+// ✅ 手機位址列/工具列伸縮會變動可視高度；保持虎頭在可視區內，避免一直撞牆抽動
+try{
+  if(window.visualViewport){
+    window.visualViewport.addEventListener("resize", () => __keepInsideViewport(M), { passive:true });
+    window.visualViewport.addEventListener("scroll", () => __keepInsideViewport(M), { passive:true });
+  }
+}catch(e){}
     // 迴圈
     let lastM = performance.now();
     const loopM = (t) => {
