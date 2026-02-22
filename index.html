@@ -216,6 +216,56 @@ input[type=number]{
 @keyframes spinCursorRot{
   to{ transform: rotate(360deg); }
 }
+
+
+/* =========================================================
+   手機/平板：可拖曳漂浮虎頭（旋轉 + 按住放大/晃動 + 按住加速）
+   - 只在 pointer:coarse（觸控）顯示
+   ========================================================= */
+#mobileOrb{
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  width: 56px;
+  height: 56px;
+  z-index: 999999;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none; /* 允許拖曳，不觸發頁面捲動 */
+  display: none; /* 觸控才顯示 */
+  background: transparent;
+  border: 0;
+}
+
+#mobileOrb .cursorWiggleWrap{ width:100%; height:100%; }
+#mobileOrb .cursorScaleWrap{
+  width:100%;
+  height:100%;
+  display:block;
+  transition: transform 120ms ease-out, filter 120ms ease-out;
+  filter: drop-shadow(0 0 2px rgba(0,0,0,.35));
+}
+#mobileOrb .cursorImg{
+  width:100%;
+  height:100%;
+  display:block;
+  animation: spinCursorRot var(--cursor-spin-speed) linear infinite;
+}
+
+/* 按住狀態：晃動 + 放大（旋轉照常） */
+#mobileOrb.hold .cursorWiggleWrap{
+  animation: cursorWiggle 0.18s ease-in-out infinite;
+}
+#mobileOrb.hold .cursorScaleWrap{
+  transform: scale(1.35);
+  filter: drop-shadow(0 0 7px rgba(255,255,255,.6));
+}
+
+/* 只在觸控裝置顯示 */
+@media (pointer:coarse){
+  #mobileOrb{ display:block; }
+}
+
 </style>
 </head>
 
@@ -331,6 +381,16 @@ input[type=number]{
   </div>
 </div>
 
+
+<!-- ===== 手機/平板：可拖曳漂浮虎頭 ===== -->
+<div id="mobileOrb" aria-hidden="true">
+  <div class="cursorWiggleWrap">
+    <div class="cursorScaleWrap">
+      <img id="mobileOrbImg" class="cursorImg" alt="">
+    </div>
+  </div>
+</div>
+
 <script>
 const btn = document.getElementById('toggleBtn');
 const info = document.getElementById('pageInfo');
@@ -358,7 +418,7 @@ distanceInput.addEventListener("input", () => {
 
 /* ===== Logo strip render（每張往右+30°，自動不撐破BAR） ===== */
 (function(){
-  const LOGO_URL = "https://github.com/menghushao/MENU/blob/main/%E4%BA%8C%E4%BB%A3%E8%99%8E%E9%A0%AD%E5%8E%BB%E8%83%8C(%E7%99%BD).png?raw=true";
+  const LOGO_URL = "assets/tiger.png";
   const strip = document.getElementById("logoStrip");
   const btn = document.getElementById("toggleBtn");
 
@@ -404,7 +464,7 @@ distanceInput.addEventListener("input", () => {
 
 /* ===== 旋轉游標（在官網內一直轉 + 按住放大 + 左右晃動） ===== */
 (function(){
-  const CURSOR_URL = "https://github.com/menghushao/MENU/blob/main/%E4%BA%8C%E4%BB%A3%E8%99%8E%E9%A0%AD%E5%8E%BB%E8%83%8C(%E7%99%BD).png?raw=true";
+  const CURSOR_URL = "assets/tiger.png";
   const c = document.getElementById("spinCursor");
   const img = document.getElementById("spinCursorImg");
   if(!c || !img) return;
@@ -412,9 +472,138 @@ distanceInput.addEventListener("input", () => {
   img.src = CURSOR_URL;
 
   const isFinePointer = window.matchMedia && window.matchMedia("(pointer:fine)").matches;
+  const isCoarsePointer = window.matchMedia && window.matchMedia("(pointer:coarse)").matches;
+
   if(!isFinePointer){
-    // 手機/平板通常沒游標，直接不啟用（也避免擋觸控）
+    // 手機/平板：不做桌機「跟隨游標」，改用漂浮虎頭（可拖曳 + 按住效果）
     document.body.style.cursor = "auto";
+
+    if(isCoarsePointer){
+      const orb = document.getElementById("mobileOrb");
+      const orbImg = document.getElementById("mobileOrbImg");
+
+      if(orb && orbImg){
+        orbImg.src = CURSOR_URL;
+
+        const __rootM = document.documentElement;
+        const __getVarM = (k, fallback) => {
+          try{
+            const v = getComputedStyle(__rootM).getPropertyValue(k).trim();
+            return v || fallback;
+          }catch(e){ return fallback; }
+        };
+        const __NORMAL_SPEED_M = __getVarM("--cursor-spin-speed", "2.4s");
+        const __HOLD_SPEED_M   = __getVarM("--cursor-spin-speed-hold", "0.6s");
+
+        const holdOnM = () => {
+          orb.classList.add("hold");
+          __rootM.style.setProperty("--cursor-spin-speed", __HOLD_SPEED_M);
+        };
+        const holdOffM = () => {
+          orb.classList.remove("hold");
+          __rootM.style.setProperty("--cursor-spin-speed", __NORMAL_SPEED_M);
+        };
+
+        let dragging = false;
+        let offsetX = 0, offsetY = 0;
+        let orbW = 56, orbH = 56;
+
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const updateSize = () => {
+          const r = orb.getBoundingClientRect();
+          orbW = r.width || orbW;
+          orbH = r.height || orbH;
+        };
+        updateSize();
+        window.addEventListener("resize", updateSize, { passive:true });
+
+        // Pointer (Android Chrome OK)
+        orb.addEventListener("pointerdown", (e) => {
+          if(e.pointerType === "mouse") return;
+          e.preventDefault();
+          updateSize();
+          holdOnM();
+
+          const r = orb.getBoundingClientRect();
+          offsetX = e.clientX - r.left;
+          offsetY = e.clientY - r.top;
+
+          dragging = true;
+        }, { passive:false });
+
+        const onPointerMove = (e) => {
+          if(!dragging) return;
+          if(e.pointerType === "mouse") return;
+          e.preventDefault();
+          updateSize();
+
+          const x = clamp(e.clientX - offsetX, 0, window.innerWidth  - orbW);
+          const y = clamp(e.clientY - offsetY, 0, window.innerHeight - orbH);
+
+          orb.style.left = x + "px";
+          orb.style.top  = y + "px";
+          orb.style.bottom = "auto";
+          orb.style.right  = "auto";
+        };
+
+        const endPointerDrag = (e) => {
+          if(!dragging) return;
+          if(e && e.pointerType === "mouse") return;
+          dragging = false;
+          holdOffM();
+        };
+
+        window.addEventListener("pointermove", onPointerMove, { passive:false });
+        window.addEventListener("pointerup", endPointerDrag, { passive:true });
+        window.addEventListener("pointercancel", endPointerDrag, { passive:true });
+
+        // Touch fallback（保險）
+        let tDragging = false;
+        let tOffsetX = 0, tOffsetY = 0;
+
+        orb.addEventListener("touchstart", (e) => {
+          if(!e.touches || !e.touches.length) return;
+          e.preventDefault();
+          updateSize();
+          holdOnM();
+
+          const r = orb.getBoundingClientRect();
+          const t = e.touches[0];
+          tOffsetX = t.clientX - r.left;
+          tOffsetY = t.clientY - r.top;
+          tDragging = true;
+        }, { passive:false });
+
+        const onTouchMove = (e) => {
+          if(!tDragging) return;
+          if(!e.touches || !e.touches.length) return;
+          e.preventDefault();
+          updateSize();
+
+          const t = e.touches[0];
+          const x = clamp(t.clientX - tOffsetX, 0, window.innerWidth  - orbW);
+          const y = clamp(t.clientY - tOffsetY, 0, window.innerHeight - orbH);
+
+          orb.style.left = x + "px";
+          orb.style.top  = y + "px";
+          orb.style.bottom = "auto";
+          orb.style.right  = "auto";
+        };
+
+        const endTouchDrag = () => {
+          if(!tDragging) return;
+          tDragging = false;
+          holdOffM();
+        };
+
+        window.addEventListener("touchmove", onTouchMove, { passive:false });
+        window.addEventListener("touchend", endTouchDrag, { passive:true });
+        window.addEventListener("touchcancel", endTouchDrag, { passive:true });
+
+        window.addEventListener("blur", () => { dragging = false; tDragging = false; holdOffM(); });
+      }
+    }
+
     return;
   }
 
