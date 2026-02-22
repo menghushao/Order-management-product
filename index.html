@@ -499,15 +499,22 @@ input[type=number]{
   }
 </style>
 
+
+<style>
+  /* --- checkbox driven open/close (works even if JS is blocked/stripped) --- */
+  #__cartToggle:checked ~ #cartAssistRoot #cartBackdrop{ opacity:1 !important; pointer-events:auto !important; }
+  #__cartToggle:checked ~ #cartAssistRoot #cartSheet{ transform:translateY(0) !important; }
+</style>
+
 </head>
 
 <body>
+<input type="checkbox" id="__cartToggle" style="position:fixed;left:-9999px;top:-9999px;opacity:0;pointer-events:none;">
 
 <!-- ===== BAR ===== -->
 <div class="topbar">
   <div class="wrap">
-    <button id="cartAssistBtn" class="toggle-btn" style="min-width:160px;" onclick="window.__cartAssistOpen && window.__cartAssistOpen()" ontouchstart="window.__cartAssistOpen && window.__cartAssistOpen()">
-線上訂餐輔助</button>
+    <label id="cartAssistBtn" class="toggle-btn" style="min-width:160px;" onclick="window.__cartAssistOpen && window.__cartAssistOpen()" ontouchstart="window.__cartAssistOpen && window.__cartAssistOpen()" for="__cartToggle" class="toggle-btn" style="min-width:160px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer;">線上訂餐輔助</label>
     <div class="title"><div id="logoStrip" class="logo-strip" aria-label="logo strip"></div></div>
     <button id="toggleBtn" class="toggle-btn">↪︎ 菜單</button>
   </div>
@@ -1556,7 +1563,7 @@ try{
 
 
 <!-- CART_DATA_BEGIN -->
-<script id="cartDataJson" type="application/json">{"schema":"cart.v1","generated_at":"2026-02-22T15:16:43.414Z","products":[]}<\/script>
+<script id="cartDataJson" type="application/json">{"schema":"cart.v1","generated_at":"2026-02-22T15:23:43.522Z","products":[]}<\/script>
 <!-- CART_DATA_END -->
 
 
@@ -1687,11 +1694,11 @@ try{
 </style>
 
 <div id="cartAssistRoot" aria-hidden="true">
-  <div id="cartBackdrop"></div>
+  <label id="cartBackdrop" for="__cartToggle"></label>
   <div id="cartSheet" role="dialog" aria-modal="true" aria-label="線上訂餐輔助">
     <div class="head">
       <div class="t">線上訂餐輔助（不含付款）</div>
-      <button class="x" id="cartCloseBtn">關閉</button>
+      <label class="x" id="cartCloseBtn" for="__cartToggle" style="cursor:pointer; display:inline-flex; align-items:center; justify-content:center;">關閉</label>
     </div>
     <div class="tabs">
       <button class="tab active" id="tabPick">點餐</button>
@@ -2019,9 +2026,7 @@ try{
 </script>
 
 
-<button id="cartAssistFab" onclick="window.__cartAssistOpen && window.__cartAssistOpen()" ontouchstart="window.__cartAssistOpen && window.__cartAssistOpen()">
-  線上訂餐
-</button>
+<label id="cartAssistFab" for="__cartToggle">線上訂餐</label>
 
 
 <script>
