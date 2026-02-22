@@ -257,7 +257,7 @@ input[type=number]{
   animation: cursorWiggle 0.18s ease-in-out infinite;
 }
 #mobileOrb.hold .cursorScaleWrap{
-  transform: scale(5);
+  transform: scale(1.35);
   filter: drop-shadow(0 0 7px rgba(255,255,255,.6));
 }
 
@@ -267,14 +267,62 @@ input[type=number]{
 }
 
 
+
+
 /* =========================================================
-   桌機閱讀字級調整（只影響桌機/滑鼠）
-   - 提升正文可讀性
-   - 不影響手機（coarse pointer）
+   桌機「自適應」字級與版面（fluid responsive）
+   - 依螢幕寬度自動縮放，不假設 32 吋
+   - clamp()：有最小/最大，不會爆版
+   - 僅影響 pointer:fine（桌機）
    ========================================================= */
-@media (pointer:fine) and (min-width: 900px){
-  body{ font-size:18px; }
-  .title{ font-size:22px; }
+@media (pointer:fine){
+  body{
+    font-size: clamp(18px, 1.05vw, 22px);
+  }
+
+  .title{
+    font-size: clamp(20px, 1.2vw, 26px);
+  }
+
+  .section h2, h2{
+    font-size: clamp(22px, 1.35vw, 30px);
+  }
+
+  .note{
+    font-size: clamp(14px, 0.9vw, 17px);
+  }
+
+  .toggle-btn,
+  input[type=number]{
+    font-size: clamp(15px, 0.95vw, 18px);
+  }
+
+  /* 內容寬度隨螢幕放大，但有上限 */
+  .wrap{
+    max-width: clamp(980px, 82vw, 1560px);
+  }
+
+  /* 上下留白隨螢幕微調 */
+  .frame{
+    padding: clamp(32px, 3vw, 56px) 0;
+  }
+}
+.title{ font-size:24px; }
+  .toggle-btn{ font-size:17px; }
+  .section h2, h2{ font-size:26px; }
+  .note{ font-size:16px; }
+  input[type=number]{ font-size:17px; }
+}
+
+/* 大螢幕再拉寬內容區（不改手機） */
+@media (pointer:fine) and (min-width: 1200px){
+  .wrap{ max-width: 1200px; }
+}
+@media (pointer:fine) and (min-width: 1600px){
+  .wrap{ max-width: 1380px; }
+  .frame{ padding: 46px 0; }
+}
+.title{ font-size:22px; }
   .toggle-btn{ font-size:16px; }
   .section h2, h2{ font-size:22px; }
   .note{ font-size:15px; }
