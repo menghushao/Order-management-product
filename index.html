@@ -329,6 +329,111 @@ input[type=number]{
   input[type=number]{ font-size:16px; }
 }
 
+
+
+
+/* =========================================================
+   舊官網「菜單文案」搬到新官網：只移文案，不含購物車/點餐功能
+   - 讓排版更像新官網黑板
+   ========================================================= */
+#pageMenu .menu-copy{
+  background: rgba(0,0,0,.14);
+  border: 1px solid rgba(244,241,233,.14);
+  border-radius: 18px;
+  padding: 22px 22px 10px;
+}
+
+#pageMenu .menu-copy h2{
+  font-size: 22px;
+  margin: 18px 0 10px;
+}
+#pageMenu .menu-copy h3{
+  font-size: 18px;
+  margin: 16px 0 8px;
+}
+#pageMenu .menu-copy p{
+  margin: 10px 0;
+}
+#pageMenu .menu-copy ol, #pageMenu .menu-copy ul{
+  padding-left: 1.2em;
+  margin: 10px 0 16px;
+}
+#pageMenu .menu-copy li{
+  margin: 7px 0;
+}
+#pageMenu .menu-copy [style*="color: #000"]{
+  color: var(--text) !important;
+  opacity: .9;
+}
+/* 盡量讓舊版寫死的橘/紅不要太刺眼（保留語意） */
+#pageMenu .menu-copy [style*="color: red"]{
+  color: #ffb4b4 !important;
+}
+#pageMenu .menu-copy [style*="color: #e65100"]{
+  color: #ffd18a !important;
+}
+
+
+/* =========================================================
+   菜單圓角框（照示意：框住整段，且寬度跟著內容走）
+   - inline-block + fit-content：不會硬撐到整行
+   - max-width:100%：避免超出容器
+   ========================================================= */
+#pageMenu .menu-box{
+  display: inline-block;
+  width: fit-content;
+  max-width: 100%;
+  box-sizing: border-box;
+
+  border: 2px solid rgba(244,241,233,.75);
+  border-radius: 22px;
+  padding: 14px 18px;
+  margin: 14px 0 20px;
+  background: transparent;
+}
+
+
+/* =========================================================
+   15 / 20 元區塊：縮短中間空白（改用 grid，靠左排列）
+   ========================================================= */
+#pageMenu .egg-grid{
+  display: grid;
+  grid-template-columns: max-content max-content; /* 兩欄依內容寬度 */
+  gap: 28px;                                     /* 你要的「像 10->15 那樣」的距離 */
+  align-items: start;
+  justify-content: start;                         /* 整組靠左，不會被撐開 */
+}
+#pageMenu .egg-grid > div{
+  justify-self: start;
+}
+
+/* 螢幕較窄時自動改成上下（不影響桌機） */
+@media (max-width: 720px){
+  #pageMenu .egg-grid{
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* =========================================================
+   咖啡 Step 1 / Step 2 框齊高
+   - 父層 grid + align-stretch
+   ========================================================= */
+#pageMenu .coffee-grid{
+  display: grid;
+  grid-template-columns: max-content max-content;
+  gap: 28px;
+  align-items: stretch; /* 關鍵：兩框等高 */
+}
+#pageMenu .coffee-grid .menu-box{
+  height: 100%;
+}
+@media (max-width: 720px){
+  #pageMenu .coffee-grid{
+    grid-template-columns: 1fr;
+  }
+}
+
 </style>
 </head>
 
@@ -430,8 +535,124 @@ input[type=number]{
 <div id="pageMenu" class="page">
   <div class="frame">
     <div class="wrap">
-      <p>（菜單與點餐系統接在這裡）</p>
+<div id="menuCopy" class="menu-copy">
+   <p>🚫 我們<strong style="color: red;">「不提供」</strong>塑膠袋和吸管。<br>雞蛋糕消費滿5份，提供不織布提網，滿12份再加贈萌虎不織布提袋，量大會使用乾淨的紙箱。</p>
+<p>🎟️消費滿60元可獲得集點卡1點，滿6份點數雙倍，滿12份直接折抵1份，點數改贈1點。<br>集滿10點可兌換任何口味雞蛋糕1份。</p>
+ <h2 style="color: #e65100;">🐣 雞蛋糕 Fluffy Egg Cakes <span style="font-size: 1rem; color: #000;">自備容器集點卡加贈1點！</span></h2>
+<p><strong style="color: red; font-size: 20px;">1 份 2 顆，可以不同口味，但請以份為單位點餐。</strong></p>
+<!-- 純雞蛋糕 -->
+ <div class="menu-box">
+<h3>1 顆 10 元 (1 份 20 元)</h3>
+<p>純雞蛋糕 Original：無內餡，只有蛋糕體 </p>
+</div>
+
+<!-- 單餡與雙餡並排 -->
+<div class="egg-grid">
+  <!-- 單餡 -->
+  <div style="flex: 1; min-width: 250px;">
+    <div class="menu-box">
+<h3>1 顆 15 元 (1 份 30 元)</h3>
+    <ol>
+      <li data-stock="">巧克力 chocolate</li>
+      <li data-stock="">奶油 Milk</li>
+      <li data-stock="">鹹蛋黃 Savory Egg Yolk</li>
+      <li data-stock="">抹茶 Matcha</li>
+      <li data-stock="">紅豆 Red Bean</li>
+      <li data-stock="">芝麻 Sesame</li>
+      <li data-stock="">蒜香 Garlic</li>
+      <li data-stock="">梅子花生 Plum Peanuts</li>
+      <li data-stock="">草莓 Strawberry</li>
+    </ol>
+</div>
+  </div>
+
+  <!-- 雙餡 -->
+  <div style="flex: 1; min-width: 250px;">
+    <div class="menu-box">
+<h3>1 顆 20 元 (1 份 <strong style="color: green;">35</strong> 元)</h3>
+    <ol start="10">
+      <li data-stock="">奶油鹹蛋(雙餡) Milk &amp; Savory Egg Yolk</li>
+      <li data-stock="">雙色乳酪 Cheddar &amp; Mozzarella</li>
+      <li data-stock="0">抹茶紅豆(雙餡) Matcha &amp; Red Bean</li>
+      <li data-stock="0">抹茶巧克力(雙餡) Matcha &amp; Chocolate</li>
+      <li data-stock="4">芝麻巧克力(雙餡) Sesame &amp; Chocolate</li>
+      <li data-stock="3">花生巧克力(雙餡) Plum Peanuts &amp; Chocolate</li>
+      <li data-stock="1">玉米濃湯 Corn Chowder</li>
+    </ol>
+</div>
+  </div>
+</div>
+    <hr style="margin: 2em 0;">
+
+    <h2 style="color: #00796b;">🥛飲品Drink<span style="font-size: 1rem; color: #000;">外帶自備悲劇折 10 元！甜度無法調整，冰塊可調整。</span></h2>
+    
+   <style>
+  ul.drink-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2em; /* 控制項目間距 */
+    padding-left: 1.2em; /* 保留圓點縮排 */
+  }
+
+  ul.drink-list li {
+    list-style-type: disc; /* 保留圓點 */
+    width: auto;
+    min-width: 200px; /* 可依需要調整 */
+  }
+</style>
+ <style>
+  ol li {
+    margin-bottom: 12px; /* 每項之間加 12px 間距 */
+    line-height: 1.6;    /* 文字行距更舒適 */
+  }
+</style>
+
+<ol>
+  <li><strong>冬瓜茶 Winter Melon (with Brown Sugar)</strong><br>
+      外帶 Take Out 480mL 25元 ／ 內用 Dine In 240mL 10元
+  </li>
+  <li style="display:none;"><strong>冬瓜檸檬 <span style="color:red;">(目前停供)</span> Winter Melon &amp; Lemon (with Brown Sugar)</strong><br>
+      外帶 Take Out 480mL 30元 ／ 內用 Dine In 240mL 15元
+  </li>
+  <li><strong>冬瓜紫蘇梅 Winter Melon &amp; Salted Plum (with Brown Sugar)</strong><br>
+      外帶 Take Out 480mL 35元 ／ 內用 Dine In 240mL 20元
+  </li>
+  <li><strong>冬瓜鮮奶 Winter Melon &amp; Milk (with Brown Sugar)</strong><br>
+      外帶 Take Out 480mL 45元 ／ 內用 Dine In 240mL 25元
+  </li>
+  <li><strong>燒仙草 Sweet Hot Grass Jelly Soup</strong><br>
+      外帶 Take Out 480mL 40元 ／ 內用 Dine In 240mL 20元
+  </li>
+</ol>
+
+    <hr style="margin: 2em 0;">
+
+    <h2 style="color: #6d4c41;">☕ 咖啡coffee<span style="font-size: 1rem; color: #000;">外帶自備悲劇折 10 元！</span></h2>
+    <p>風味為香氣呈現，全無糖、不提供糖，冰／熱可調。<br>Flavor is expressed through aroma. No sugar is added or provided. Available hot or iced.</p>
+
+    <div class="coffee-grid"><div class="menu-box">
+<p><strong>先選風味：Step 1: Choose Your Flavor</strong></p>
+    <ol>
+      <li>經典Classic（烘焙 33%，咖啡因 75mg）</li>
+      <li>低因經典Classic Decaf（烘焙 33%，咖啡因 2mg）</li>
+      <li>香草Vanilla（烘焙 58%，咖啡因 68mg）</li>
+      <li>花果Floral &amp; Fruity（烘焙 16%，咖啡因 69mg）</li>
+      <li>胡椒Spicy（烘焙 75%，咖啡因 55mg）</li>
+    </ol>
+</div>
+
+    <div class="menu-box">
+<p><strong>再選作法：Step 2: Choose Your Style</strong></p>
+    <ol>
+      <li><strong>美式Americano</strong>：<br>內用Dine In 240mL 35元 ／ 外帶Take Out 480mL 60元</li>
+      <li><strong>拿鐵Caffè Latte</strong>：<br>內用Dine In 240mL 55元 ／ 外帶Take Out 480mL 95元</li>
+      <li><strong>萌翻拿鐵</strong>：<br>240mL  65元 （奶泡撒上萌虎造型巧克力粉，限定內用）
+      </li>
+    </ol>
+</div></div>
+
     </div>
+</div>
   </div>
 </div>
 
