@@ -796,7 +796,7 @@ distanceInput.addEventListener("input", () => {
 */
 (function(){
   const CURSOR_URL = "tiger.png";
-  const BUILD = "v23";
+  const BUILD = "v25";
 
   const root = document.documentElement;
 
@@ -824,6 +824,7 @@ distanceInput.addEventListener("input", () => {
       pounceMs: 0,
       touchPounce: false,
       _saved: null,
+      _vp: null,
       dragging: false,
       dragOffX: 0,
       dragOffY: 0,
@@ -867,7 +868,16 @@ distanceInput.addEventListener("input", () => {
     pointer.type = "none";
   };
 
-  // 只在「滑鼠正在移動」的短時間窗內，才讓虎頭有追獵反應
+  
+  // ===== 視窗範圍（手機地址列/捲動會改變 innerHeight，改用 visualViewport 以避免「空氣牆」）=====
+  const getViewport = () => {
+    const vv = window.visualViewport;
+    if(vv){
+      return { w: vv.width, h: vv.height, ox: vv.offsetLeft, oy: vv.offsetTop };
+    }
+    return { w: window.innerWidth, h: window.innerHeight, ox: 0, oy: 0 };
+  };
+// 只在「滑鼠正在移動」的短時間窗內，才讓虎頭有追獵反應
   const isMouseMoving = () => {
     if(!pointer.active) return false;
     if(pointer.type !== "mouse") return false;
@@ -877,11 +887,15 @@ distanceInput.addEventListener("input", () => {
   // ===== 亂走目標產生 =====
   const pickWanderTarget = (agent) => {
     const pad = 24;
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    // 避免靠邊
-    const tx = pad + Math.random() * Math.max(1, (w - pad*2));
-    const ty = pad + Math.random() * Math.max(1, (h - pad*2));
+    const vp = getViewport();
+    const w = vp.w;
+    const h = vp.h;
+    const ox = vp.ox;
+    const oy = vp.oy;
+
+    // 避免靠邊（以 visualViewport 為準，避免捲動/地址列造成「牆」）
+    const tx = ox + pad + Math.random() * Math.max(1, (w - pad*2));
+    const ty = oy + pad + Math.random() * Math.max(1, (h - pad*2));
     agent.st.targetX = tx;
     agent.st.targetY = ty;
 
@@ -1043,13 +1057,30 @@ distanceInput.addEventListener("input", () => {
     s.y += s.vy * dt;
 
     // 邊界（留一點 padding，並考慮元素尺寸避免「卡出框外」）
-    // 改成「碰牆反彈」而不是硬 clamp，避免在邊界因為視窗高度/捲動變動而抖動卡住
+    // 手機上地址列/捲動會讓 innerHeight 變動，改用 visualViewport，並在視窗尺寸變動時「只做 clamp 不反彈」
     const pad = 18;
     const padX = pad + (s.w ? s.w/2 : 0);
     const padY = pad + (s.h ? s.h/2 : 0);
 
-    const minX = padX, maxX = window.innerWidth  - padX;
-    const minY = padY, maxY = window.innerHeight - padY;
+    const vp = getViewport();
+    const minX = vp.ox + padX, maxX = vp.ox + vp.w - padX;
+    const minY = vp.oy + padY, maxY = vp.oy + vp.h - padY;
+
+    // 若視窗範圍改變（常見於手機卷軸/地址列收合），不要把它當成「撞牆」反彈，否則會抽筋抖
+    if(!s._vp){
+      s._vp = { w: vp.w, h: vp.h, ox: vp.ox, oy: vp.oy };
+    }else{
+      const dw = Math.abs(s._vp.w - vp.w);
+      const dh = Math.abs(s._vp.h - vp.h);
+      const dox = Math.abs(s._vp.ox - vp.ox);
+      const doy = Math.abs(s._vp.oy - vp.oy);
+      if(dw > 1 || dh > 1 || dox > 1 || doy > 1){
+        s._vp = { w: vp.w, h: vp.h, ox: vp.ox, oy: vp.oy };
+        // 只把位置拉回合法範圍，不反彈、不停車
+        s.x = clamp(s.x, minX, maxX);
+        s.y = clamp(s.y, minY, maxY);
+      }
+    }
 
     const bounce = 0.72; // 反彈係數（越小越「軟」）
     const stopEps = 0.012; // 太小就直接停掉避免抖
