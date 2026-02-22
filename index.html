@@ -796,6 +796,7 @@ distanceInput.addEventListener("input", () => {
 */
 (function(){
   const CURSOR_URL = "tiger.png";
+  const BUILD = "v23";
 
   const root = document.documentElement;
 
@@ -821,6 +822,8 @@ distanceInput.addEventListener("input", () => {
       pauseMs: 0,
       nextPickMs: 0,
       pounceMs: 0,
+      touchPounce: false,
+      _saved: null,
       dragging: false,
       dragOffX: 0,
       dragOffY: 0,
@@ -916,14 +919,25 @@ distanceInput.addEventListener("input", () => {
   };
 
   // ===== 觸碰點「撲擊」：手機用（點哪撲哪） =====
-  // 一次性撲擊：只給速度脈衝，不把「目標點」鎖住（放手後會立刻回到逛街）
+  // 一次性撲擊：暫時把目標改成觸點（只追一次），結束後立刻回到逛街
   const pounceAt = (agent, x, y) => {
     if(!agent || !agent.st) return;
     const s = agent.st;
     if(s.dragging) return;
 
-    // 不改變 wander 目標：撲完就回到原本的自走軌跡
-    s.pauseMs = 0;
+    // 儲存目前逛街狀態，撲完要還原
+    s._saved = {
+      targetX: s.targetX,
+      targetY: s.targetY,
+      nextPickMs: s.nextPickMs,
+      pauseMs: s.pauseMs
+    };
+
+    s.touchPounce = true;
+    s.pauseMs = 0;               // 撲擊期間不允許 pause
+    s.nextPickMs = 999999;       // 撲擊期間不要被 wander 換目標
+    s.targetX = x;
+    s.targetY = y;
 
     const dx = x - s.x;
     const dy = y - s.y;
@@ -931,9 +945,10 @@ distanceInput.addEventListener("input", () => {
     const nx = dx / dist;
     const ny = dy / dist;
 
-    s.pounceMs = 220; // 觸控撲擊窗口（一次性）
-    s.vx = nx * 0.75;
-    s.vy = ny * 0.75;
+    // 撲擊窗口：用較高的 accel/maxV 推進；同時給一次速度脈衝
+    s.pounceMs = 260;
+    s.vx = nx * 0.60;
+    s.vy = ny * 0.60;
 
     pawStamp(s.x, s.y, true);
   };
@@ -950,21 +965,29 @@ distanceInput.addEventListener("input", () => {
       return;
     }
 
-    // 暫停
-    if(s.pauseMs > 0){
+    // 觸控撲擊期間：不允許停下、也不換 wander 目標（避免「衝一下就停」）
+    if(s.touchPounce && s.pounceMs > 0){
+      s.pauseMs = 0;
+      s.nextPickMs = 999999;
+    }
+
+    // 暫停（觸控撲擊期間不暫停）
+    if(!s.touchPounce && s.pauseMs > 0){
       s.pauseMs -= dt;
       agent.setPos(s.x, s.y);
       return;
     }
 
-    // 走動目標更新
-    s.nextPickMs -= dt;
-    if(s.nextPickMs <= 0){
-      pickWanderTarget(agent);
+    // 走動目標更新（觸控撲擊期間不換目標）
+    if(!s.touchPounce){
+      s.nextPickMs -= dt;
+      if(s.nextPickMs <= 0){
+        pickWanderTarget(agent);
+      }
     }
 
-    // 合成目標：wander + pointer（有偏向但不是瞬間追）
-    const b = pointerBias(s.x, s.y);
+    // 合成目標：逛街 wander +（桌機）滑鼠偏向；手機撲擊期間只追撲擊目標
+    const b = (s.touchPounce ? 0 : pointerBias(s.x, s.y));
     const tx = (1-b)*s.targetX + b*pointer.x;
     const ty = (1-b)*s.targetY + b*pointer.y;
 
@@ -1028,11 +1051,32 @@ distanceInput.addEventListener("input", () => {
 
     agent.setPos(s.x, s.y);
 
-    // 到目標附近就準備停一下
+    // 到目標附近
     if(dist < 24){
-      s.pauseMs = 450 + Math.random()*1400;
-      // 走到目標後再過一段時間才換下個
-      s.nextPickMs = 700 + Math.random()*1400;
+      if(s.touchPounce){
+        // 撲到就結束，回到逛街（不要在這裡 pause）
+        s.pounceMs = 0;
+      }else{
+        // 正常逛街：停一下再走
+        s.pauseMs = 450 + Math.random()*1400;
+        s.nextPickMs = 700 + Math.random()*1400;
+      }
+    }
+
+    // 觸控撲擊結束：還原逛街目標，並讓它繼續走（不要抽筋卡住）
+    if(s.touchPounce && s.pounceMs <= 0){
+      s.touchPounce = false;
+      if(s._saved){
+        s.targetX = s._saved.targetX;
+        s.targetY = s._saved.targetY;
+        s.nextPickMs = Math.max(220, s._saved.nextPickMs || 0);
+        s.pauseMs = 0;
+        s._saved = null;
+      }else{
+        // 理論上不會走到這裡，保險：直接挑新目標
+        s.pauseMs = 0;
+        s.nextPickMs = 120;
+      }
     }
 
     // 輕量腳印：走動時也留一點（不會太密，腳印自身會節流）
@@ -1168,8 +1212,8 @@ distanceInput.addEventListener("input", () => {
     };
     const onMoveM = (e) => {
       if(e.pointerType === "mouse") return;
-      setPointer(e.clientX, e.clientY, "touch");
       if(!M.st.dragging) return;
+      setPointer(e.clientX, e.clientY, "touch");
       const x = e.clientX - M.st.dragOffX;
       const y = e.clientY - M.st.dragOffY;
       M.setPos(x, y);
@@ -1181,6 +1225,7 @@ distanceInput.addEventListener("input", () => {
       if(!M.st.dragging) return;
       M.st.dragging = false;
       holdOffM();
+      clearPointer();
       M.st.vx *= 0.35;
       M.st.vy *= 0.35;
     };
