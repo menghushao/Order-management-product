@@ -225,9 +225,10 @@ input[type=number]{
 #mobileOrb{
   position: fixed;
   left: 18px;
-  bottom: 18px;
+  top: 18px;
   width: 56px;
   height: 56px;
+  transform: translate(-50%, -50%);
   z-index: 999999;
   user-select: none;
   -webkit-user-select: none;
@@ -461,23 +462,19 @@ input[type=number]{
 
 /* ===== 滑鼠軌跡：🐀（只在桌機 pointer:fine 生效）===== */
 .rat-stamp{
-
   position: absolute;
-  transform: translate(-50%, -50%) rotate(var(--rot, 0deg));
+  transform: translate(-50%, -50%) scaleX(var(--sx, 1)) rotate(var(--rot, 0deg));
   opacity: 0.85;
   font-size: 20px;
   line-height: 1;
   filter: drop-shadow(0 0 2px rgba(0,0,0,.35));
   animation: pawFade 1.35s ease-out forwards; /* 沿用現有淡出動畫 */
   user-select: none;
-  transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) 
 }
 
 @keyframes pawFade{
-  0%   { opacity: 0.80; transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) scale(1); }
-  100% { opacity: 0;    transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) scale(1.06); }
-}
-100% { opacity: 0;    transform: translate(-50%, -50%) rotate(var(--rot, 0deg)) scale(1.05); }
+  0%   { opacity: 0.80; transform: translate(-50%, -50%) scaleX(var(--sx, 1)) rotate(var(--rot, 0deg)) scale(1); }
+  100% { opacity: 0;    transform: translate(-50%, -50%) scaleX(var(--sx, 1)) rotate(var(--rot, 0deg)) scale(1.06); }
 }
 
 </style>
@@ -914,6 +911,30 @@ distanceInput.addEventListener("input", () => {
     }
   };
 
+  // ===== 觸碰點「撲擊」：手機用（點哪撲哪） =====
+  const pounceAt = (agent, x, y) => {
+    if(!agent || !agent.st) return;
+    const s = agent.st;
+    if(s.dragging) return;
+
+    s.pauseMs = 0;
+    s.targetX = x;
+    s.targetY = y;
+    s.nextPickMs = 900; // 讓目標至少維持一小段時間
+
+    const dx = x - s.x;
+    const dy = y - s.y;
+    const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+    const nx = dx / dist;
+    const ny = dy / dist;
+
+    s.pounceMs = 320; // 觸控撲擊窗口
+    s.vx = nx * 0.75;
+    s.vy = ny * 0.75;
+
+    pawStamp(s.x, s.y, true);
+  };
+
   // ===== 主更新迴圈（同一套物理，用於桌機或手機 agent）=====
   const stepAgent = (agent, dt) => {
     const s = agent.st;
@@ -995,10 +1016,12 @@ distanceInput.addEventListener("input", () => {
     s.x += s.vx * dt;
     s.y += s.vy * dt;
 
-    // 邊界（留一點 padding）
+    // 邊界（留一點 padding，並考慮元素尺寸避免「卡出框外」）
     const pad = 18;
-    s.x = clamp(s.x, pad, window.innerWidth  - pad);
-    s.y = clamp(s.y, pad, window.innerHeight - pad);
+    const padX = pad + (s.w ? s.w/2 : 0);
+    const padY = pad + (s.h ? s.h/2 : 0);
+    s.x = clamp(s.x, padX, window.innerWidth  - padX);
+    s.y = clamp(s.y, padY, window.innerHeight - padY);
 
     agent.setPos(s.x, s.y);
 
@@ -1122,6 +1145,8 @@ distanceInput.addEventListener("input", () => {
       if(!e.touches || !e.touches.length) return;
       const t = e.touches[0];
       setPointer(t.clientX, t.clientY, "touch");
+      // 點哪撲哪：不需要拖到虎頭本體
+      pounceAt(M, t.clientX, t.clientY);
     }, { passive:true });
     window.addEventListener("touchmove", (e) => {
       if(!e.touches || !e.touches.length) return;
@@ -1281,13 +1306,16 @@ distanceInput.addEventListener("input", () => {
     const dx=x1-x2, dy=y1-y2;
     return Math.sqrt(dx*dx+dy*dy);
   }
-  function dirDeg(x, y){
-    if(lastT === 0) return 0;
+  function faceSx(x, y){
+    if(lastT === 0) return 1;
     const dx = x - lastX;
-    const dy = y - lastY;
-    if(Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001) return 0;
-    // 🐀 emoji 預設朝左，補 +180 度校正
-    return (Math.atan2(dy, dx) * 180 / Math.PI) + 180;
+    // dx>0 表示往右走：用水平鏡像讓 🐀 朝右（避免 180° 造成頭下腳上）
+    if(Math.abs(dx) < 0.001) return 1;
+    return dx > 0 ? -1 : 1;
+  }
+
+  function rotJitter(){
+    return (Math.random() * 12) - 6;
   }
 
   function stampRat(x, y){
@@ -1302,13 +1330,13 @@ distanceInput.addEventListener("input", () => {
     el.textContent = "🐀";
 
     const jitter = (Math.random() * 8) - 4;
-    const baseRot = dirDeg(x, y);
-    const rotJit  = (Math.random() * 10) - 5;
-    const rot = baseRot + rotJit;
+    const rot = rotJitter();
+    const sx = faceSx(x, y);
 
     el.style.left = (x + jitter) + "px";
     el.style.top  = (y + jitter) + "px";
     el.style.setProperty("--rot", rot + "deg");
+    el.style.setProperty("--sx", sx);
 
     host.appendChild(el);
 
