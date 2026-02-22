@@ -1043,11 +1043,36 @@ distanceInput.addEventListener("input", () => {
     s.y += s.vy * dt;
 
     // 邊界（留一點 padding，並考慮元素尺寸避免「卡出框外」）
+    // 改成「碰牆反彈」而不是硬 clamp，避免在邊界因為視窗高度/捲動變動而抖動卡住
     const pad = 18;
     const padX = pad + (s.w ? s.w/2 : 0);
     const padY = pad + (s.h ? s.h/2 : 0);
-    s.x = clamp(s.x, padX, window.innerWidth  - padX);
-    s.y = clamp(s.y, padY, window.innerHeight - padY);
+
+    const minX = padX, maxX = window.innerWidth  - padX;
+    const minY = padY, maxY = window.innerHeight - padY;
+
+    const bounce = 0.72; // 反彈係數（越小越「軟」）
+    const stopEps = 0.012; // 太小就直接停掉避免抖
+
+    if(s.x < minX){
+      s.x = minX;
+      if(s.vx < 0) s.vx = -s.vx * bounce;
+      if(Math.abs(s.vx) < stopEps) s.vx = 0;
+    }else if(s.x > maxX){
+      s.x = maxX;
+      if(s.vx > 0) s.vx = -s.vx * bounce;
+      if(Math.abs(s.vx) < stopEps) s.vx = 0;
+    }
+
+    if(s.y < minY){
+      s.y = minY;
+      if(s.vy < 0) s.vy = -s.vy * bounce;
+      if(Math.abs(s.vy) < stopEps) s.vy = 0;
+    }else if(s.y > maxY){
+      s.y = maxY;
+      if(s.vy > 0) s.vy = -s.vy * bounce;
+      if(Math.abs(s.vy) < stopEps) s.vy = 0;
+    }
 
     agent.setPos(s.x, s.y);
 
