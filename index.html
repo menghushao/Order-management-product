@@ -60,6 +60,7 @@ body{
   border-bottom-color:var(--wood-dark);
 }
 .topbar .wrap{
+  position:relative; /* 看板隱形按鈕定位用 */
   height:100%;
   display:flex;
   align-items:center;
@@ -477,7 +478,238 @@ input[type=number]{
   100% { opacity: 0;    transform: translate(-50%, -50%) scaleX(var(--sx, 1)) rotate(var(--rot, 0deg)) scale(1.06); }
 }
 
+
+/* =========================================================
+   看板模式：BAR 左上隱形按鈕 + 設定面板 + 一頁式縮放
+   - 點一次：開設定
+   - 設定確認：進入看板模式（無卷軸）
+   - 再點一次：完整還原
+   ========================================================= */
+#boardHotspot{
+  position:absolute;
+  left:0;
+  top:0;
+  width:86px;
+  height:68px; /* 對齊 BAR 高度 */
+  cursor:pointer;
+  z-index:25; /* 高於 topbar 內容 */
+  background:transparent;
+}
+
+/* ===== 看板模式：BAR 會消失；提供全域左上退出熱區 ===== */
+#boardExitHotspot{
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 92px;
+  height: 92px;
+  z-index: 1000003;
+  cursor: pointer;
+  background: transparent;
+  display: none;
+}
+html.board-mode #boardExitHotspot{ display:block; }
+html.board-mode .topbar{ display:none !important; }
+/* === 看板模式：菜單框距離縮半（只在看板模式生效） === */
+html.board-mode #pageMenu .egg-grid{ gap: 14px !important; }
+html.board-mode #pageMenu .coffee-grid{ gap: 14px !important; }
+html.board-mode #pageMenu .menu-box{
+  margin: 7px 0 10px !important;
+  padding: 10px 12px !important;
+  border-radius: 16px !important;
+}
+
+#boardConfig{
+  position:fixed;
+  inset:0;
+  z-index:1000000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.62);
+}
+#boardConfig[hidden]{ display:none; }
+
+#boardConfig .board-panel{
+  width:min(520px, calc(100vw - 28px));
+  border:2px solid rgba(244,241,233,.75);
+  border-radius:18px;
+  background:var(--board);
+  padding:16px 16px 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.45);
+}
+#boardConfig .board-panel h3{
+  margin:0 0 10px;
+  font-size:18px;
+}
+#boardConfig .board-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:10px 12px;
+  align-items:end;
+}
+#boardConfig label{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  font-size:14px;
+  opacity:.95;
+}
+#boardConfig input, #boardConfig select{
+  background:transparent;
+  border:1px solid rgba(244,241,233,.85);
+  color:var(--text);
+  padding:6px 8px;
+  border-radius:10px;
+  font-size:16px;
+}
+#boardConfig .board-actions{
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+  margin-top:12px;
+}
+#boardConfig .board-actions button{
+  background:transparent;
+  border:2px solid rgba(244,241,233,.85);
+  color:var(--text);
+  padding:7px 14px;
+  border-radius:12px;
+  cursor:pointer;
+  min-height:38px;
+}
+#boardConfig .board-actions button.primary{
+  border-color:#ffd18a;
+}
+#boardConfig .board-hint{
+  margin-top:10px;
+  font-size:13px;
+  opacity:.85;
+  line-height:1.5;
+}
+
+
+/* =========================================================
+   看板模式：強制維持原本「桌機排版」(避免窄寬 media query 把框改成直列)
+   - 進入看板模式時會在 <html> 加上 .board-mode
+   ========================================================= */
+html.board-mode #pageMenu .egg-grid{
+  grid-template-columns: max-content max-content !important;
+}
+html.board-mode #pageMenu .coffee-grid{
+  grid-template-columns: max-content max-content !important;
+}
+html.board-mode #pageMenu ul.drink-list{
+  flex-wrap: wrap !important;
+}
+
+
+
+/* ===== 看板模式：BAR 固定不縮放；只縮放 BAR 下方內容 ===== */
+html.board-mode .topbar{
+  position: fixed !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 100% !important;
+}
+html.board-mode body{
+  overflow: hidden !important;
+}
+#__boardStage{
+  position: relative;
+  left: 0;
+  top: 0;
+  width: auto;
+  height: auto;
+}
+/* =========================================================
+   看板模式修正：立屏不外溢 / 真正鎖 viewport
+   - 避免 board-mode 下 wrap / 木框 / fixed layer 造成水平外溢
+   ========================================================= */
+html.board-mode,
+html.board-mode body{
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+html.board-mode .frame{
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* 看板模式：內容寬度永遠不超出 body */
+html.board-mode .wrap{
+  max-width: calc(100% - 36px) !important;
+  width: calc(100% - 36px);
+}
+
+/* 立屏更嚴格：避免任何 max-width clamp 撐破 */
+html.board-mode.portrait .wrap{
+  max-width: calc(100% - 36px) !important;
+  width: calc(100% - 36px);
+}
+
+/* board-mode 下，把 100vw/100vh 的 fixed layer 改成跟 body 走，避免推爆右邊 */
+html.board-mode #pawTrail{
+  left:0 !important;
+  top:0 !important;
+  width:100vw !important;
+  height:100vh !important;
+  overflow:hidden !important;
+}
+
+
+/* 看板模式仍顯示漂浮虎頭（避免 F11 全螢幕看不到） */
+html.board-mode #spinCursor{ z-index: 999999 !important; }
+html.board-mode #mobileOrb{ z-index: 999999 !important; }
+
+/* =========================================================
+   看板模式：追逐老鼠（只在 board-mode）
+   ========================================================= */
+#boardMiceLayer{
+  position: fixed;
+  left: 0; top: 0;
+  width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 999997; /* 在腳印(999998)下面，貓頭(999999)上面 */
+  display: none;
+  overflow: hidden;
+}
+html.board-mode #boardMiceLayer{ display:block; }
+
+.board-mouse{
+  position: fixed;
+  left: 0; top: 0;
+  transform: translate(-50%, -50%);
+  font-size: 30px;
+  line-height: 1;
+  opacity: 0.95;
+  filter: drop-shadow(0 0 3px rgba(0,0,0,.55));
+  user-select: none;
+  -webkit-user-select: none;
+}
+.board-mouse.dead{ opacity: 0; }
+
 </style>
+
+<style>
+#boardQR{display:none;}
+html.board-mode #boardQR{
+  display:flex;
+  flex-direction:column;
+  gap:25px;
+  position:fixed;
+  top:6vh;
+  right:24px;
+  z-index:1000002;
+}
+html.board-mode #boardQR .qr{
+  width:70px;
+  height:auto;
+}
+</style>
+
 </head>
 
 <body>
@@ -485,10 +717,59 @@ input[type=number]{
 <!-- ===== BAR ===== -->
 <div class="topbar">
   <div class="wrap">
+    <div id="boardHotspot" aria-label="board hotspot"></div>
     <div class="title"><div id="logoStrip" class="logo-strip" aria-label="logo strip"></div></div>
     <button id="toggleBtn" class="toggle-btn">↪︎ 菜單</button>
   </div>
 </div>
+
+
+<!-- ===== 看板模式設定面板（由 BAR 左上隱形按鈕開啟） ===== -->
+<div id="boardConfig" hidden>
+  <div class="board-panel" role="dialog" aria-modal="true" aria-label="看板模式設定">
+    <h3>看板模式設定</h3>
+
+    <div class="board-grid">
+      <label>
+        螢幕尺寸（吋）
+        <input type="number" id="cfgInch" min="1" step="1" value="42">
+      </label>
+
+      <label>
+        顯示方向
+        <select id="cfgOrient">
+          <option value="portrait" selected>豎屏</option>
+          <option value="landscape">橫屏</option>
+        </select>
+      </label>
+
+      <label>
+        解析度
+        <select id="cfgRes">
+          <option value="1080" selected>1080P</option>
+          <option value="2160">4K</option>
+        </select>
+      </label>
+
+      <label>
+        （可選）額外縮放%
+        <input type="number" id="cfgZoom" min="50" max="150" step="1" value="100">
+      </label>
+    </div>
+
+    <div class="board-actions">
+      <button id="cfgCancel">取消</button>
+      <button id="cfgApply" class="primary">確認</button>
+    </div>
+
+    <div class="board-hint">
+      1) 點 BAR 左上角隱形區開啟本面板。<br>
+      2) 進入看板模式後：再點一次同一區會直接還原。<br>
+      3) ESC 可關閉面板（不會切模式）。
+    </div>
+  </div>
+</div>
+
 
 <!-- ===== 店家資訊 ===== -->
 <div id="pageInfo" class="page active">
@@ -673,8 +954,8 @@ input[type=number]{
     <div class="menu-box">
 <p><strong>再選作法：Step 2: Choose Your Style</strong></p>
     <ol>
-      <li><strong>美式Americano</strong>：<br>內用Dine In 240mL 35元 ／ 外帶Take Out 480mL 60元</li>
-      <li><strong>拿鐵Caffè Latte</strong>：<br>內用Dine In 240mL 55元 ／ 外帶Take Out 480mL 95元</li>
+      <li><strong>美式Americano</strong>：<br>內用Dine In 240mL 35元<BR>外帶Take Out 480mL 60元</li>
+      <li><strong>拿鐵Caffè Latte</strong>：<br>內用Dine In 240mL 55元<BR>外帶Take Out 480mL 95元</li>
       <li><strong>萌翻拿鐵</strong>：<br>240mL  65元 （奶泡撒上萌虎造型巧克力粉，限定內用）
       </li>
     </ol>
@@ -781,7 +1062,7 @@ distanceInput.addEventListener("input", () => {
    - 手機：沿用原本可拖曳虎頭，但增加「自己亂走 + 觸碰點吸引」邏輯
 */
 (function(){
-  const CURSOR_URL = "tiger.png";  const BUILD = "v31";
+  const CURSOR_URL = "tiger.png";  const BUILD = "v44";
 
   const root = document.documentElement;
 
@@ -884,8 +1165,24 @@ distanceInput.addEventListener("input", () => {
   }
 };
 
-  // ===== 力場：偏向 pointer 的權重（只在滑鼠正在移動時生效；積極性更高）=====
+  
+  // ===== 看板模式：外部吸引點（讓貓追老鼠用）=====
+  const __attractor = { x: 0, y: 0, until: 0 };
+  window.__catSetAttractor = (x, y, ms=140) => {
+    __attractor.x = Number(x) || 0;
+    __attractor.y = Number(y) || 0;
+    __attractor.until = performance.now() + Math.max(60, ms|0);
+  };
+
+// ===== 力場：偏向 pointer 的權重（只在滑鼠正在移動時生效；積極性更高）=====
   const pointerBias = (ax, ay) => {
+    const now = performance.now();
+    const attrOn = now < __attractor.until;
+    // 若沒有真實滑鼠移動，但看板有吸引點（老鼠），就把它視為『滑鼠正在移動』來觸發捕獵。
+    if(attrOn && (!pointer.active || pointer.type !== 'mouse' || (now - pointer.t) > 220)){
+      pointer.x = __attractor.x; pointer.y = __attractor.y;
+      pointer.t = now; pointer.active = true; pointer.type = 'mouse';
+    }
     // 只對滑鼠「正在移動」時才追
     if(!isMouseMoving()) return 0;
 
@@ -1051,34 +1348,41 @@ const accel = usingPounce ? pounceAccel : cruiseAccel;
 
 
 
-// ===== 最小巡航速度（手機）+ 卡點脫困 =====
-if(!usingPounce && (window.matchMedia && window.matchMedia("(pointer:coarse)").matches) && !s.dragging && !s.touchPounce){
-  const minCruiseV = 0.050; // px/ms（手機較柔和）
-  if(s.pauseMs <= 0 && dist > 55){
+// ===== 最小巡航速度 + 卡點脫困（桌機/手機共用）=====
+if(!usingPounce && !s.dragging && !s.touchPounce){
+  const isCoarse = (window.matchMedia && window.matchMedia("(pointer:coarse)").matches);
+
+  // 最小巡航速度：避免速度被阻尼磨到接近 0 之後「小碎步」像卡住
+  const minCruiseV = isCoarse ? 0.050 : 0.032; // px/ms（桌機更小、更不躁）
+  const keepDist   = isCoarse ? 55 : 85;       // 目標距離太近就直接換目標，避免在原地抖
+  if(s.pauseMs <= 0 && dist > keepDist){
     const vv = Math.sqrt(s.vx*s.vx + s.vy*s.vy) || 0;
     if(vv < minCruiseV){
       s.vx = nx * minCruiseV;
       s.vy = ny * minCruiseV;
     }
-  }else{
-    // 目標太近直接換新目標（不要停在那邊抖）
+  }else if(dist <= keepDist){
     pickWanderTarget(agent);
   }
 
   // 卡點偵測：長時間幾乎沒位移就直接換目標 + 小踢力
+  const movedThresh = isCoarse ? 0.45 : 0.35;
+  const stuckLimit  = isCoarse ? 1100 : 900;  // ms
+  const kick        = isCoarse ? 0.12 : 0.10;
+
   const moved = Math.abs(s.x - (s._lastSX || 0)) + Math.abs(s.y - (s._lastSY || 0));
-  if(moved < 0.45) s._stuckMs = (s._stuckMs || 0) + dt;
+  if(moved < movedThresh) s._stuckMs = (s._stuckMs || 0) + dt;
   else s._stuckMs = 0;
   s._lastSX = s.x; s._lastSY = s.y;
 
-  if(s._stuckMs > 1100){
+  if(s._stuckMs > stuckLimit){
     s._stuckMs = 0;
     pickWanderTarget(agent);
-    s.vx += (Math.random()*2 - 1) * 0.12;
-    s.vy += (Math.random()*2 - 1) * 0.12;
+    s.vx += (Math.random()*2 - 1) * kick;
+    s.vy += (Math.random()*2 - 1) * kick;
   }
 }
-    // 更新位置
+// 更新位置
     s.x += s.vx * dt;
     s.y += s.vy * dt;
 
@@ -1516,6 +1820,568 @@ try{
   }, { passive:true });
 })();
 </script>
+
+
+<script>
+/* =========================================================
+   看板模式（虛擬螢幕）：一頁式 / 無卷軸 / 可還原
+   - 以「目標解析度 + 橫/豎」計算 scale
+   - body 以 translate + scale 置中顯示
+   ========================================================= */
+(function(){
+  const hotspot = document.getElementById('boardHotspot');
+  const panel   = document.getElementById('boardConfig');
+  // ✅ 看板模式用：BAR 會隱藏，所以額外放一個全域左上隱形「退出」熱區
+  let exitHotspot = document.getElementById('boardExitHotspot');
+  if(!exitHotspot){
+    exitHotspot = document.createElement('div');
+    exitHotspot.id = 'boardExitHotspot';
+    exitHotspot.setAttribute('aria-label','board exit hotspot');
+    document.body.appendChild(exitHotspot);
+  }
+
+  if(!hotspot || !panel) return;
+
+  const $ = (id)=>document.getElementById(id);
+
+  const cfg = {
+    inch: 42,
+    orient: 'portrait',
+    res: 1080,
+    zoom: 100
+  };
+
+
+  // ===== 看板模式：只縮放 BAR 下方內容（BAR 固定不縮放）=====
+  const topbarEl = document.querySelector('.topbar');
+  let stageEl = null;
+
+  function __ensureBoardStage(){
+    if(stageEl && stageEl.isConnected) return stageEl;
+    stageEl = document.getElementById('__boardStage');
+    if(!stageEl){
+      stageEl = document.createElement('div');
+      stageEl.id = '__boardStage';
+      // 插在 topbar 後面，避免破壞原結構
+      const b = document.body;
+      if(topbarEl && topbarEl.parentNode === b && topbarEl.nextSibling){
+        b.insertBefore(stageEl, topbarEl.nextSibling);
+      }else{
+        b.insertBefore(stageEl, b.firstChild);
+      }
+
+      // 把需要縮放的內容搬進 stage（不含 topbar / boardConfig）
+      const ids = ['pageInfo','pageMenu'];
+      ids.forEach(id=>{
+        const el = document.getElementById(id);
+        if(el && el.parentNode === b){
+          stageEl.appendChild(el);
+        }
+      });
+    }
+    return stageEl;
+  }
+
+
+  let boardOn = false;
+  let saved = null;
+
+  function baseResToWH(res){
+    // res = 1080 => 1920x1080, res = 2160 => 3840x2160
+    const h = Number(res) || 1080;
+    const w = Math.round(h * 16 / 9);
+    return { w, h };
+  }
+
+  function getTargetWH(){
+    const {w,h} = baseResToWH(cfg.res);
+    if(cfg.orient === 'portrait'){
+      return { tw: h, th: w }; // 1080x1920
+    }
+    return { tw: w, th: h };   // 1920x1080
+  }
+
+  
+  function __syncBoardOrientClass(){
+    const root = document.documentElement;
+    const portrait = (window.innerHeight >= window.innerWidth);
+    root.classList.toggle("portrait", portrait);
+    root.classList.toggle("landscape", !portrait);
+  }
+function showPanel(){
+    panel.hidden = false;
+  }
+  function hidePanel(){
+    panel.hidden = true;
+  }
+
+  function saveCurrent(){
+    const b = document.body;
+    const s = __ensureBoardStage();
+    saved = {
+      // body（只管 overflow，避免原頁面被捲走）
+      bodyOverflow: b.style.overflow,
+
+      // stage（真正做 transform 的容器）
+      stageTransform: s.style.transform,
+      stageTransformOrigin: s.style.transformOrigin,
+      stageWidth: s.style.width,
+      stageHeight: s.style.height,
+      stagePosition: s.style.position,
+      stageLeft: s.style.left,
+      stageTop: s.style.top,
+
+      // topbar（讓它回到原本 sticky）
+      topbarPosition: topbarEl ? topbarEl.style.position : '',
+      topbarLeft: topbarEl ? topbarEl.style.left : '',
+      topbarTop: topbarEl ? topbarEl.style.top : '',
+      topbarWidth: topbarEl ? topbarEl.style.width : '',
+      topbarZ: topbarEl ? topbarEl.style.zIndex : ''
+    };
+  };
+
+  function restore(){
+    if(!saved) return;
+    const b = document.body;
+    const s = __ensureBoardStage();
+
+    document.documentElement.classList.remove("board-mode");
+
+    // body
+    b.style.overflow = saved.bodyOverflow || '';
+
+    // stage
+    s.style.transform = saved.stageTransform || '';
+    s.style.transformOrigin = saved.stageTransformOrigin || '';
+    s.style.width = saved.stageWidth || '';
+    s.style.height = saved.stageHeight || '';
+    s.style.position = saved.stagePosition || '';
+    s.style.left = saved.stageLeft || '';
+    s.style.top = saved.stageTop || '';
+
+    // topbar
+    if(topbarEl){
+      topbarEl.style.position = saved.topbarPosition || '';
+      topbarEl.style.left = saved.topbarLeft || '';
+      topbarEl.style.top = saved.topbarTop || '';
+      topbarEl.style.width = saved.topbarWidth || '';
+      topbarEl.style.zIndex = saved.topbarZ || '';
+    }
+
+
+    // 額外：看板模式會把 BAR 隱藏，這裡要還原
+    if(topbarEl){
+      topbarEl.style.display = '';
+    }
+    if(exitHotspot){
+      exitHotspot.style.display = 'none';
+    }
+    boardOn = false;
+    try{ window.dispatchEvent(new CustomEvent('boardmodechange',{detail:{on:false}})); }catch(e){}
+  }
+
+  function apply(){
+    const b = document.body;
+    const s = __ensureBoardStage();
+
+    __syncBoardOrientClass();
+    document.documentElement.classList.add("board-mode");
+
+    // BAR 在看板模式會隱藏（用 CSS），避免佔高度或推擠版面
+    if(topbarEl){
+      topbarEl.style.display = 'none';
+    }
+    if(exitHotspot){
+      exitHotspot.style.display = 'block';
+    }
+
+    const {tw, th} = getTargetWH();
+
+    // ✅ 只用「整個視窗」做縮放與置中（不扣 BAR）
+    const availW = Math.max(1, window.innerWidth);
+    const availH = Math.max(1, window.innerHeight);
+
+    let scale = Math.min(availW / tw, availH / th);
+
+    // 額外縮放（50%~150%），仍維持不超出視窗：超出就被 clamp 回來
+    const z = Math.max(50, Math.min(150, Number(cfg.zoom) || 100)) / 100;
+    scale = scale * z;
+
+    // 如果超出視窗，強制縮回去（保持一頁式）
+    const fitScale = Math.min(availW / tw, availH / th);
+    if(scale > fitScale) scale = fitScale;
+
+    // 安全邊界：避免小數/四捨五入造成右側 1px 外溢
+    const safe = 1;
+    const contentW = tw * scale;
+    const contentH = th * scale;
+
+    let tx = Math.floor((availW - contentW) / 2);
+    let ty = Math.floor((availH - contentH) / 2);
+
+    // 不允許正向偏移把內容推到右/下之外（寧可貼邊，也不要外溢）
+    if(tx > safe) tx = safe;
+    if(ty > safe) ty = safe;
+
+    s.style.transformOrigin = 'top left';
+    s.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+
+    // 無卷軸
+    b.style.overflow = 'hidden';
+
+    // 用虛擬尺寸鎖定 stage 內的 layout（避免自適應把寬度撐爆）
+    s.style.width = tw + 'px';
+    s.style.height = th + 'px';
+    s.style.position = 'absolute';
+    s.style.left = '0';
+    s.style.top = '0';
+
+    boardOn = true;
+    try{ window.dispatchEvent(new CustomEvent('boardmodechange',{detail:{on:true}})); }catch(e){}
+
+  }
+
+  function applyFromInputs(){
+    cfg.inch = Number($('cfgInch').value) || 42;
+    cfg.orient = $('cfgOrient').value || 'portrait';
+    cfg.res = Number($('cfgRes').value) || 1080;
+    cfg.zoom = Number($('cfgZoom').value) || 100;
+
+    if(!boardOn) saveCurrent();
+    apply();
+  }
+
+  function onHotspotClick(){
+    if(boardOn){
+      restore();
+    }else{
+      // 同一顆：點一下先開面板，讓你改條件
+      $('cfgInch').value = cfg.inch;
+      $('cfgOrient').value = cfg.orient;
+      $('cfgRes').value = String(cfg.res);
+      $('cfgZoom').value = cfg.zoom;
+      showPanel();
+    }
+  }
+
+  hotspot.addEventListener('click', onHotspotClick);
+  if(exitHotspot){
+    exitHotspot.addEventListener('click', () => {
+      if(boardOn) restore();
+      else onHotspotClick();
+    });
+  }
+
+  // 面板：確認 / 取消
+  $('cfgApply').addEventListener('click', () => {
+    hidePanel();
+    applyFromInputs();
+  });
+  $('cfgCancel').addEventListener('click', () => {
+    hidePanel();
+  });
+
+  // 點黑幕關閉（不切模式）
+  panel.addEventListener('click', (e) => {
+    if(e.target === panel) hidePanel();
+  });
+
+  // ESC：關面板；若已在看板模式，ESC 不還原（避免誤觸）
+  window.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape'){
+      if(!panel.hidden) hidePanel();
+    }
+  });
+
+  // 看板模式下：視窗尺寸變更就重新 fit（例如拖拉視窗、切換螢幕）
+  window.addEventListener('resize', () => {
+    if(boardOn){ __syncBoardOrientClass(); apply(); }
+  }, { passive:true });
+})();
+</script>
+
+
+<script>
+/* =========================================================
+   看板模式：一隻老鼠（隨機生成）+ 貓追捕
+   - 只在 html.board-mode 時運作
+   - 老鼠被抓到會消失，30 秒後重生
+   - 老鼠會逃（靠近貓就往反方向加速）
+   ========================================================= */
+(function(){
+  let layer = document.getElementById('boardMiceLayer');
+  if(!layer){
+    layer = document.createElement('div');
+    layer.id = 'boardMiceLayer';
+    document.body.appendChild(layer);
+  }
+
+  const mice = [];
+  const MICE_N = 1;
+
+  function rand(min, max){ return min + Math.random() * (max - min); }
+  function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
+  function getCatCenter(){
+    const spin = document.getElementById('spinCursor');
+    const orb  = document.getElementById('mobileOrb');
+    const el = (spin && spin.style.display !== 'none') ? spin : orb;
+    if(!el) return { x: window.innerWidth/2, y: window.innerHeight/2 };
+    const r = el.getBoundingClientRect();
+    return { x: r.left + r.width/2, y: r.top + r.height/2 };
+  }
+
+  function spawnMouse(i){
+    let m = mice[i];
+    if(!m){
+      const el = document.createElement('div');
+      el.className = 'board-mouse';
+      el.textContent = '🐀';
+      layer.appendChild(el);
+      m = mice[i] = {
+        el,
+        x: rand(80, window.innerWidth - 80),
+        y: rand(90, window.innerHeight - 90),
+        vx: 0, vy: 0,
+        tx: 0, ty: 0,
+        nextPick: 0,
+        deadMs: 0,
+        alive: true
+      };
+    }
+    m.alive = true;
+    m.deadMs = 0;
+    m.el.classList.remove('dead');
+
+    const cat = getCatCenter();
+    // 出生點盡量不要離貓太近
+    for(let k=0;k<12;k++){
+      const x = rand(70, window.innerWidth - 70);
+      const y = rand(80, window.innerHeight - 80);
+      const dx = x - cat.x, dy = y - cat.y;
+      if(Math.hypot(dx,dy) > 220){
+        m.x = x; m.y = y;
+        break;
+      }
+    }
+    m.vx = rand(-0.06, 0.06);
+    m.vy = rand(-0.06, 0.06);
+    m.nextPick = 0;
+    m.tx = m.x; m.ty = m.y;
+    renderMouse(m);
+  }
+
+  function killMouse(m){
+    m.alive = false;
+    m.el.classList.add('dead');
+    m.deadMs = 30000; // 30 秒
+  }
+
+  function pickWander(m){
+    const pad = 70;
+    m.tx = rand(pad, Math.max(pad+1, window.innerWidth - pad));
+    m.ty = rand(pad, Math.max(pad+1, window.innerHeight - pad));
+    m.nextPick = 650 + Math.random()*1250;
+  }
+
+  function renderMouse(m){
+    m.el.style.left = m.x + 'px';
+    m.el.style.top  = m.y + 'px';
+  }
+
+  function stepMouse(m, dt, cat){
+    const W = window.innerWidth, H = window.innerHeight;
+
+    if(!m.alive){
+      m.deadMs -= dt;
+      if(m.deadMs <= 0){
+        spawnMouse(mice.indexOf(m));
+      }
+      return;
+    }
+
+    // === 逃跑：靠近貓就往反方向加速（更會逃、比較不容易被抓到） ===
+    const dx = m.x - cat.x;
+    const dy = m.y - cat.y;
+    const d  = Math.hypot(dx,dy) || 1;
+
+    const near = d < 560;
+    const veryNear = d < 300;
+
+    if(near){
+      const nx = dx / d;
+      const ny = dy / d;
+
+      // 逃跑加速度：越近越大
+      const k = veryNear ? 0.0082 : 0.0056; // px/ms^2
+      m.vx += nx * k * dt;
+      m.vy += ny * k * dt;
+
+      // 側向擾動（看起來更像在逃）
+      const side = (Math.random()*2 - 1) * (veryNear ? 0.0026 : 0.0018) * dt;
+      m.vx += -ny * side;
+      m.vy +=  nx * side;
+
+      // 逃跑時不選 wander 目標
+      m.nextPick = 240;
+    }else{
+      m.nextPick -= dt;
+      if(m.nextPick <= 0) pickWander(m);
+
+      const wx = m.tx - m.x;
+      const wy = m.ty - m.y;
+      const wd = Math.hypot(wx,wy) || 1;
+      const nx = wx / wd, ny = wy / wd;
+
+      m.vx += nx * 0.00125 * dt;
+      m.vy += ny * 0.00125 * dt;
+    }
+
+    // === 角落脫困/反向逃逸：到角落也要反向逃，避免卡死四角 ===
+    const edge = 74;              // 邊界感應距離
+    const cornerBoost = 0.0062;   // 推回畫面中心的加速度（px/ms^2）
+    const swirl = 0.0016;         // 側向擾動
+
+    let pushX = 0, pushY = 0;
+    if(m.x < edge) pushX += (edge - m.x) / edge;
+    else if(m.x > (W - edge)) pushX -= (m.x - (W - edge)) / edge;
+
+    if(m.y < edge) pushY += (edge - m.y) / edge;
+    else if(m.y > (H - edge)) pushY -= (m.y - (H - edge)) / edge;
+
+    // pushX/pushY 指向「往內」(正=往右/下，負=往左/上)
+    if(pushX !== 0 || pushY !== 0){
+      // 越靠近角落推得越大
+      m.vx += pushX * cornerBoost * dt;
+      m.vy += pushY * cornerBoost * dt;
+
+      // 加一點旋轉擾動，讓它不會沿牆磨進角落
+      const s = (Math.random()*2 - 1) * swirl * dt;
+      m.vx += -pushY * s;
+      m.vy +=  pushX * s;
+
+      // 靠邊就趕快重新選 wander，避免 wander 目標把它拉去角落
+      m.nextPick = Math.min(m.nextPick, 120);
+      if(!near){
+        // 不被追時也會主動往內跑一下
+        m.tx = W * 0.5 + (Math.random()*2 - 1) * (W * 0.18);
+        m.ty = H * 0.5 + (Math.random()*2 - 1) * (H * 0.18);
+      }
+    }
+
+    // 阻尼（逃跑時阻尼稍小，保持速度）
+    const damp = near ? 0.992 : 0.988;
+    m.vx *= damp;
+    m.vy *= damp;
+
+    // 限速（逃跑更快）
+    const maxV = near ? 0.92 : 0.34; // px/ms
+    const v = Math.hypot(m.vx, m.vy) || 1;
+    if(v > maxV){
+      m.vx = m.vx / v * maxV;
+      m.vy = m.vy / v * maxV;
+    }
+
+    m.x += m.vx * dt;
+    m.y += m.vy * dt;
+
+    // 邊界反彈（讓它永遠回得來，不會貼牆抖）
+    const pad = 34;
+    const minX = pad, maxX = W - pad;
+    const minY = pad, maxY = H - pad;
+    const bounce = 0.78;
+
+    if(m.x < minX){ m.x = minX; if(m.vx < 0) m.vx = -m.vx*bounce; }
+    else if(m.x > maxX){ m.x = maxX; if(m.vx > 0) m.vx = -m.vx*bounce; }
+    if(m.y < minY){ m.y = minY; if(m.vy < 0) m.vy = -m.vy*bounce; }
+    else if(m.y > maxY){ m.y = maxY; if(m.vy > 0) m.vy = -m.vy*bounce; }
+
+    renderMouse(m);
+  }
+
+  function nearestAliveMouse(cat){
+    let best = null, bestD = 1e9;
+    for(const m of mice){
+      if(!m || !m.alive) continue;
+      const d = Math.hypot(m.x - cat.x, m.y - cat.y);
+      if(d < bestD){ bestD = d; best = m; }
+    }
+    return { m: best, d: bestD };
+  }
+
+  let running = false;
+  let last = 0;
+
+  function ensureMice(){
+    while(mice.length < MICE_N){
+      mice.push(null);
+    }
+    for(let i=0;i<MICE_N;i++){
+      if(!mice[i]) spawnMouse(i);
+      else if(!mice[i].alive && mice[i].deadMs <= 0) spawnMouse(i);
+    }
+  }
+
+  function loop(t){
+    if(!running) return;
+    if(!last) last = t;
+    const dt = Math.min(34, t - last);
+    last = t;
+
+    const cat = getCatCenter();
+
+    // 貓追最近那隻（讓原本撲擊邏輯也能觸發）
+    const { m: prey, d } = nearestAliveMouse(cat);
+    if(prey && typeof window.__catSetAttractor === 'function'){
+      window.__catSetAttractor(prey.x, prey.y, 160);
+    }
+
+    // 更新老鼠 + 抓到判定
+    for(const m of mice){
+      if(!m) continue;
+      stepMouse(m, dt, cat);
+      if(m.alive){
+        const dd = Math.hypot(m.x - cat.x, m.y - cat.y);
+        if(dd < 18){
+          killMouse(m);
+        }
+      }
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  function start(){
+    if(running) return;
+    ensureMice();
+    running = true;
+    last = 0;
+    requestAnimationFrame(loop);
+  }
+  function stop(){
+    running = false;
+  }
+
+  // 依看板模式開關啟停
+  window.addEventListener('boardmodechange', (e) => {
+    const on = !!(e && e.detail && e.detail.on);
+    if(on) start();
+    else stop();
+  });
+
+  // 保險：若直接重整在 board-mode，也要啟動
+  if(document.documentElement.classList.contains('board-mode')){
+    start();
+  }
+})();
+</script>
+
+
+<div id="boardQR">
+  <img class="qr" data-type="site" src="https://github.com/menghushao/MENU/blob/main/%E5%AE%98%E7%B6%B2QR.png?raw=true" alt="官網QR">
+  <img class="qr" data-type="linepay" src="https://github.com/menghushao/MENU/blob/main/LINE%20PAY%20QR.jpg?raw=true" alt="LINE PAY QR">
+  <img class="qr" data-type="pay" src="https://github.com/menghushao/MENU/blob/main/%E5%85%A8%E6%94%AF%E4%BB%98%20QR.jpg?raw=true" alt="其他支付QR">
+</div>
 
 </body>
 </html>
