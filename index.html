@@ -1,6 +1,5 @@
 <!doctype html>
-<html lang="zh-Hant">
-<head>
+<html lang="zh-Hant"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>萌虎燒 官方網頁| 雞蛋糕・甜點・下午茶</title>
@@ -710,7 +709,28 @@ html.board-mode #boardQR .qr{
 }
 </style>
 
-</head>
+<style id="wsFpEnhanceStyle">
+        .ws-fp-stock{ margin-left:6px; font-weight:900; }
+        .ws-fp-hasstock .ws-fp-stock{ color:#dc2626; }
+        .ws-fp-soldout{ color:#9ca3af !important; }
+        .ws-fp-soldout *{ color:#9ca3af !important; }
+        .ws-fp-soldout .ws-fp-stock{ color:#9ca3af !important; font-weight:900; }
+        .ws-fp-tooltip{
+          position: fixed;
+          z-index: 2147483647;
+          pointer-events: none;
+          background: rgba(17,24,39,.92);
+          color: #fff;
+          border: 1px solid rgba(255,255,255,.14);
+          border-radius: 10px;
+          padding: 10px 12px;
+          box-shadow: 0 10px 30px rgba(0,0,0,.35);
+          font-size: 13px;
+          line-height: 1.55;
+          max-width: 340px;
+          white-space: normal;
+        }
+      </style></head>
 
 <body>
 
@@ -725,7 +745,7 @@ html.board-mode #boardQR .qr{
 
 
 <!-- ===== 看板模式設定面板（由 BAR 左上隱形按鈕開啟） ===== -->
-<div id="boardConfig" hidden>
+<div id="boardConfig" hidden="">
   <div class="board-panel" role="dialog" aria-modal="true" aria-label="看板模式設定">
     <h3>看板模式設定</h3>
 
@@ -738,7 +758,7 @@ html.board-mode #boardQR .qr{
       <label>
         顯示方向
         <select id="cfgOrient">
-          <option value="portrait" selected>豎屏</option>
+          <option value="portrait" selected="">豎屏</option>
           <option value="landscape">橫屏</option>
         </select>
       </label>
@@ -746,7 +766,7 @@ html.board-mode #boardQR .qr{
       <label>
         解析度
         <select id="cfgRes">
-          <option value="1080" selected>1080P</option>
+          <option value="1080" selected="">1080P</option>
           <option value="2160">4K</option>
         </select>
       </label>
@@ -787,21 +807,21 @@ html.board-mode #boardQR .qr{
 <p>
 🛵 優惠後(請參考菜單)滿300元，苗栗市門牌我們可外送(享到店折扣優惠)，不滿可透過
 <a href="https://www.ubereats.com/tw/store/%E8%90%8C%E8%99%8E%E7%87%92-%E7%94%9C%E9%BB%9E-%E4%B8%8B%E5%8D%88%E8%8C%B6-%E9%BB%9E%E5%BF%83-%E9%9B%9E%E8%9B%8B%E7%B3%95/C-zADMIpWq-_9Pep-1uOVQ" target="_blank">UBER Eats</a>
-點餐外送(無到店折扣優惠)。<BR>
+點餐外送(無到店折扣優惠)。<br>
 市外建議透過<a href="https://maps.app.goo.gl/B6KTsppsNF3jqvfC9" target="_blank">GOOGLE地圖</a>
 避開收費路段，填入與萌虎燒的距離<input type="number" id="distanceInput" min="0" step="0.1" placeholder="公里">
-  <span id="deliveryMsg" class="warn"></span><BR>
+  <span id="deliveryMsg" class="warn"></span><br>
 <em style="color:pink;">外送量大請至少前一天與老闆聯繫，避免臨時使用外送平台，否則極有可能因為備料不足或有其他排程訂單導致無法承接）</em>
 </p>
 
 <p>
 <strong>📱電話：</strong>
 <a href="tel:0912457104">0912457104</a>
-<em> (拒接隱藏來電號碼)</em><BR>
+<em> (拒接隱藏來電號碼)</em><br>
 
 <strong>🗨️通訊軟體：</strong>
 <a href="https://reurl.cc/qZAE2y" target="_blank">LINE官方</a>
-<em> (回覆速度較快)、</em><a href="https://m.me/menghushao" target="_blank">FB官方 </a><BR>
+<em> (回覆速度較快)、</em><a href="https://m.me/menghushao" target="_blank">FB官方 </a><br>
 餐點都是現點現做，可透過電話或通訊軟體預訂，避免現場等待。
 </p>
 
@@ -810,7 +830,7 @@ html.board-mode #boardQR .qr{
 <em>
 週日固定休息<br>
 週一 ~ 五 的11:00 ~ 22:00<br>
-週六&#8194;&#8194;&#8194;&#8194;的10:00 ~ 23:59
+週六    的10:00 ~ 23:59
 </em>
 </p>
 
@@ -826,9 +846,9 @@ html.board-mode #boardQR .qr{
 
 
 <p>
-📄 有註冊商業登記，可提供收據核銷點心費用，可使用現金、行動支付結帳。<BR>
-📶Wi-Fi 密碼：0912457104<BR>
-⚠️ 偶有麵糊沒完全熟透的情況，這無法完全避免，若發生了請告訴我們，我們將直接退回餐點費用。<BR>
+📄 有註冊商業登記，可提供收據核銷點心費用，可使用現金、行動支付結帳。<br>
+📶Wi-Fi 密碼：0912457104<br>
+⚠️ 偶有麵糊沒完全熟透的情況，這無法完全避免，若發生了請告訴我們，我們將直接退回餐點費用。<br>
 🐱<a href="https://reurl.cc/Aym5rE" target="_blank">[萌虎燒-石虎小貓貓] LINE 貼圖</a>
 </p>
 
@@ -853,7 +873,7 @@ html.board-mode #boardQR .qr{
 <!-- 純雞蛋糕 -->
  <div class="menu-box">
 <h3>1 顆 10 元 (1 份 20 元)</h3>
-<p data-uid="fp_19c7a45ebb7_f49f66c1_11">純雞蛋糕 Original：無內餡，只有蛋糕體 </p>
+<p data-uid="fp_19c7a45ebb7_f49f66c1_11" data-ws-nutri="熱量(大卡)：95.5&lt;br&gt;蛋白質(g)：2.25&lt;br&gt;脂肪(g)：2.66&lt;br&gt;飽和脂肪(g)：0.80&lt;br&gt;反式脂肪(g)：0.06&lt;br&gt;碳水(g)：15.36&lt;br&gt;糖(g)：6.23&lt;br&gt;鈉(mg)：54.7" class="ws-fp-hasstock">純雞蛋糕 Original：無內餡，只有蛋糕體  <span class="ws-fp-stock">剩13顆</span></p>
 </div>
 
 <!-- 單餡與雙餡並排 -->
@@ -863,15 +883,15 @@ html.board-mode #boardQR .qr{
     <div class="menu-box">
 <h3>1 顆 15 元 (1 份 30 元)</h3>
     <ol>
-      <li data-uid="fp_19c7a45ebb7_0050d633_12">巧克力 chocolate</li>
-      <li data-uid="fp_19c7a45ebb7_1f8761d7_13">奶油 Milk</li>
-      <li data-uid="fp_19c7a45ebb7_275e966f_14">鹹蛋黃 Savory Egg Yolk</li>
-      <li ddata-uid="fp_19c7a45ebb7_186b7c21_15">抹茶 Matcha</li>
-      <li data-uid="fp_19c7a45ebb7_423df2dd_16">紅豆 Red Bean</li>
-      <li ddata-uid="fp_19c7a45ebb7_ed76997a_17">芝麻 Sesame</li>
-      <li data-uid="fp_19c7a45ebb7_af2931c7_18">蒜香 Garlic</li>
-      <li data-uid="fp_19c7a45ebb7_60cde13d_19">梅子花生 Plum Peanuts</li>
-      <li data-uid="fp_19c7a45ebb7_97beb9cb_1a">草莓 Strawberry</li>
+      <li data-uid="fp_19c7a45ebb7_0050d633_12" data-ws-nutri="熱量(大卡)：115&lt;br&gt;蛋白質(g)：2.63&lt;br&gt;脂肪(g)：4.20&lt;br&gt;飽和脂肪(g)：2.40&lt;br&gt;反式脂肪(g)：0.06&lt;br&gt;碳水(g)：16.60&lt;br&gt;糖(g)：7.08&lt;br&gt;鈉(mg)：55.5" class="ws-fp-hasstock">巧克力 chocolate <span class="ws-fp-stock">剩16顆</span></li>
+      <li data-uid="fp_19c7a45ebb7_1f8761d7_13" data-ws-nutri="熱量(大卡)：111&lt;br&gt;蛋白質(g)：2.95&lt;br&gt;脂肪(g)：3.70&lt;br&gt;飽和脂肪(g)：1.68&lt;br&gt;反式脂肪(g)：0.07&lt;br&gt;碳水(g)：16.31&lt;br&gt;糖(g)：7.37&lt;br&gt;鈉(mg)：52.2" class="ws-fp-hasstock">奶油 Milk <span class="ws-fp-stock">剩16顆</span></li>
+      <li data-uid="fp_19c7a45ebb7_275e966f_14" data-ws-nutri="熱量(大卡)：118&lt;br&gt;蛋白質(g)：3.34&lt;br&gt;脂肪(g)：4.78&lt;br&gt;飽和脂肪(g)：1.59&lt;br&gt;反式脂肪(g)：0.07&lt;br&gt;碳水(g)：14.86&lt;br&gt;糖(g)：6.01&lt;br&gt;鈉(mg)：71.9" class="ws-fp-hasstock">鹹蛋黃 Savory Egg Yolk <span class="ws-fp-stock">剩16顆</span></li>
+      <li data-uid="fp_19c7a45ebb7_186b7c21_15" data-ws-nutri="熱量(大卡)：108&lt;br&gt;蛋白質(g)：2.86&lt;br&gt;脂肪(g)：3.20&lt;br&gt;飽和脂肪(g)：1.34&lt;br&gt;反式脂肪(g)：0.05&lt;br&gt;碳水(g)：16.62&lt;br&gt;糖(g)：7.33&lt;br&gt;鈉(mg)：46.8" class="ws-fp-hasstock">抹茶 Matcha <span class="ws-fp-stock">剩16顆</span></li>
+      <li data-uid="fp_19c7a45ebb7_423df2dd_16" data-ws-nutri="熱量(大卡)：105&lt;br&gt;蛋白質(g)：3.18&lt;br&gt;脂肪(g)：2.78&lt;br&gt;飽和脂肪(g)：1.04&lt;br&gt;反式脂肪(g)：0.06&lt;br&gt;碳水(g)：16.96&lt;br&gt;糖(g)：6.54&lt;br&gt;鈉(mg)：48.6" class="ws-fp-hasstock">紅豆 Red Bean <span class="ws-fp-stock">剩16顆</span></li>
+      <li data-uid="fp_19c7a45ebb7_ed76997a_17" data-ws-nutri="熱量(大卡)：113&lt;br&gt;蛋白質(g)：3.01&lt;br&gt;脂肪(g)：3.87&lt;br&gt;飽和脂肪(g)：1.47&lt;br&gt;反式脂肪(g)：0.06&lt;br&gt;碳水(g)：16.32&lt;br&gt;糖(g)：7.17&lt;br&gt;鈉(mg)：49.7" class="ws-fp-hasstock">芝麻 Sesame <span class="ws-fp-stock">剩16顆</span></li>
+      <li data-uid="fp_19c7a45ebb7_af2931c7_18" data-ws-nutri="熱量(大卡)：115&lt;br&gt;蛋白質(g)：2.39&lt;br&gt;脂肪(g)：4.59&lt;br&gt;飽和脂肪(g)：1.99&lt;br&gt;反式脂肪(g)：0.05&lt;br&gt;碳水(g)：15.79&lt;br&gt;糖(g)：5.92&lt;br&gt;鈉(mg)：102" class="ws-fp-hasstock">蒜香 Garlic <span class="ws-fp-stock">剩16顆</span></li>
+      <li data-uid="fp_19c7a45ebb7_60cde13d_19" data-ws-nutri="熱量(大卡)：130&lt;br&gt;蛋白質(g)：3.53&lt;br&gt;脂肪(g)：5.23&lt;br&gt;飽和脂肪(g)：1.69&lt;br&gt;反式脂肪(g)：0.05&lt;br&gt;碳水(g)：17.03&lt;br&gt;糖(g)：7.75&lt;br&gt;鈉(mg)：55.1" class="ws-fp-hasstock">梅子花生 Plum Peanuts <span class="ws-fp-stock">剩16顆</span></li>
+      <li data-uid="fp_19c7a45ebb7_97beb9cb_1a" data-ws-nutri="熱量(大卡)：100&lt;br&gt;蛋白質(g)：2.08&lt;br&gt;脂肪(g)：2.37&lt;br&gt;飽和脂肪(g)：0.76&lt;br&gt;反式脂肪(g)：0.06&lt;br&gt;碳水(g)：17.35&lt;br&gt;糖(g)：8.07&lt;br&gt;鈉(mg)：50.4" class="ws-fp-hasstock">草莓 Strawberry <span class="ws-fp-stock">剩16顆</span></li>
     </ol>
 </div>
   </div>
@@ -881,13 +901,13 @@ html.board-mode #boardQR .qr{
     <div class="menu-box">
 <h3>1 顆 20 元 (1 份 <strong style="color: green;">35</strong> 元)</h3>
     <ol start="10">
-      <li data-uid="fp_19c7a45ebb7_f9154957_1c">奶油鹹蛋(雙餡) Milk &amp; Savory Egg Yolk</li>
-      <li data-uid="fp_19c7a45ebb7_b7abecf7_1d">雙色乳酪 Cheddar &amp; Mozzarella</li>
-      <li data-uid="fp_19c7a45ebb7_7599c171_1e">抹茶紅豆(雙餡) Matcha &amp; Red Bean</li>
-      <li data-uid="fp_19c7a45ebb7_2df4cae0_1f">抹茶巧克力(雙餡) Matcha &amp; Chocolate</li>
-      <li data-uid="fp_19c7a45ebb7_58c50b40_20">芝麻巧克力(雙餡) Sesame &amp; Chocolate</li>
-      <li data-uid="fp_19c7a45ebb7_f2df5b90_21">花生巧克力(雙餡) Plum Peanuts &amp; Chocolate</li>
-      <li data-uid="fp_19c7a45ebb7_c2871fef_22">玉米濃湯 Corn Chowder</li>
+      <li data-uid="fp_19c7a45ebb7_f9154957_1c" data-ws-nutri="熱量(大卡)：130&lt;br&gt;蛋白質(g)：3.71&lt;br&gt;脂肪(g)：5.16&lt;br&gt;飽和脂肪(g)：2.08&lt;br&gt;反式脂肪(g)：0.08&lt;br&gt;碳水(g)：16.82&lt;br&gt;糖(g)：7.36&lt;br&gt;鈉(mg)：69.4" class="ws-fp-hasstock">奶油鹹蛋(雙餡) Milk &amp; Savory Egg Yolk <span class="ws-fp-stock">剩16顆</span></li>
+      <li data-uid="fp_19c7a45ebb7_b7abecf7_1d" data-ws-nutri="熱量(大卡)：136&lt;br&gt;蛋白質(g)：5.89&lt;br&gt;脂肪(g)：6.55&lt;br&gt;飽和脂肪(g)：3.55&lt;br&gt;反式脂肪(g)：0.31&lt;br&gt;碳水(g)：13.67&lt;br&gt;糖(g)：5.30&lt;br&gt;鈉(mg)：150" class="ws-fp-hasstock">雙色乳酪 Cheddar &amp; Mozzarella <span class="ws-fp-stock">剩16顆</span></li>
+      <li data-uid="fp_19c7a45ebb7_7599c171_1e" data-ws-nutri="熱量(大卡)：118&lt;br&gt;蛋白質(g)：3.53&lt;br&gt;脂肪(g)：3.34&lt;br&gt;飽和脂肪(g)：1.43&lt;br&gt;反式脂肪(g)：0.05&lt;br&gt;碳水(g)：18.57&lt;br&gt;糖(g)：7.72&lt;br&gt;鈉(mg)：48.6" class="ws-fp-hasstock">抹茶紅豆(雙餡) Matcha &amp; Red Bean <span class="ws-fp-stock">剩16顆</span></li>
+      <li data-uid="fp_19c7a45ebb7_2df4cae0_1f" data-ws-nutri="熱量(大卡)：126&lt;br&gt;蛋白質(g)：3.13&lt;br&gt;脂肪(g)：4.37&lt;br&gt;飽和脂肪(g)：2.42&lt;br&gt;反式脂肪(g)：0.06&lt;br&gt;碳水(g)：18.31&lt;br&gt;糖(g)：8.11&lt;br&gt;鈉(mg)：53.6" class="ws-fp-hasstock">抹茶巧克力(雙餡) Matcha &amp; Chocolate <span class="ws-fp-stock">剩16顆</span></li>
+      <li data-uid="fp_19c7a45ebb7_58c50b40_20" data-ws-nutri="熱量(大卡)：129&lt;br&gt;蛋白質(g)：3.24&lt;br&gt;脂肪(g)：4.86&lt;br&gt;飽和脂肪(g)：2.51&lt;br&gt;反式脂肪(g)：0.06&lt;br&gt;碳水(g)：18.09&lt;br&gt;糖(g)：7.99&lt;br&gt;鈉(mg)：55.7" class="ws-fp-hasstock">芝麻巧克力(雙餡) Sesame &amp; Chocolate <span class="ws-fp-stock">剩16顆</span></li>
+      <li data-uid="fp_19c7a45ebb7_f2df5b90_21" data-ws-nutri="熱量(大卡)：142&lt;br&gt;蛋白質(g)：3.62&lt;br&gt;脂肪(g)：5.85&lt;br&gt;飽和脂肪(g)：2.67&lt;br&gt;反式脂肪(g)：0.06&lt;br&gt;碳水(g)：18.61&lt;br&gt;糖(g)：8.42&lt;br&gt;鈉(mg)：59.6" class="ws-fp-hasstock">花生巧克力(雙餡) Plum Peanuts &amp; Chocolate <span class="ws-fp-stock">剩16顆</span></li>
+      <li data-uid="fp_19c7a45ebb7_c2871fef_22" data-ws-nutri="熱量(大卡)：103&lt;br&gt;蛋白質(g)：2.55&lt;br&gt;脂肪(g)：3.00&lt;br&gt;飽和脂肪(g)：1.18&lt;br&gt;反式脂肪(g)：0.06&lt;br&gt;碳水(g)：16.20&lt;br&gt;糖(g)：6.40&lt;br&gt;鈉(mg)：92.1" class="ws-fp-hasstock">玉米濃湯 Corn Chowder <span class="ws-fp-stock">剩16顆</span></li>
     </ol>
 </div>
   </div>
@@ -954,8 +974,8 @@ html.board-mode #boardQR .qr{
     <div class="menu-box">
 <p><strong>再選作法：Step 2: Choose Your Style</strong></p>
     <ol>
-      <li><strong>美式Americano</strong>：<br>內用Dine In 240mL 35元<BR>外帶Take Out 480mL 60元</li>
-      <li><strong>拿鐵Caffè Latte</strong>：<br>內用Dine In 240mL 55元<BR>外帶Take Out 480mL 95元</li>
+      <li><strong>美式Americano</strong>：<br>內用Dine In 240mL 35元<br>外帶Take Out 480mL 60元</li>
+      <li><strong>拿鐵Caffè Latte</strong>：<br>內用Dine In 240mL 55元<br>外帶Take Out 480mL 95元</li>
       <li><strong>萌翻拿鐵</strong>：<br>240mL  65元 （奶泡撒上萌虎造型巧克力粉，限定內用）
       </li>
     </ol>
@@ -2383,5 +2403,77 @@ function showPanel(){
   <img class="qr" data-type="pay" src="https://github.com/menghushao/MENU/blob/main/%E5%85%A8%E6%94%AF%E4%BB%98%20QR.jpg?raw=true" alt="其他支付QR">
 </div>
 
-</body>
-</html>
+
+
+<script id="wsFpEnhanceScript">
+        (function(){
+          let tip = null;
+          function ensureTip(){
+            if(tip) return tip;
+            tip = document.createElement('div');
+            tip.className = 'ws-fp-tooltip';
+            tip.style.display = 'none';
+            document.body.appendChild(tip);
+            return tip;
+          }
+          function show(html){
+            const t = ensureTip();
+            t.innerHTML = html || '';
+            t.style.display = html ? 'block' : 'none';
+          }
+          function hide(){
+            if(!tip) return;
+            tip.style.display = 'none';
+          }
+          function move(e){
+            if(!tip || tip.style.display==='none') return;
+            const pad = 14;
+            let x = (e && e.clientX != null) ? e.clientX + pad : pad;
+            let y = (e && e.clientY != null) ? e.clientY + pad : pad;
+            const w = tip.offsetWidth || 0;
+            const h = tip.offsetHeight || 0;
+            const vw = window.innerWidth || 0;
+            const vh = window.innerHeight || 0;
+            if(x + w + pad > vw) x = Math.max(pad, vw - w - pad);
+            if(y + h + pad > vh) y = Math.max(pad, vh - h - pad);
+            tip.style.left = x + 'px';
+            tip.style.top = y + 'px';
+          }
+
+          document.addEventListener('mousemove', move, { passive:true });
+
+          document.addEventListener('mouseover', (e)=>{
+            const el = e && e.target && e.target.closest ? e.target.closest('[data-ws-nutri]') : null;
+            if(!el) return;
+            const html = el.getAttribute('data-ws-nutri') || '';
+            if(!html) return;
+            show(html);
+            move(e);
+          });
+
+          document.addEventListener('mouseout', (e)=>{
+            const toEl = e && e.relatedTarget && e.relatedTarget.closest ? e.relatedTarget.closest('[data-ws-nutri]') : null;
+            const fromEl = e && e.target && e.target.closest ? e.target.closest('[data-ws-nutri]') : null;
+            if(fromEl && !toEl) hide();
+          });
+
+          // touch：長按 350ms 顯示，放開消失（避免手機沒 hover）
+          let tmr = 0;
+          document.addEventListener('touchstart', (e)=>{
+            const el = e && e.target && e.target.closest ? e.target.closest('[data-ws-nutri]') : null;
+            if(!el) return;
+            const html = el.getAttribute('data-ws-nutri') || '';
+            if(!html) return;
+            clearTimeout(tmr);
+            tmr = setTimeout(()=>{
+              show(html);
+              try{
+                const touch = e.touches && e.touches[0];
+                if(touch) move({ clientX: touch.clientX, clientY: touch.clientY });
+              }catch(_){}
+            }, 350);
+          }, { passive:true });
+          document.addEventListener('touchend', ()=>{ clearTimeout(tmr); hide(); }, { passive:true });
+          document.addEventListener('touchcancel', ()=>{ clearTimeout(tmr); hide(); }, { passive:true });
+        })();
+      </script></body></html>
