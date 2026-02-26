@@ -90,6 +90,204 @@ body{
   white-space:nowrap;
   transform:none;
 }
+/* ===== Topbar actions ===== */
+.topbar-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex:0 0 auto;
+}
+
+/* =========================================================
+   通訊軟體點餐輔助（UI骨架）
+   - 僅做介面與基本切頁/記錄；點餐/組合邏輯後續再接
+   ========================================================= */
+#msgAssistOverlay{
+  position:fixed;
+  inset:0;
+  z-index:1000004;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.62);
+}
+#msgAssistOverlay.show{ display:flex; }
+
+#msgAssistOverlay .ma-modal{
+  width:min(980px, calc(100vw - 28px));
+  height:min(86vh, 820px);
+  border:2px solid rgba(244,241,233,.75);
+  border-radius:18px;
+  background:var(--board);
+  box-shadow:0 12px 38px rgba(0,0,0,.45);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+#msgAssistOverlay .ma-top{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border-bottom:1px solid rgba(244,241,233,.18);
+}
+#msgAssistOverlay .ma-tabs{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex:1 1 auto;
+  min-width:0;
+}
+#msgAssistOverlay .ma-tab{
+  background:transparent;
+  border:2px solid rgba(244,241,233,.75);
+  color:var(--text);
+  padding:6px 12px;
+  border-radius:12px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+#msgAssistOverlay .ma-tab.active{
+  border-color:#ffd18a;
+}
+#msgAssistOverlay .ma-close{
+  background:transparent;
+  border:2px solid rgba(244,241,233,.75);
+  color:var(--text);
+  width:40px;
+  height:36px;
+  border-radius:12px;
+  cursor:pointer;
+  flex:0 0 auto;
+}
+
+#msgAssistOverlay .ma-body{
+  padding:14px 14px 16px;
+  overflow:auto;
+  flex:1 1 auto;
+}
+#msgAssistOverlay .ma-pane{ display:none; }
+#msgAssistOverlay .ma-pane.active{ display:block; }
+
+#msgAssistOverlay .ma-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:10px 12px;
+  align-items:end;
+}
+#msgAssistOverlay label{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  font-size:14px;
+  opacity:.95;
+}
+#msgAssistOverlay input, 
+#msgAssistOverlay select, 
+#msgAssistOverlay textarea{
+  background:transparent;
+  border:1px solid rgba(244,241,233,.85);
+  color:var(--text);
+  padding:8px 10px;
+  border-radius:10px;
+  font-size:16px;
+}
+#msgAssistOverlay textarea{ resize:vertical; min-height:90px; }
+
+#msgAssistOverlay .ma-hint{
+  margin:10px 0 0;
+  font-size:13px;
+  opacity:.85;
+  line-height:1.55;
+}
+
+#msgAssistOverlay .ma-order-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:12px;
+  align-items:stretch;
+}
+#msgAssistOverlay .ma-box{
+  border:1px solid rgba(244,241,233,.20);
+  border-radius:14px;
+  overflow:hidden;
+  min-height: 320px;
+}
+#msgAssistOverlay .ma-box .ma-boxbar{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border-bottom:1px solid rgba(244,241,233,.16);
+}
+#msgAssistOverlay .ma-box .ma-boxbar .spacer{ flex:1 1 auto; }
+#msgAssistOverlay .ma-box .ma-boxbody{
+  padding:12px;
+  min-height: 260px;
+}
+#msgAssistOverlay .ma-mini-btn{
+  background:transparent;
+  border:2px solid rgba(244,241,233,.75);
+  color:var(--text);
+  padding:6px 12px;
+  border-radius:12px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
+#msgAssistOverlay .ma-rows{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:10px;
+}
+#msgAssistOverlay .ma-row{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+#msgAssistOverlay .ma-row input{
+  flex:1 1 auto;
+}
+#msgAssistOverlay .ma-del{
+  background:transparent;
+  border:2px solid rgba(255,180,180,.9);
+  color:#ffb4b4;
+  padding:6px 10px;
+  border-radius:12px;
+  cursor:pointer;
+  flex:0 0 auto;
+}
+#msgAssistOverlay .ma-add{
+  background:transparent;
+  border:2px solid rgba(244,241,233,.75);
+  color:var(--text);
+  padding:6px 10px;
+  border-radius:12px;
+  cursor:pointer;
+}
+
+#msgAssistOverlay .ma-distance-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:nowrap; /* 讓輸入框不要被擠到下一行 */
+}
+#msgAssistOverlay #maDistanceInput{
+  width: 120px;
+  max-width: 38vw;
+  flex:0 0 auto;
+}
+#msgAssistOverlay #maDeliveryMsg{
+  flex:1 1 auto;
+  min-width:0;
+}
+
+@media (max-width: 760px){
+  #msgAssistOverlay .ma-grid{ grid-template-columns: 1fr; }
+  #msgAssistOverlay .ma-order-grid{ grid-template-columns: 1fr; }
+}
+
 
 /* ===== Page ===== */
 .page{
@@ -690,6 +888,82 @@ html.board-mode #boardMiceLayer{ display:block; }
 }
 .board-mouse.dead{ opacity: 0; }
 
+
+/* ===== 通訊軟體點餐輔助：新增（品項/購物車/狀態 modal/總額列） ===== */
+#msgAssistOverlay .ma-top{ gap:10px; }
+#msgAssistOverlay .ma-totals{
+  display:flex; flex-wrap:wrap; gap:10px;
+  font-size:12px;
+  padding:4px 8px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;
+  background: rgba(0,0,0,.18);
+  color:#fff;
+}
+#msgAssistOverlay .ma-totals b{ font-weight:900; }
+#msgAssistOverlay .ma-chips{ display:flex; flex-wrap:wrap; gap:8px; padding:4px 0 10px; }
+#msgAssistOverlay .ma-chip{
+  border:1px solid #e5e7eb; background:#fff;
+  border-radius:999px; padding:6px 10px;
+  cursor:pointer; font-weight:800; font-size:12px;
+}
+#msgAssistOverlay .ma-chip.active{ border-color:#111827; }
+#msgAssistOverlay .ma-list{ display:flex; flex-direction:column; gap:8px; }
+#msgAssistOverlay .ma-prod{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:10px; padding:10px 12px;
+  border:1px solid #e5e7eb; border-radius:12px;
+  background:#fff;
+}
+#msgAssistOverlay .ma-prod .nm{ font-weight:900; }
+#msgAssistOverlay .ma-prod .meta{ font-size:12px; color:#6b7280; }
+#msgAssistOverlay .ma-cart{ display:flex; flex-direction:column; gap:8px; margin-bottom:10px; }
+#msgAssistOverlay .ma-line{
+  border:1px solid #e5e7eb; border-radius:12px;
+  padding:10px 12px; background:#fff;
+  display:flex; flex-direction:column; gap:6px;
+}
+#msgAssistOverlay .ma-line .row1{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+#msgAssistOverlay .ma-line .row2{
+  display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+  font-size:12px; color:#374151;
+}
+#msgAssistOverlay .ma-qty{
+  display:flex; align-items:center; gap:6px;
+}
+#msgAssistOverlay .ma-qty button{
+  width:28px; height:28px; border-radius:10px;
+  border:1px solid #e5e7eb; background:#fff; cursor:pointer;
+  font-weight:900;
+}
+#msgAssistOverlay .ma-qty input{
+  width:54px; padding:6px 8px; border-radius:10px; border:1px solid #e5e7eb;
+}
+#msgAssistOverlay .ma-state-ov{
+  position:fixed; inset:0; background:rgba(0,0,0,.55);
+  display:none; align-items:center; justify-content:center;
+  z-index: 2147483646;
+}
+#msgAssistOverlay .ma-state-ov.show{ display:flex; }
+#msgAssistOverlay .ma-state-card{
+  width: 520px; max-width: 92vw;
+  background:#fff; border-radius:16px;
+  border:1px solid #e5e7eb;
+  box-shadow: 0 14px 40px rgba(0,0,0,.35);
+  padding: 14px;
+}
+#msgAssistOverlay .ma-state-title{ font-weight:900; margin-bottom:8px; }
+#msgAssistOverlay .ma-state-list{ display:flex; flex-direction:column; gap:8px; max-height: 55vh; overflow:auto; padding-right:4px; }
+#msgAssistOverlay .ma-state-opt{
+  border:1px solid #e5e7eb; border-radius:12px; padding:10px 12px;
+  cursor:pointer; user-select:none;
+}
+#msgAssistOverlay .ma-state-opt.active{ border-color:#111827; background:#f9fafb; }
+#msgAssistOverlay .ma-state-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:10px; }
+#msgAssistOverlay #maCartText{ min-height: 96px; }
+
 </style>
 
 <style>
@@ -730,7 +1004,7 @@ html.board-mode #boardQR .qr{
           max-width: 340px;
           white-space: normal;
         }
-      </style></head>
+      </style><script id="wsPublicOrderPayload">window.__WS_PUBLIC_ORDER_PAYLOAD__ = {"generated_at":"2026-02-26T08:07:40.993Z","catalog":[{"id":"fp_19c7a45ebb7_8b50b5c0_1","name":"不織布提網","short":"提網","item":"包裝","price":5,"tags":["fp_19c7a45ebb7_8b50b5c0_1"],"states":[]},{"id":"fp_19c7a45ebb7_4480d6d6_2","name":"冬瓜茶_內用","short":"冬_內","item":"飲品","price":10,"tags":["fp_19c7a45ebb7_4480d6d6_2","集點","12份折1份","滿60元1點","飲品滿500折50","飲品滿1000七折"],"states":[{"name":"加冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_3be5defa_3","name":"冬瓜茶_外帶","short":"冬_外","item":"飲品","price":25,"tags":["fp_19c7a45ebb7_3be5defa_3","集點","12份折1份","滿60元1點"],"states":[{"name":"去冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_058ca7d4_4","name":"冬瓜茶_外帶自杯","short":"冬_自","item":"飲品","price":15,"tags":["fp_19c7a45ebb7_058ca7d4_4","12份折1份","滿60元1點"],"states":[{"name":"去冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_665b32b8_5","name":"冬瓜紫蘇梅_內用","short":"冬梅_內","item":"飲品","price":20,"tags":["fp_19c7a45ebb7_665b32b8_5","集點","12份折1份","滿60元1點"],"states":[{"name":"去冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_20add37f_6","name":"冬瓜紫蘇梅_外帶","short":"冬梅_外","item":"飲品","price":35,"tags":["fp_19c7a45ebb7_20add37f_6","集點","12份折1份","滿60元1點"],"states":[{"name":"去冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_214267b1_7","name":"冬瓜紫蘇梅_外帶自杯","short":"冬梅_自","item":"飲品","price":25,"tags":["fp_19c7a45ebb7_214267b1_7","集點","12份折1份","滿60元1點"],"states":[{"name":"去冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_4dc5535a_8","name":"冬瓜鮮奶_內用","short":"冬鮮_內","item":"飲品","price":25,"tags":["fp_19c7a45ebb7_4dc5535a_8","集點","12份折1份","滿60元1點"],"states":[{"name":"加冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_430dd58d_9","name":"冬瓜鮮奶_外帶","short":"冬鮮_外","item":"飲品","price":45,"tags":["fp_19c7a45ebb7_430dd58d_9","集點","12份折1份","滿60元1點"],"states":[{"name":"去冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_5872c045_a","name":"冬瓜鮮奶_外帶自杯","short":"冬鮮_自","item":"飲品","price":35,"tags":["fp_19c7a45ebb7_5872c045_a","集點","12份折1份","滿60元1點"],"states":[{"name":"去冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_016fcde8_b","name":"冬瓜檸檬_內用","short":"冬檸_內","item":"飲品","price":15,"tags":["fp_19c7a45ebb7_016fcde8_b","集點","12份折1份","滿60元1點"],"states":[{"name":"加冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_20088b0d_c","name":"冬瓜檸檬_外帶","short":"冬檸_外","item":"飲品","price":30,"tags":["fp_19c7a45ebb7_20088b0d_c","集點","12份折1份","滿60元1點"],"states":[{"name":"去冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_c1af0339_d","name":"冬瓜檸檬_外帶自杯","short":"冬檸_自","item":"飲品","price":20,"tags":["fp_19c7a45ebb7_c1af0339_d","集點","12份折1份","滿60元1點"],"states":[{"name":"去冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_f3ab4a63_e","name":"燒仙草_內用","short":"燒_內","item":"飲品","price":20,"tags":["fp_19c7a45ebb7_f3ab4a63_e","集點","12份折1份","滿60元1點"],"states":[]},{"id":"fp_19c7a45ebb7_d77a6533_f","name":"燒仙草_外帶","short":"燒_外","item":"飲品","price":40,"tags":["fp_19c7a45ebb7_d77a6533_f","集點","12份折1份","滿60元1點"],"states":[]},{"id":"fp_19c7a45ebb7_e9920412_10","name":"燒仙草_外帶自杯","short":"燒_自","item":"飲品","price":30,"tags":["fp_19c7a45ebb7_e9920412_10","集點","12份折1份","滿60元1點"],"states":[]},{"id":"fp_19c7a45ebb7_f49f66c1_11","name":"純雞蛋糕","short":"純","item":"雞蛋糕","price":10,"tags":["fp_19c7a45ebb7_f49f66c1_11","集點","12份折1份","滿60元1點","10元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_0050d633_12","name":"巧克力","short":"巧","item":"雞蛋糕","price":15,"tags":["fp_19c7a45ebb7_0050d633_12","集點","12份折1份","滿60元1點","15元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_1f8761d7_13","name":"奶油","short":"奶","item":"雞蛋糕","price":15,"tags":["fp_19c7a45ebb7_1f8761d7_13","集點","12份折1份","滿60元1點","15元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_275e966f_14","name":"鹹蛋黃","short":"鹹","item":"雞蛋糕","price":15,"tags":["fp_19c7a45ebb7_275e966f_14","集點","12份折1份","滿60元1點","15元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_186b7c21_15","name":"抹茶","short":"抹","item":"雞蛋糕","price":15,"tags":["fp_19c7a45ebb7_186b7c21_15","集點","12份折1份","滿60元1點","15元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_423df2dd_16","name":"紅豆","short":"紅","item":"雞蛋糕","price":15,"tags":["fp_19c7a45ebb7_423df2dd_16","集點","12份折1份","滿60元1點","15元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_ed76997a_17","name":"芝麻","short":"芝","item":"雞蛋糕","price":15,"tags":["fp_19c7a45ebb7_ed76997a_17","集點","12份折1份","滿60元1點","15元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_af2931c7_18","name":"蒜香","short":"蒜","item":"雞蛋糕","price":15,"tags":["fp_19c7a45ebb7_af2931c7_18","集點","12份折1份","滿60元1點","15元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_60cde13d_19","name":"梅子花生","short":"花","item":"雞蛋糕","price":15,"tags":["fp_19c7a45ebb7_60cde13d_19","集點","12份折1份","滿60元1點","15元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_97beb9cb_1a","name":"草莓","short":"莓","item":"雞蛋糕","price":15,"tags":["fp_19c7a45ebb7_97beb9cb_1a","集點","12份折1份","滿60元1點","15元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_f9154957_1c","name":"奶油鹹蛋","short":"奶鹹","item":"雞蛋糕","price":20,"tags":["fp_19c7a45ebb7_f9154957_1c","集點","12份折1份","滿60元1點","20元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_b7abecf7_1d","name":"雙色乳酪","short":"酪","item":"雞蛋糕","price":20,"tags":["fp_19c7a45ebb7_b7abecf7_1d","集點","12份折1份","滿60元1點","20元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_7599c171_1e","name":"抹茶紅豆","short":"抹紅","item":"雞蛋糕","price":20,"tags":["fp_19c7a45ebb7_7599c171_1e","集點","12份折1份","滿60元1點","20元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_2df4cae0_1f","name":"抹茶巧克力","short":"抹巧","item":"雞蛋糕","price":20,"tags":["fp_19c7a45ebb7_2df4cae0_1f","集點","12份折1份","滿60元1點","20元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_58c50b40_20","name":"芝麻巧克力","short":"芝巧","item":"雞蛋糕","price":20,"tags":["fp_19c7a45ebb7_58c50b40_20","集點","12份折1份","滿60元1點","20元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_f2df5b90_21","name":"花生巧克力","short":"花巧","item":"雞蛋糕","price":20,"tags":["fp_19c7a45ebb7_f2df5b90_21","集點","12份折1份","滿60元1點","20元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_c2871fef_22","name":"玉米濃湯","short":"濃","item":"雞蛋糕","price":20,"tags":["fp_19c7a45ebb7_c2871fef_22","集點","12份折1份","滿60元1點","20元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_5795c186_24","name":"美式_內用","short":"美內","item":"咖啡","price":35,"tags":["fp_19c7a45ebb7_5795c186_24","集點"],"states":[{"name":"經典","xor":true,"delta":0,"qty":1},{"name":"低因","xor":true,"delta":0,"qty":1},{"name":"花果","xor":true,"delta":0,"qty":1},{"name":"香草","xor":true,"delta":0,"qty":1},{"name":"木質辛香","xor":true,"delta":0,"qty":1},{"name":"冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_badcbb6c_25","name":"美式_外帶","short":"美外","item":"咖啡","price":60,"tags":["fp_19c7a45ebb7_badcbb6c_25","集點"],"states":[{"name":"經典","xor":true,"delta":0,"qty":1},{"name":"低因","xor":true,"delta":0,"qty":1},{"name":"花果","xor":true,"delta":0,"qty":1},{"name":"香草","xor":true,"delta":0,"qty":1},{"name":"木質辛香","xor":true,"delta":0,"qty":1},{"name":"冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_050b9ebd_26","name":"美式_外帶自杯","short":"美自","item":"咖啡","price":50,"tags":["fp_19c7a45ebb7_050b9ebd_26","集點"],"states":[{"name":"經典","xor":true,"delta":0,"qty":1},{"name":"低因","xor":true,"delta":0,"qty":1},{"name":"花果","xor":true,"delta":0,"qty":1},{"name":"香草","xor":true,"delta":0,"qty":1},{"name":"木質辛香","xor":true,"delta":0,"qty":1},{"name":"冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_116acc71_27","name":"拿鐵_內用","short":"拿內","item":"咖啡","price":55,"tags":["fp_19c7a45ebb7_116acc71_27","集點"],"states":[{"name":"經典","xor":true,"delta":0,"qty":1},{"name":"低因","xor":true,"delta":0,"qty":1},{"name":"花果","xor":true,"delta":0,"qty":1},{"name":"香草","xor":true,"delta":0,"qty":1},{"name":"木質辛香","xor":true,"delta":0,"qty":1},{"name":"冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_0bfaa202_28","name":"萌翻拿鐵","short":"萌翻","item":"咖啡","price":65,"tags":["fp_19c7a45ebb7_0bfaa202_28","集點"],"states":[{"name":"經典","xor":true,"delta":0,"qty":1},{"name":"低因","xor":true,"delta":0,"qty":1},{"name":"花果","xor":true,"delta":0,"qty":1},{"name":"香草","xor":true,"delta":0,"qty":1},{"name":"木質辛香","xor":true,"delta":0,"qty":1},{"name":"冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_edb4d269_29","name":"拿鐵_外帶","short":"拿外","item":"咖啡","price":95,"tags":["fp_19c7a45ebb7_edb4d269_29","集點"],"states":[{"name":"經典","xor":true,"delta":0,"qty":1},{"name":"低因","xor":true,"delta":0,"qty":1},{"name":"花果","xor":true,"delta":0,"qty":1},{"name":"香草","xor":true,"delta":0,"qty":1},{"name":"木質辛香","xor":true,"delta":0,"qty":1},{"name":"冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_74b5eb25_2a","name":"拿鐵_外帶自杯","short":"拿自","item":"咖啡","price":85,"tags":["fp_19c7a45ebb7_74b5eb25_2a","集點"],"states":[{"name":"經典","xor":true,"delta":0,"qty":1},{"name":"低因","xor":true,"delta":0,"qty":1},{"name":"花果","xor":true,"delta":0,"qty":1},{"name":"香草","xor":true,"delta":0,"qty":1},{"name":"木質辛香","xor":true,"delta":0,"qty":1},{"name":"冰","xor":true,"delta":0,"qty":1}]}],"discounts":[{"id":"d_mlue9iqr_r5pnk6","name":"點卡","type":"coupon","note1_targets":["10元雞蛋糕","15元雞蛋糕","20元雞蛋糕"],"amount_threshold":0,"qty_threshold":0,"bundle_price":0,"coupon_mode":"full","coupon_amount":0},{"id":"d_mlue9iqr_n3m385","name":"12折1","type":"qty","note1_targets":["12份折1份"],"amount_threshold":0,"qty_threshold":12,"bundle_price":0,"coupon_mode":"full","coupon_amount":0},{"id":"d_mlue9iqr_xhbv97","name":"純","type":"bundle_qty","note1_targets":[],"amount_threshold":0,"qty_threshold":0,"bundle_price":20,"coupon_mode":"full","coupon_amount":0},{"id":"d_mlue9iqr_1vqenp","name":"純+單","type":"bundle_qty","note1_targets":[],"amount_threshold":0,"qty_threshold":0,"bundle_price":25,"coupon_mode":"full","coupon_amount":0},{"id":"d_mlue9iqr_vgj7wj","name":"單","type":"bundle_qty","note1_targets":[],"amount_threshold":0,"qty_threshold":0,"bundle_price":30,"coupon_mode":"full","coupon_amount":0},{"id":"d_mlue9iqr_tjfngb","name":"雙","type":"bundle_qty","note1_targets":[],"amount_threshold":0,"qty_threshold":0,"bundle_price":35,"coupon_mode":"full","coupon_amount":0},{"id":"d_mlue9iqr_171wcz","name":"純+雙","type":"bundle_qty","note1_targets":[],"amount_threshold":0,"qty_threshold":0,"bundle_price":30,"coupon_mode":"full","coupon_amount":0},{"id":"d_mlue9iqr_mnkdtt","name":"單+雙","type":"bundle_qty","note1_targets":[],"amount_threshold":0,"qty_threshold":0,"bundle_price":35,"coupon_mode":"full","coupon_amount":0},{"id":"d_mlue9iqr_em3cim","name":"餅","type":"bundle_qty","note1_targets":[],"amount_threshold":0,"qty_threshold":0,"bundle_price":15,"coupon_mode":"full","coupon_amount":0},{"id":"d_mlue9iqr_xfkmff","name":"集點","type":"points","note1_targets":["集點"],"amount_threshold":0,"qty_threshold":0,"bundle_price":0,"coupon_mode":"full","coupon_amount":0}],"discountApplyOrder":["d_mlue9iqr_tjfngb","d_mlue9iqr_vgj7wj","d_mlue9iqr_xhbv97","d_mlue9iqr_mnkdtt","d_mlue9iqr_171wcz","d_mlue9iqr_1vqenp","d_mlue9iqr_em3cim","d_mlue9iqr_r5pnk6","d_mlue9iqr_n3m385","d_mlue9iqr_xfkmff"]};</script></head>
 
 <body>
 
@@ -739,7 +1013,10 @@ html.board-mode #boardQR .qr{
   <div class="wrap">
     <div id="boardHotspot" aria-label="board hotspot"></div>
     <div class="title"><div id="logoStrip" class="logo-strip" aria-label="logo strip"></div></div>
-    <button id="toggleBtn" class="toggle-btn">↪︎ 菜單</button>
+    <div class="topbar-actions">
+      <button id="msgAssistBtn" class="toggle-btn">通訊軟體點餐輔助</button>
+      <button id="toggleBtn" class="toggle-btn">↪︎ 菜單</button>
+    </div>
   </div>
 </div>
 
@@ -786,6 +1063,146 @@ html.board-mode #boardQR .qr{
       1) 點 BAR 左上角隱形區開啟本面板。<br>
       2) 進入看板模式後：再點一次同一區會直接還原。<br>
       3) ESC 可關閉面板（不會切模式）。
+    </div>
+  </div>
+</div>
+
+<!-- ===== 通訊軟體點餐輔助（彈窗） ===== -->
+<div id="msgAssistOverlay" aria-hidden="true">
+  <div class="ma-modal" role="dialog" aria-modal="true" aria-label="通訊軟體點餐輔助">
+    <div class="ma-top">
+      <div class="ma-tabs">
+        <button class="ma-tab active" data-tab="info">資訊</button>
+        <button class="ma-tab" data-tab="order">點餐</button>
+        <button class="ma-tab" data-tab="bundle">訂單組合</button>
+      </div>
+      <div class="ma-totals" id="maTotals" aria-label="結帳試算">
+        <span>訂單金額 <b id="maOrderAmt">0</b></span>
+        <span>總折扣 <b id="maDiscountAmt">0</b></span>
+        <span>集點 <b id="maPointsAmt">0</b></span>
+      </div>
+      <button class="ma-close" id="msgAssistClose" aria-label="close">✕</button>
+    </div>
+
+    <div class="ma-body">
+      <!-- 資訊 -->
+      <div class="ma-pane active" id="maPane_info">
+        <div class="ma-grid">
+          <label>
+            通訊軟體
+            <select id="maApp">
+              <option value="line" selected="">萌虎燒LINE官方</option>
+              <option value="fb">萌虎燒FB粉絲團</option>
+            </select>
+          </label>
+
+          <div></div>
+
+          <label>
+            稱謂（外送必填）
+            <input id="maName" type="text" placeholder="例如：林先生">
+          </label>
+
+          <label>
+            連絡電話（外送必填）
+            <input id="maPhone" type="tel" inputmode="tel" placeholder="例如：0912xxxxxx">
+          </label>
+
+          <label>
+            取餐時間（外送必填）
+            <input id="maPickup" type="text" placeholder="yyyy/mm/dd hh:mm">
+          </label>
+
+          <div></div>
+
+          <label style="grid-column: 1 / span 1;">
+            外送地址（苗栗市門牌滿300原可送）
+            <input id="maAddr" type="text" placeholder="例如：苗栗市xxx路xx號">
+          </label>
+
+          <label>
+            <a href="https://maps.app.goo.gl/B6KTsppsNF3jqvfC9" target="_blank">市外點我查找距離</a>
+            <span class="ma-distance-row">
+              <input type="number" id="maDistanceInput" min="0" step="0.1" placeholder="公里">
+              <span id="maDeliveryMsg" class="warn"></span>
+            </span>
+          </label>
+
+          <label style="grid-column: 1 / -1;">
+            招牌/行號（非必填）
+            <input id="maShop" type="text" placeholder="例如：某某公司">
+          </label>
+        </div>
+
+        <div class="ma-hint">
+          ＊瀏覽器會記錄上一次輸入的資訊（只存在你的裝置上）。<br>
+          ＊若「外送地址」有值，視為外送：上方標示外送必填的欄位請填好。
+        </div>
+      </div>
+
+      <!-- 點餐 -->
+      <div class="ma-pane" id="maPane_order">
+        <div class="ma-order-grid">
+          <div class="ma-box">
+            <div class="ma-boxbar">
+              <div>品項</div>
+              <div class="spacer"></div>
+            </div>
+            <div class="ma-boxbody">
+              <div class="ma-chips" id="maItemChips"></div>
+              <div class="ma-list" id="maProductList"></div>
+            </div>
+          </div>
+
+          <div class="ma-box">
+            <div class="ma-boxbar">
+              <div>購物車</div>
+              <div class="spacer"></div>
+              <button class="ma-mini-btn" id="maCartBoss">找老闆</button>
+              <button class="ma-mini-btn" id="maCartCopy">複製</button>
+            </div>
+            <div class="ma-boxbody">
+              <div class="ma-cart" id="maCartList"></div>
+              <textarea id="maCartText" placeholder="（會自動生成可貼到通訊軟體的文字）"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- 狀態選擇 Modal -->
+        <div class="ma-state-ov" id="maStateOv" aria-hidden="true">
+          <div class="ma-state-card" role="dialog" aria-modal="true" aria-label="選擇狀態">
+            <div class="ma-state-title" id="maStateTitle">選擇狀態</div>
+            <div class="ma-state-list" id="maStateList"></div>
+            <div class="ma-state-actions">
+              <button class="ma-mini-btn" id="maStateCancel" type="button">取消</button>
+              <button class="ma-mini-btn" id="maStateOk" type="button">確定</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="ma-hint">
+          ＊點選產品後若有狀態，會先跳出狀態選擇；選妥後自動加入購物車。<br>
+          ＊若「外送地址」有值，複製/找老闆會自動用外送格式。
+        </div>
+      </div>
+
+      <!-- 訂單組合（先畫位置 + 可增刪列） -->
+      <div class="ma-pane" id="maPane_bundle">
+        <div class="ma-box" style="min-height:auto;">
+          <div class="ma-boxbar">
+            <div>訂單組合（待建置）</div>
+            <div class="spacer"></div>
+            <button class="ma-mini-btn" id="maBundleBoss">找老闆</button>
+            <button class="ma-mini-btn" id="maBundleBtn">組合</button>
+          </div>
+          <div class="ma-boxbody" style="min-height:auto;">
+            <div>下方預設三列，可自行增加或刪除（組合邏輯後續處理）。</div>
+            <div class="ma-rows" id="maBundleRows"></div>
+            <button class="ma-add" id="maAddRow" type="button">＋ 增加一列</button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -1029,6 +1446,21 @@ distanceInput.addEventListener("input", () => {
   else amount = 300 + (km - 3) * 150;
   deliveryMsg.textContent = ` 公里，需滿 ${amount} 元，請先聯繫店家評估。`;
 });
+
+
+// ===== 通訊軟體點餐輔助：距離試算（同店家資訊規則）=====
+const maDistanceInput = document.getElementById("maDistanceInput");
+const maDeliveryMsg = document.getElementById("maDeliveryMsg");
+if(maDistanceInput && maDeliveryMsg){
+  maDistanceInput.addEventListener("input", () => {
+    const km = Math.ceil(parseFloat(maDistanceInput.value) || 0);
+    let amount = 0;
+    if (km <= 3) amount = 300;
+    else if (km <= 15) amount = 300 + (km - 3) * 100;
+    else amount = 300 + (km - 3) * 150;
+    maDeliveryMsg.textContent = ` 公里，需滿 ${amount} 元，請先聯繫店家評估。`;
+  });
+}
 
 /* ===== Logo strip render（每張往右+30°，自動不撐破BAR） ===== */
 (function(){
@@ -2404,6 +2836,1028 @@ function showPanel(){
 </div>
 
 
+
+<script id="msgAssistScript">
+(function(){
+  const $ = (id)=>document.getElementById(id);
+  const overlay = $('msgAssistOverlay');
+  const btn = $('msgAssistBtn');
+  if(!overlay || !btn) return;
+
+  const LS_KEY = 'mh_msgassist_info_v1';
+  const tabs = Array.from(overlay.querySelectorAll('.ma-tab'));
+  const panes = {
+    info: $('maPane_info'),
+    order: $('maPane_order'),
+    bundle: $('maPane_bundle')
+  };
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function fmt(dt){
+    const y = dt.getFullYear();
+    const m = pad(dt.getMonth()+1);
+    const d = pad(dt.getDate());
+    const hh = pad(dt.getHours());
+    const mm = pad(dt.getMinutes());
+    return `${y}/${m}/${d} ${hh}:${mm}`;
+  }
+  function parseMaybe(str){
+    const s = String(str||'').trim();
+    const m = /^(\d{4})\/(\d{2})\/(\d{2})\s+(\d{2}):(\d{2})$/.exec(s);
+    if(!m) return null;
+    const y=+m[1], mo=+m[2]-1, d=+m[3], hh=+m[4], mm=+m[5];
+    const dt = new Date(y,mo,d,hh,mm,0,0);
+    if(!isFinite(dt.getTime())) return null;
+    return dt;
+  }
+
+  function loadInfo(){
+    let data = {};
+    try{ data = JSON.parse(localStorage.getItem(LS_KEY)||'{}')||{}; }catch(_){}
+    const app = $('maApp'); const name=$('maName'); const phone=$('maPhone');
+    const pickup=$('maPickup'); const addr=$('maAddr'); const shop=$('maShop');
+    if(app && data.app) app.value = data.app;
+    if(name) name.value = data.name || '';
+    if(phone) phone.value = data.phone || '';
+    if(addr) addr.value = data.addr || '';
+    if(shop) shop.value = data.shop || '';
+
+    // pickup：若無有效值，預設「現在+15分鐘」
+    const dt = parseMaybe(data.pickup);
+    const base = dt || new Date(Date.now() + 15*60000);
+    if(pickup) pickup.value = fmt(base);
+  }
+
+  function saveInfo(){
+    const data = {
+      app: $('maApp')?.value || 'line',
+      name: $('maName')?.value || '',
+      phone: $('maPhone')?.value || '',
+      pickup: $('maPickup')?.value || '',
+      addr: $('maAddr')?.value || '',
+      shop: $('maShop')?.value || ''
+    };
+    try{ localStorage.setItem(LS_KEY, JSON.stringify(data)); }catch(_){}
+  }
+
+  function show(){
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden','false');
+    // 每次打開都先載入（保證「上一次紀錄」）
+    loadInfo();
+    bindInfoOnce();
+    switchTab('info');
+  }
+  function hide(){
+    overlay.classList.remove('show');
+    overlay.setAttribute('aria-hidden','true');
+  }
+
+  function switchTab(name){
+    tabs.forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
+    Object.keys(panes).forEach(k=>{
+      const el = panes[k];
+      if(el) el.classList.toggle('active', k===name);
+    });
+  }
+
+  btn.addEventListener('click', ()=>{
+    const ok = confirm('此功能僅輔助點餐流程，仍須以通訊軟體與店家點餐');
+    if(!ok) return;
+    show();
+  });
+
+  $('msgAssistClose')?.addEventListener('click', hide);
+  overlay.addEventListener('click', (ev)=>{
+    if(ev.target === overlay) hide();
+  });
+  document.addEventListener('keydown', (ev)=>{
+    if(ev.key === 'Escape' && overlay.classList.contains('show')) hide();
+  });
+
+  tabs.forEach(t=>{
+    t.addEventListener('click', ()=> switchTab(t.dataset.tab || 'info'));
+  });
+
+  // 點餐頁：複製（目前先複製文字框）
+  $('maCartCopy')?.addEventListener('click', async ()=>{
+    const ta = $('maCartText');
+    const txt = (ta && ta.value) ? ta.value : '';
+    try{
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        await navigator.clipboard.writeText(txt);
+        alert('已複製');
+        return;
+      }
+    }catch(_){}
+    try{
+      const tmp = document.createElement('textarea');
+      tmp.value = txt;
+      tmp.style.position='fixed'; tmp.style.left='-9999px'; tmp.style.top='-9999px';
+      document.body.appendChild(tmp);
+      tmp.focus(); tmp.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(tmp);
+      alert(ok ? '已複製' : '複製失敗');
+    }catch(_){
+      alert('複製失敗');
+    }
+  });
+
+  // 點餐頁：找老闆（待建置）
+  $('maCartBoss')?.addEventListener('click', ()=>{
+    alert('找老闆（待建置）');
+  });
+
+
+  // 訂單組合頁：三列起始 + 可增刪
+  const rowsHost = $('maBundleRows');
+  // 訂單組合頁：找老闆（待建置）
+  $('maBundleBoss')?.addEventListener('click', ()=>{
+    alert('找老闆（待建置）');
+  });
+
+  function makeRow(val){
+    const row = document.createElement('div');
+    row.className = 'ma-row';
+    row.innerHTML = `
+      <input type="text" placeholder="（內容後續接：例如組合條件/備註）" value="${String(val||'').replace(/"/g,'&quot;')}">
+      <button type="button" class="ma-del" aria-label="delete">刪除</button>
+    `;
+    const inp = row.querySelector('input');
+    const del = row.querySelector('button.ma-del');
+    if(inp) inp.addEventListener('input', ()=>{ /* 先不記錄，後續再接邏輯 */ });
+    if(del) del.addEventListener('click', ()=> row.remove());
+    return row;
+  }
+  function ensure3Rows(){
+    if(!rowsHost) return;
+    if(rowsHost.children.length) return;
+    rowsHost.appendChild(makeRow(''));
+    rowsHost.appendChild(makeRow(''));
+    rowsHost.appendChild(makeRow(''));
+  }
+  $('maAddRow')?.addEventListener('click', ()=>{
+    if(!rowsHost) return;
+    rowsHost.appendChild(makeRow(''));
+  });
+  ensure3Rows();
+
+  // Info inputs: auto-save
+  let infoBound = false;
+  function bindInfoOnce(){
+    if(infoBound) return;
+    infoBound = true;
+    ['maApp','maName','maPhone','maPickup','maAddr','maShop'].forEach(id=>{
+      const el = $(id);
+      if(!el) return;
+      el.addEventListener('change', saveInfo);
+      el.addEventListener('input', saveInfo);
+    });
+  }
+
+
+  // ===================== 點餐：資料來源（由工作系統注入；若沒有就退回掃描頁面 data-uid） =====================
+  function __maGetPayload(){
+    try{
+      const p = window.__WS_PUBLIC_ORDER_PAYLOAD__;
+      if(p && Array.isArray(p.catalog)) return p;
+    }catch(_){}
+    // fallback：掃描官網上有 data-uid 的產品（只取 name/uid，price=0；折扣/集點不可用）
+    const nodes = Array.from(document.querySelectorAll('[data-uid]'));
+    const catalog = nodes.map(el=>{
+      const id = (el.getAttribute('data-uid')||'').trim();
+      const name = (el.textContent||'').trim().split(/\s+/).slice(0,6).join(' ');
+      return { id, name, short:'', item:'', price:0, tags:[id], states:[] };
+    }).filter(x=>x.id && x.name);
+    return { generated_at: new Date().toISOString(), catalog, discounts:[], discountApplyOrder:[] };
+  }
+
+  const __ma = {
+    payload: null,
+    item: '',
+    cart: [], // { id,name,price,qty,states:[name], stateDelta, isEgg, egg2 }
+    pendingPick: null
+  };
+
+  function __maMoney(n){
+    const v = Number(n||0) || 0;
+    // 官網顯示不用小數
+    return String(Math.round(v));
+  }
+
+  function __maIsEgg(prod){
+    const nm = String(prod?.name||'');
+    const it = String(prod?.item||'');
+    return (nm.includes('雞蛋糕') || it.includes('雞蛋糕'));
+  }
+
+  function __maInitOrderUI(){
+    __ma.payload = __maGetPayload();
+    const chipsEl = $('maItemChips');
+    const listEl = $('maProductList');
+    const cartEl = $('maCartList');
+
+    if(!chipsEl || !listEl || !cartEl) return;
+
+    // build item chips
+    const items = Array.from(new Set((__ma.payload.catalog||[]).map(p=>String(p.item||'').trim()).filter(Boolean)));
+    items.sort((a,b)=>a.localeCompare(b,'zh-Hant'));
+    if(items.length===0) items.push('全部');
+
+    chipsEl.innerHTML = '';
+    const mkChip = (label)=>{
+      const b = document.createElement('button');
+      b.type='button';
+      b.className='ma-chip';
+      b.textContent=label;
+      b.onclick=()=>{
+        __ma.item = (label==='全部') ? '' : label;
+        Array.from(chipsEl.querySelectorAll('.ma-chip')).forEach(x=>x.classList.toggle('active', x===b));
+        __maRenderProducts();
+      };
+      return b;
+    };
+
+    const allFirst = items.includes('全部') ? items : ['全部'].concat(items);
+    allFirst.forEach((it, i)=>{
+      const c = mkChip(it);
+      if(i===0){ c.classList.add('active'); __ma.item=''; }
+      chipsEl.appendChild(c);
+    });
+
+    // bind cart buttons
+    $('maCartCopy')?.addEventListener('click', ()=>{ __maCopyOrBoss(false); });
+    $('maCartBoss')?.addEventListener('click', ()=>{ __maCopyOrBoss(true); });
+
+    // state modal binds
+    $('maStateCancel')?.addEventListener('click', __maCloseStateModal);
+    $('maStateOk')?.addEventListener('click', __maConfirmStateModal);
+    $('maStateOv')?.addEventListener('click', (e)=>{
+      if(e && e.target && e.target.id==='maStateOv') __maCloseStateModal();
+    });
+
+    __maRenderProducts();
+    __maRenderCart();
+  }
+
+  function __maRenderProducts(){
+    const listEl = $('maProductList');
+    if(!listEl) return;
+    const item = String(__ma.item||'').trim();
+    const arr = (__ma.payload.catalog||[])
+      .filter(p=> p && (!item || String(p.item||'').trim()===item))
+      .slice()
+      .sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'zh-Hant'));
+
+    listEl.innerHTML = '';
+    arr.forEach(p=>{
+      const row = document.createElement('div');
+      row.className='ma-prod';
+      const left = document.createElement('div');
+      const nm = document.createElement('div');
+      nm.className='nm';
+      nm.textContent = p.name || '';
+      const meta = document.createElement('div');
+      meta.className='meta';
+      meta.textContent = (p.price>0) ? (`$${__maMoney(p.price)}`) : '';
+      left.appendChild(nm);
+      left.appendChild(meta);
+
+      const btn = document.createElement('button');
+      btn.type='button';
+      btn.className='ma-mini-btn';
+      btn.textContent='加入';
+      btn.onclick=()=>__maPickProduct(p);
+
+      row.appendChild(left);
+      row.appendChild(btn);
+      listEl.appendChild(row);
+    });
+  }
+
+  function __maPickProduct(prod){
+    const states = Array.isArray(prod.states) ? prod.states : [];
+    if(states.length>0){
+      __ma.pendingPick = { prod, picked: [] }; // picked state names
+      __maOpenStateModal(prod, states);
+      return;
+    }
+    __maAddToCart(prod, []);
+  }
+
+  function __maOpenStateModal(prod, states){
+    const ov = $('maStateOv');
+    const ttl = $('maStateTitle');
+    const list = $('maStateList');
+    if(!ov || !list) return;
+    if(ttl) ttl.textContent = `選擇狀態：${prod.name||''}`;
+
+    list.innerHTML='';
+    const opts = states.map(s=>({
+      name: String(s.name||'').trim(),
+      xor: !!s.xor,
+      delta: Number(s.delta||0)||0
+    })).filter(x=>x.name);
+
+    // 同一產品的狀態：依需求「擇一」；若你未來需要多組 xor，可再擴充
+    let picked = null;
+    opts.forEach(o=>{
+      const div = document.createElement('div');
+      div.className='ma-state-opt';
+      div.textContent = (o.delta ? `${o.name} (${o.delta>0?'+':''}${__maMoney(o.delta)})` : o.name);
+      div.onclick=()=>{
+        picked = o;
+        Array.from(list.children).forEach(x=>x.classList.remove('active'));
+        div.classList.add('active');
+      };
+      list.appendChild(div);
+    });
+
+    // default pick first
+    if(list.firstElementChild){
+      list.firstElementChild.classList.add('active');
+      picked = opts[0] || null;
+    }
+
+    __ma.pendingPick = { prod, pickedObj: picked, opts };
+    ov.classList.add('show');
+    ov.setAttribute('aria-hidden','false');
+  }
+
+  function __maCloseStateModal(){
+    const ov = $('maStateOv');
+    if(!ov) return;
+    ov.classList.remove('show');
+    ov.setAttribute('aria-hidden','true');
+    __ma.pendingPick = null;
+  }
+
+  function __maConfirmStateModalBase(){
+    const p = __ma.pendingPick;
+    if(!p || !p.prod){
+      __maCloseStateModal();
+      return;
+    }
+    const picked = p.pickedObj ? [p.pickedObj] : [];
+    __maCloseStateModal();
+    __maAddToCart(p.prod, picked);
+  }
+
+  function __maAddToCart(prod, pickedStates){
+    const id = String(prod.id||'').trim();
+    if(!id) return;
+    const isEgg = __maIsEgg(prod);
+    const basePrice = Number(prod.price||0)||0;
+
+    // 同產品 + 同狀態（含第二顆口味資訊）算同一行：這裡先做「同產品同狀態就合併」
+    const stateKey = (pickedStates||[]).map(x=>x.name).join('|');
+    const key = id + '::' + stateKey;
+
+    const exist = __ma.cart.find(x=>x && x.__key===key);
+    if(exist){
+      exist.qty = Math.max(1, (exist.qty||1) + 1);
+    }else{
+      const stateNames = (pickedStates||[]).map(x=>x.name);
+      const delta = (pickedStates||[]).reduce((s,x)=>s+(Number(x.delta||0)||0),0);
+      __ma.cart.push({
+        __key: key,
+        id,
+        name: prod.name||'',
+        price: basePrice,
+        stateNames,
+        stateDelta: delta,
+        qty: 1,
+        isEgg,
+        egg2: '' // 第二顆口味（雞蛋糕）
+      });
+    }
+    __maRenderCart();
+  }
+
+  function __maRenderCart(){
+    const cartEl = $('maCartList');
+    const txtEl = $('maCartText');
+    if(!cartEl || !txtEl) return;
+
+    cartEl.innerHTML='';
+    (__ma.cart||[]).forEach((ln, idx)=>{
+      const div = document.createElement('div');
+      div.className='ma-line';
+
+      const row1 = document.createElement('div');
+      row1.className='row1';
+
+      const title = document.createElement('div');
+      title.style.fontWeight='900';
+
+      const st = (ln.stateNames && ln.stateNames.length) ? `(${ln.stateNames.join('、')})` : '';
+      title.textContent = `${ln.name}${st}`;
+
+      const qty = document.createElement('div');
+      qty.className='ma-qty';
+      const bMinus = document.createElement('button'); bMinus.type='button'; bMinus.textContent='-';
+      const bPlus = document.createElement('button'); bPlus.type='button'; bPlus.textContent='+';
+      const ip = document.createElement('input'); ip.type='number'; ip.min='0'; ip.step='1'; ip.value=String(ln.qty||1);
+
+      bMinus.onclick=()=>{
+        const q = Math.max(0, (ln.qty||1) - 1);
+        if(q<=0){ __ma.cart.splice(idx,1); }
+        else ln.qty=q;
+        __maRenderCart();
+      };
+      bPlus.onclick=()=>{ ln.qty = Math.max(1, (ln.qty||1) + 1); __maRenderCart(); };
+      ip.onchange=()=>{
+        const q = Math.max(0, Math.floor(Number(ip.value)||0));
+        if(q<=0){ __ma.cart.splice(idx,1); }
+        else ln.qty=q;
+        __maRenderCart();
+      };
+
+      qty.appendChild(bMinus);
+      qty.appendChild(ip);
+      qty.appendChild(bPlus);
+
+      row1.appendChild(title);
+      row1.appendChild(qty);
+
+      const row2 = document.createElement('div');
+      row2.className='row2';
+
+      const price = document.createElement('div');
+      const unit = (Number(ln.price||0) + Number(ln.stateDelta||0)) || 0;
+      const unitStr = unit>0 ? `$${__maMoney(unit)}` : '';
+      const eggHint = ln.isEgg ? '（一份=兩顆）' : '';
+      price.textContent = unitStr ? `${unitStr} ${eggHint}` : eggHint;
+
+      row2.appendChild(price);
+
+      if(ln.isEgg){
+        const btn2 = document.createElement('button');
+        btn2.type='button';
+        btn2.className='ma-mini-btn';
+        btn2.textContent = ln.egg2 ? `第二顆：${ln.egg2}` : '第二顆口味';
+        btn2.onclick=()=>__maPickEggSecond(idx);
+        row2.appendChild(btn2);
+      }
+
+      div.appendChild(row1);
+      div.appendChild(row2);
+      cartEl.appendChild(div);
+    });
+
+    // 更新文字 + 試算
+    txtEl.value = __maBuildCopyText(false);
+    __maUpdateTotals();
+  }
+
+  function __maPickEggSecond(lineIdx){
+    const ln = __ma.cart[lineIdx];
+    if(!ln) return;
+    // 用同一品項的所有雞蛋糕口味當作候選：這裡用「同 item=雞蛋糕」的產品名
+    const payload = __ma.payload || { catalog:[] };
+    const candidates = (payload.catalog||[]).filter(p=>__maIsEgg(p)).map(p=>p.name).filter(Boolean);
+    const uniq = Array.from(new Set(candidates));
+
+    // 用 state modal 當作簡易 picker
+    const fakeProd = { name: '第二顆口味', states: uniq.map(n=>({ name:n, xor:true, delta:0 })) };
+    __ma.pendingPick = { prod: fakeProd, pickedObj: null, opts: [] , __isEgg2:true, lineIdx };
+    __maOpenStateModal(fakeProd, fakeProd.states);
+    // 覆蓋 confirm：在 confirm 裡用 pendingPick.__isEgg2 判斷
+  }
+
+  // 狀態確認：第二顆口味也共用同一個 modal
+  function __maConfirmStateModal(){
+    const p = __ma.pendingPick;
+    if(p && p.__isEgg2){
+      const pickedName = p.pickedObj ? String(p.pickedObj.name||'').trim() : '';
+      const li = p.lineIdx;
+      __maCloseStateModal();
+      if(Number.isFinite(li) && __ma.cart[li]){
+        __ma.cart[li].egg2 = pickedName;
+        __maRenderCart();
+      }
+      return;
+    }
+    return __maConfirmStateModalBase();
+  }
+
+  function __maBuildCartContent(){
+    // 依需求：雞蛋糕一次就是兩顆；如果沒選第二顆口味，視為同口味
+    const parts = [];
+    (__ma.cart||[]).forEach(ln=>{
+      if(!ln || !ln.name) return;
+      const q = Math.max(1, Math.floor(Number(ln.qty)||1));
+      const st = (ln.stateNames && ln.stateNames.length) ? `(${ln.stateNames.join('、')})` : '';
+      if(ln.isEgg){
+        const f1 = ln.name; // 第一顆口味（即產品名）
+        const f2 = ln.egg2 ? ln.egg2 : f1;
+        parts.push(`${f1}${st}×${q}份(共${q*2}顆：${f1}、${f2})`);
+      }else{
+        parts.push(`${ln.name}${st}×${q}`);
+      }
+    });
+    return parts.join('、');
+  }
+
+  function __maBuildCopyText(forBundle){
+    const name = ($('maName')?.value||'').trim();
+    const phone = ($('maPhone')?.value||'').trim();
+    const pickup = ($('maPickup')?.value||'').trim();
+    const addr = ($('maAddr')?.value||'').trim();
+    const shop = ($('maShop')?.value||'').trim();
+
+    const cartContent = __maBuildCartContent();
+    if(forBundle){
+      return `【${cartContent}】`;
+    }
+
+    const isDelivery = !!addr;
+    if(isDelivery){
+      return `老闆您好，我要外送${addr}${shop?(' '+shop):''}【${cartContent}】預計${pickup}送達，${name}${phone}謝謝。`;
+    }
+    return `老闆您好，我要自取【${cartContent}】預計${pickup}取餐，${name}${phone}謝謝。`;
+  }
+
+  function __maCopyOrBoss(openLink){
+    const text = __maBuildCopyText(false);
+    try{ navigator.clipboard && navigator.clipboard.writeText(text); }catch(_){
+      try{
+        const ta = $('maCartText');
+        if(ta){ ta.focus(); ta.select(); document.execCommand('copy'); }
+      }catch(_){}
+    }
+    if(openLink){
+      const app = ($('maApp')?.value||'line').trim();
+      const url = (app==='fb') ? 'https://m.me/menghushao' : 'https://reurl.cc/qZAE2y';
+      try{ window.open(url, '_blank'); }catch(_){ location.href=url; }
+    }
+  }
+
+  function __maUpdateTotals(){
+    const elOrder = $('maOrderAmt');
+    const elDis = $('maDiscountAmt');
+    const elPts = $('maPointsAmt');
+
+    // order amount
+    let orderAmt = 0;
+    const units = []; // for points calc
+    (__ma.cart||[]).forEach(ln=>{
+      const q = Math.max(1, Math.floor(Number(ln.qty)||1));
+      const unitPrice = (Number(ln.price||0) + Number(ln.stateDelta||0)) || 0;
+      // 雞蛋糕一份兩顆，但價格仍然以「一份」計算（與工作系統一致）
+      orderAmt += unitPrice * q;
+      // points units：以「份」為單位
+      for(let i=0;i<q;i++){
+        units.push({ price: unitPrice, tags: [ln.id].concat(ln.stateNames||[]) });
+      }
+    });
+
+    // discount/points：若 payload 有折扣規則就試算；沒有就都 0
+    let discount = 0;
+    let points = 0;
+
+    try{
+      const p = __ma.payload || {};
+      const picked = __maGetPickedApplicableDiscounts(p);
+      const bundleUnits = [];
+      picked.forEach(({d})=>{
+        if(d && d.type==='bundle_qty'){
+          __maApplyBundleQtyDiscount(units, d, bundleUnits);
+        }
+      });
+
+      const units2 = [];
+      (bundleUnits||[]).forEach(u=>{ if(u && isFinite(+u.price)) units2.push({ price:+u.price||0, tags: u.tags||[] }); });
+      (units||[]).forEach(u=> units2.push({ price:+u.price||0, tags: u.tags||[] }));
+
+      discount = __maCalcDiscountDelta(picked, units2);
+      points = __maCalcPointsEarned(picked, units2);
+    }catch(_){}
+
+    if(elOrder) elOrder.textContent = __maMoney(orderAmt);
+    if(elDis) elDis.textContent = __maMoney(discount);
+    if(elPts) elPts.textContent = __maMoney(points);
+  }
+
+  // ====== 折扣/集點：把工作系統的「通用」算法做成官網版（只依 tags + price，不依任何成本欄位） ======
+  function __maNormalizeDiscounts(payload){
+    const ds = Array.isArray(payload.discounts) ? payload.discounts.slice() : [];
+    const ord = Array.isArray(payload.discountApplyOrder) ? payload.discountApplyOrder.slice() : [];
+    // assign apply_order by order list
+    ds.forEach(d=>{
+      if(!d) return;
+      const id = String(d.id||'').trim();
+      const idx = id ? ord.indexOf(id) : -1;
+      d.apply_order = (idx>=0) ? idx : (Number(d.apply_order)||0);
+    });
+    ds.sort((a,b)=>(+a.apply_order||0) - (+b.apply_order||0));
+    return ds.filter(d=>d && (d.enabled!==false) && (d.disabled!==true));
+  }
+
+  function __maGetPickedApplicableDiscounts(payload){
+    // 官網：全部都「被動生效」，所以 picked=所有 enabled 規則
+    const ds = __maNormalizeDiscounts(payload);
+    return ds.map((d, idx)=>({ idx, d }));
+  }
+
+  function __maPickTaggedUnits(units, tags){
+    const tset = new Set((tags||[]).map(x=>String(x||'').trim()).filter(Boolean));
+    return (units||[]).filter(u=>{
+      const ut = Array.isArray(u.tags) ? u.tags : [];
+      return ut.some(x=>tset.has(String(x||'').trim()));
+    });
+  }
+
+  function __maCalcDiscountDelta(picked, units){
+    // 依工作系統概念：originalTotal - finalTotal
+    const originalTotal = (units||[]).reduce((s,u)=>s+(+u.price||0),0);
+
+    // clone working units
+    const work = (units||[]).map(u=>({ price:+u.price||0, tags: Array.isArray(u.tags)?u.tags.slice():[] }));
+
+    const currentUnits = ()=>work;
+
+    picked.forEach(({d, idx})=>{
+      if(!d || !d.type) return;
+      const type = String(d.type||'').trim();
+
+      if(type==='coupon'){
+        // 官網不提供客選 coupon；仍可能用於被動（qty=0 時不生效）
+        return;
+      }
+
+      // amount_off / amount_percent（購滿金額）
+      if(type==='amount'){
+        const thr = Number(d.amount_threshold||0)||0;
+        if(thr<=0) return;
+        const total = currentUnits().reduce((s,u)=>s+(+u.price||0),0);
+        if(total < thr) return;
+
+        if(isFinite(Number(d.amount_off)) && Number(d.amount_off)>0){
+          let left = Number(d.amount_off)||0;
+          // 從高價份開始扣
+          currentUnits().sort((a,b)=>(+b.price||0)-(+a.price||0));
+          for(const u of currentUnits()){
+            if(left<=0) break;
+            const p = +u.price||0;
+            if(p<=0) continue;
+            const cut = Math.min(left, p);
+            u.price = p - cut;
+            left -= cut;
+          }
+          return;
+        }
+        const pct = Number(d.amount_percent||0)||0;
+        if(pct>0 && pct<1){
+          currentUnits().forEach(u=>{ u.price = Math.max(0, (+u.price||0) * (1-pct)); });
+        }
+        return;
+      }
+
+      // qty（購滿數量）
+      if(type==='qty'){
+        const thr = Math.max(0, Math.floor(Number(d.qty_threshold||0)||0));
+        if(thr<=0) return;
+        const cnt = currentUnits().filter(u=>(+u.price||0)>0).length;
+        if(cnt < thr) return;
+
+        if(isFinite(Number(d.qty_off)) && Number(d.qty_off)>0){
+          let left = Number(d.qty_off)||0;
+          currentUnits().sort((a,b)=>(+b.price||0)-(+a.price||0));
+          for(const u of currentUnits()){
+            if(left<=0) break;
+            const p = +u.price||0;
+            if(p<=0) continue;
+            const cut = Math.min(left, p);
+            u.price = p - cut;
+            left -= cut;
+          }
+          return;
+        }
+        const pct = Number(d.qty_percent||0)||0;
+        if(pct>0 && pct<1){
+          currentUnits().forEach(u=>{ u.price = Math.max(0, (+u.price||0) * (1-pct)); });
+        }
+        return;
+      }
+
+      // bundle_qty（組合特價：變成份）
+      if(type==='bundle_qty'){
+        // 已在外層先用 __maApplyBundleQtyDiscount 轉成 bundleUnits；這裡不直接扣
+        return;
+      }
+    });
+
+    const finalTotal = currentUnits().reduce((s,u)=>s+(+u.price||0),0);
+    const delta = Math.max(0, (originalTotal - finalTotal));
+    return +delta.toFixed(2);
+  }
+
+  function __maApplyBundleQtyDiscount(items, d, outUnits){
+    try{
+      const targets = Array.isArray(d.bundle_targets) ? d.bundle_targets : [];
+      const thr = Math.max(0, Math.floor(Number(d.bundle_qty||0)||0));
+      const price = Number(d.bundle_price||0)||0;
+      if(thr<=0 || price<=0 || targets.length===0) return;
+
+      const cand = __maPickTaggedUnits(items, targets);
+      if(cand.length < thr) return;
+
+      // 按價格高->低組成 bundle（較直覺：先把貴的組掉）
+      cand.sort((a,b)=>(+b.price||0)-(+a.price||0));
+      const take = cand.slice(0, thr);
+      take.forEach(u=>{ u.__used = true; });
+
+      outUnits.push({ price, tags: targets.slice() });
+    }catch(_){}
+  }
+
+  function __maCalcPointsEarned(picked, units){
+    // points 規則：沿用工作系統概念（stage1/2 + synergy_points）；僅依 tags + price
+    let total = 0;
+    picked.forEach(({d, idx})=>{
+      if(!d) return;
+      if(String(d.type||'')!=='points') return;
+
+      const tags = Array.isArray(d.note1_targets) ? d.note1_targets : [];
+      if(tags.length===0) return;
+
+      const eligible = __maPickTaggedUnits(units, tags).filter(u=>!u.__used);
+      if(eligible.length===0) return;
+
+      const s1Type = String(d.stage1_type||'amount');
+      const s1Thr = Number(d.stage1_thr||0)||0;
+      const s1Give = Number(d.stage1_give||0)||0;
+
+      const s2Type = String(d.stage2_type||'amount');
+      const s2Thr = Number(d.stage2_thr||0)||0;
+      const s2Mul = Number(d.stage2_mul||0)||0;
+      const cap = Math.max(0, Math.floor(Number(d.cap||0)||0));
+
+      const synergyPoints = Math.max(0, Math.floor(Number(d.synergy_points||0)||0));
+
+      const cnt = eligible.length;
+      const sum = Math.max(0, eligible.reduce((s,u)=>s+(+u.price||0),0));
+
+      let base = 0;
+      if(s1Type === 'qty'){
+        if(isFinite(s1Thr) && s1Thr>0 && s1Give>0) base = Math.floor(cnt / s1Thr) * s1Give;
+      }else{
+        if(isFinite(s1Thr) && s1Thr>0 && s1Give>0) base = Math.floor(sum / s1Thr) * s1Give;
+      }
+
+      let hit2 = false;
+      if(s2Type === 'qty'){
+        hit2 = (isFinite(s2Thr) && s2Thr>0) ? (cnt >= s2Thr) : false;
+      }else{
+        hit2 = (isFinite(s2Thr) && s2Thr>0) ? (sum >= s2Thr) : false;
+      }
+      if(hit2 && isFinite(s2Mul) && s2Mul>0) base = base * s2Mul;
+
+      base = Math.floor(base || 0);
+      if(cap>0) base = Math.min(base, cap);
+
+      const pts = Math.max(0, Math.floor((synergyPoints + base) || 0));
+      total += pts;
+    });
+    return Math.max(0, Math.floor(total||0));
+  }
+
+  // ===================== 訂單組合：解析 + 組合 + 找老闆 =====================
+  function __maInitBundleUI(){
+    const rowsWrap = $('maBundleRows');
+    if(!rowsWrap) return;
+
+    function addRow(val){
+      const row = document.createElement('div');
+      row.className='ma-row';
+      row.innerHTML = `
+        <textarea class="ma-ta" placeholder="貼上每一位的訂單內容（可留空）"></textarea>
+        <button class="ma-mini-btn ma-del" type="button">刪除</button>
+      `;
+      const ta = row.querySelector('textarea');
+      const del = row.querySelector('button');
+      if(ta && val) ta.value = val;
+      del.onclick=()=>{ row.remove(); __maUpdateBundleTotals(); };
+      ta.oninput=()=>__maUpdateBundleTotals();
+      rowsWrap.appendChild(row);
+    }
+
+    // 初次 3 列
+    if(rowsWrap.children.length===0){
+      addRow(''); addRow(''); addRow('');
+    }
+
+    $('maAddRow')?.addEventListener('click', ()=>addRow(''));
+    $('maBundleBtn')?.addEventListener('click', ()=>__maBundle(false));
+    $('maBundleBoss')?.addEventListener('click', ()=>__maBundle(true));
+
+    __maUpdateBundleTotals();
+  }
+
+  function __maParseOneOrderText(text){
+    const s = String(text||'').trim();
+    if(!s) return null;
+    const name = (s.match(/，([^，]{1,12})\d{6,}/) || [])[1] || (s.match(/，([^，]{1,12})謝謝/)||[])[1] || '';
+    const m = s.match(/【([\s\S]*?)】/);
+    const cart = m ? String(m[1]||'').trim() : '';
+    return { name: (name||'').trim() || '無名', cart };
+  }
+
+  function __maBundle(openLink){
+    const rowsWrap = $('maBundleRows');
+    if(!rowsWrap) return;
+
+    const parts = [];
+    Array.from(rowsWrap.querySelectorAll('textarea')).forEach(ta=>{
+      const parsed = __maParseOneOrderText(ta.value);
+      if(!parsed) return;
+      if(!parsed.cart) return;
+      parts.push(`${parsed.name}【${parsed.cart}】`);
+    });
+
+    const combinedCart = parts.join('');
+    const name = ($('maName')?.value||'').trim();
+    const phone = ($('maPhone')?.value||'').trim();
+    const pickup = ($('maPickup')?.value||'').trim();
+    const addr = ($('maAddr')?.value||'').trim();
+    const shop = ($('maShop')?.value||'').trim();
+
+    const isDelivery = !!addr;
+    const text = isDelivery
+      ? `老闆您好，我要外送${addr}${shop?(' '+shop):''}【${combinedCart}】預計${pickup}送達，${name}${phone}謝謝。`
+      : `老闆您好，我要自取【${combinedCart}】預計${pickup}取餐，${name}${phone}謝謝。`;
+
+    try{ navigator.clipboard && navigator.clipboard.writeText(text); }catch(_){
+      try{
+        // fallback：臨時 textarea
+        const tmp=document.createElement('textarea');
+        tmp.value=text; document.body.appendChild(tmp);
+        tmp.select(); document.execCommand('copy'); tmp.remove();
+      }catch(_){}
+    }
+
+    if(openLink){
+      const app = ($('maApp')?.value||'line').trim();
+      const url = (app==='fb') ? 'https://m.me/menghushao' : 'https://reurl.cc/qZAE2y';
+      try{ window.open(url, '_blank'); }catch(_){ location.href=url; }
+    }
+  }
+
+  
+  function __maSplitTopLevel(str){
+    const out=[]; let cur=''; let depth=0;
+    const s=String(str||'');
+    for(let i=0;i<s.length;i++){
+      const ch=s[i];
+      if(ch==='(' || ch==='（') depth++;
+      if(ch===')' || ch==='）') depth=Math.max(0, depth-1);
+      if(ch==='、' && depth===0){
+        if(cur.trim()) out.push(cur.trim());
+        cur='';
+        continue;
+      }
+      cur+=ch;
+    }
+    if(cur.trim()) out.push(cur.trim());
+    return out;
+  }
+
+  function __maParseCartString(cartStr){
+    const payload = __ma.payload || { catalog:[] };
+    const catalog = Array.isArray(payload.catalog) ? payload.catalog : [];
+    const byName = new Map(catalog.map(p=>[String(p.name||'').trim(), p]));
+    const items = [];
+
+    const parts = __maSplitTopLevel(String(cartStr||''));
+    parts.forEach(seg=>{
+      // seg examples:
+      // "紅豆雞蛋糕(焦)×2份(共4顆：紅豆雞蛋糕、奶油雞蛋糕)"
+      // "卡士達(焦)×1"
+      const m = seg.match(/^(.+?)×\s*(\d+)\s*(份)?/);
+      if(!m) return;
+      const left = String(m[1]||'').trim();
+      const qty = Math.max(1, Math.floor(Number(m[2]||1)||1));
+
+      // states: name(states)
+      let name = left;
+      let states = [];
+      const ms = left.match(/^(.+?)\((.+)\)$/);
+      const ms2 = left.match(/^(.+?)（(.+)）$/);
+      const mm = ms || ms2;
+      if(mm){
+        name = String(mm[1]||'').trim();
+        states = String(mm[2]||'').split('、').map(x=>String(x||'').trim()).filter(Boolean);
+      }
+
+      const prod = byName.get(name);
+      if(!prod){
+        // 找不到就跳過（避免亂算）
+        return;
+      }
+
+      // state delta
+      let delta = 0;
+      try{
+        const stArr = Array.isArray(prod.states) ? prod.states : [];
+        states.forEach(sn=>{
+          const st = stArr.find(x=>x && String(x.name||'').trim()===sn);
+          if(st) delta += (Number(st.delta||0)||0);
+        });
+      }catch(_){}
+
+      items.push({
+        id: String(prod.id||'').trim(),
+        name: String(prod.name||'').trim(),
+        qty,
+        unitPrice: (Number(prod.price||0)||0) + delta,
+        stateNames: states
+      });
+    });
+
+    return items;
+  }
+
+  function __maUpdateBundleTotals(){
+    // 訂單組合頁：把所有貼入的 cart 當作同一筆訂單去算折扣/集點（被動生效）
+    const elOrder = $('maOrderAmt');
+    const elDis = $('maDiscountAmt');
+    const elPts = $('maPointsAmt');
+
+    try{
+      const rowsWrap = $('maBundleRows');
+      if(!rowsWrap) return;
+
+      const allItems = [];
+      Array.from(rowsWrap.querySelectorAll('textarea')).forEach(ta=>{
+        const parsed = __maParseOneOrderText(ta.value);
+        if(parsed && parsed.cart){
+          const arr = __maParseCartString(parsed.cart);
+          arr.forEach(x=>allItems.push(x));
+        }
+      });
+
+      // build units
+      let orderAmt=0;
+      const units=[];
+      allItems.forEach(it=>{
+        const q = Math.max(1, Math.floor(Number(it.qty)||1));
+        const unit = Number(it.unitPrice||0)||0;
+        orderAmt += unit*q;
+        for(let i=0;i<q;i++){
+          units.push({ price: unit, tags: [it.id].concat(it.stateNames||[]) });
+        }
+      });
+
+      let discount=0, points=0;
+      try{
+        const p = __ma.payload || {};
+        const picked = __maGetPickedApplicableDiscounts(p);
+        const bundleUnits = [];
+        picked.forEach(({d})=>{
+          if(d && d.type==='bundle_qty'){
+            __maApplyBundleQtyDiscount(units, d, bundleUnits);
+          }
+        });
+        const units2 = [];
+        (bundleUnits||[]).forEach(u=>{ if(u && isFinite(+u.price)) units2.push({ price:+u.price||0, tags: u.tags||[] }); });
+        (units||[]).forEach(u=> units2.push({ price:+u.price||0, tags: u.tags||[] }));
+
+        discount = __maCalcDiscountDelta(picked, units2);
+        points = __maCalcPointsEarned(picked, units2);
+      }catch(_){}
+
+      if(elOrder) elOrder.textContent = __maMoney(orderAmt);
+      if(elDis) elDis.textContent = __maMoney(discount);
+      if(elPts) elPts.textContent = __maMoney(points);
+    }catch(_){
+      if(elOrder) elOrder.textContent = '0';
+      if(elDis) elDis.textContent = '0';
+      if(elPts) elPts.textContent = '0';
+    }
+  }
+
+
+  // tab 切換時更新試算（資訊->點餐->訂單組合）
+  tabs.forEach(t=>{
+    t.addEventListener('click', ()=>{
+      const name = t.dataset.tab;
+      if(name==='order'){ __maInitOrderUI(); }
+      if(name==='bundle'){ __maInitBundleUI(); }
+      setTimeout(()=>{
+        if(name==='order'){ __maUpdateTotals(); }
+      }, 0);
+    });
+  });
+
+  // 彈窗打開時先初始化一次（避免第一次切 tab 才載）
+  try{ __maInitOrderUI(); }catch(_){}
+  try{ __maInitBundleUI(); }catch(_){}
+
+
+})();
+</script>
 
 <script id="wsFpEnhanceScript">
         (function(){
