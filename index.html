@@ -131,6 +131,11 @@ body{
   padding:10px 12px;
   border-bottom:1px solid rgba(244,241,233,.18);
 }
+#msgAssistOverlay .ma-amtbar{ margin-left:auto; display:flex; align-items:center; gap:10px; font-size:12px; opacity:.95; white-space:nowrap; }
+#msgAssistOverlay .ma-amtbar .k{ opacity:.85; }
+#msgAssistOverlay .ma-amtbar .v{ font-weight:800; }
+#msgAssistOverlay .ma-amtbar .sep{ opacity:.35; }
+
 #msgAssistOverlay .ma-tabs{
   display:flex;
   align-items:center;
@@ -163,11 +168,25 @@ body{
 
 #msgAssistOverlay .ma-body{
   padding:14px 14px 16px;
-  overflow:auto;
+  overflow:hidden;
   flex:1 1 auto;
 }
 #msgAssistOverlay .ma-pane{ display:none; }
 #msgAssistOverlay .ma-pane.active{ display:block; }
+
+#msgAssistOverlay .ma-pane{ height:100%; overflow:auto; }
+#msgAssistOverlay #maPane_order{ overflow:hidden; }
+#msgAssistOverlay #maPane_order .ma-hint{ display:none; } /* 點餐頁不要讓外層捲走 */
+#msgAssistOverlay #maPane_order .ma-order-grid{ height:100%; }
+#msgAssistOverlay #maPane_order .ma-box{ min-height:0; }
+#msgAssistOverlay #maPane_order .ma-box .ma-boxbody{ min-height:0; }
+
+/* === 訂單組合頁：讓捲動只發生在 boxbody，BAR 固定不捲走 === */
+#msgAssistOverlay #maPane_bundle{ overflow:hidden; }
+#msgAssistOverlay #maPane_bundle .ma-box{ height:100%; min-height:0; }
+#msgAssistOverlay #maPane_bundle .ma-box .ma-boxbody{ min-height:0; }
+
+
 
 #msgAssistOverlay .ma-grid{
   display:grid;
@@ -220,11 +239,77 @@ body{
   padding:10px 12px;
   border-bottom:1px solid rgba(244,241,233,.16);
 }
+
+#msgAssistOverlay .ma-box .ma-boxbar.ma-stickybar{
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--board);
+}
+
 #msgAssistOverlay .ma-box .ma-boxbar .spacer{ flex:1 1 auto; }
 #msgAssistOverlay .ma-box .ma-boxbody{
   padding:12px;
   min-height: 260px;
 }
+
+#msgAssistOverlay .ma-box{
+  display:flex;
+  flex-direction:column;
+}
+#msgAssistOverlay .ma-box .ma-boxbody{
+  flex:1 1 auto;
+  overflow:auto;
+}
+
+#msgAssistOverlay .ma-itembar{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+#msgAssistOverlay .ma-itembtn{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(244,241,233,.35);
+  color:var(--text);
+  padding:6px 10px;
+  border-radius:999px;
+  cursor:pointer;
+  font-size:13px;
+  user-select:none;
+}
+#msgAssistOverlay .ma-itembtn.active{
+  border-color: rgba(255,209,138,.95);
+  box-shadow: 0 0 0 3px rgba(255,209,138,.18);
+}
+#msgAssistOverlay .ma-items-sticky{
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--board);
+  padding-bottom:10px;
+}
+#msgAssistOverlay .ma-prodlist{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+#msgAssistOverlay .ma-prodbtn{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(244,241,233,.22);
+  color:var(--text);
+  padding:10px 10px;
+  border-radius:12px;
+  text-align:left;
+  cursor:pointer;
+  font-size:14px;
+}
+#msgAssistOverlay .ma-prodbtn .sub{
+  display:block;
+  opacity:.85;
+  font-size:12px;
+  margin-top:4px;
+}
+
 #msgAssistOverlay .ma-mini-btn{
   background:transparent;
   border:2px solid rgba(244,241,233,.75);
@@ -889,80 +974,90 @@ html.board-mode #boardMiceLayer{ display:block; }
 .board-mouse.dead{ opacity: 0; }
 
 
-/* ===== 通訊軟體點餐輔助：新增（品項/購物車/狀態 modal/總額列） ===== */
-#msgAssistOverlay .ma-top{ gap:10px; }
-#msgAssistOverlay .ma-totals{
-  display:flex; flex-wrap:wrap; gap:10px;
-  font-size:12px;
-  padding:4px 8px;
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:10px;
-  background: rgba(0,0,0,.18);
-  color:#fff;
-}
-#msgAssistOverlay .ma-totals b{ font-weight:900; }
-#msgAssistOverlay .ma-chips{ display:flex; flex-wrap:wrap; gap:8px; padding:4px 0 10px; }
-#msgAssistOverlay .ma-chip{
-  border:1px solid #e5e7eb; background:#fff;
-  border-radius:999px; padding:6px 10px;
-  cursor:pointer; font-weight:800; font-size:12px;
-}
-#msgAssistOverlay .ma-chip.active{ border-color:#111827; }
-#msgAssistOverlay .ma-list{ display:flex; flex-direction:column; gap:8px; }
-#msgAssistOverlay .ma-prod{
-  display:flex; align-items:center; justify-content:space-between;
-  gap:10px; padding:10px 12px;
-  border:1px solid #e5e7eb; border-radius:12px;
-  background:#fff;
-}
-#msgAssistOverlay .ma-prod .nm{ font-weight:900; }
-#msgAssistOverlay .ma-prod .meta{ font-size:12px; color:#6b7280; }
-#msgAssistOverlay .ma-cart{ display:flex; flex-direction:column; gap:8px; margin-bottom:10px; }
-#msgAssistOverlay .ma-line{
-  border:1px solid #e5e7eb; border-radius:12px;
-  padding:10px 12px; background:#fff;
-  display:flex; flex-direction:column; gap:6px;
-}
-#msgAssistOverlay .ma-line .row1{
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
-}
-#msgAssistOverlay .ma-line .row2{
-  display:flex; gap:8px; align-items:center; flex-wrap:wrap;
-  font-size:12px; color:#374151;
-}
-#msgAssistOverlay .ma-qty{
-  display:flex; align-items:center; gap:6px;
-}
-#msgAssistOverlay .ma-qty button{
-  width:28px; height:28px; border-radius:10px;
-  border:1px solid #e5e7eb; background:#fff; cursor:pointer;
-  font-weight:900;
-}
-#msgAssistOverlay .ma-qty input{
-  width:54px; padding:6px 8px; border-radius:10px; border:1px solid #e5e7eb;
-}
-#msgAssistOverlay .ma-state-ov{
-  position:fixed; inset:0; background:rgba(0,0,0,.55);
-  display:none; align-items:center; justify-content:center;
-  z-index: 2147483646;
-}
-#msgAssistOverlay .ma-state-ov.show{ display:flex; }
-#msgAssistOverlay .ma-state-card{
-  width: 520px; max-width: 92vw;
-  background:#fff; border-radius:16px;
-  border:1px solid #e5e7eb;
-  box-shadow: 0 14px 40px rgba(0,0,0,.35);
-  padding: 14px;
-}
-#msgAssistOverlay .ma-state-title{ font-weight:900; margin-bottom:8px; }
-#msgAssistOverlay .ma-state-list{ display:flex; flex-direction:column; gap:8px; max-height: 55vh; overflow:auto; padding-right:4px; }
-#msgAssistOverlay .ma-state-opt{
-  border:1px solid #e5e7eb; border-radius:12px; padding:10px 12px;
-  cursor:pointer; user-select:none;
-}
-#msgAssistOverlay .ma-state-opt.active{ border-color:#111827; background:#f9fafb; }
-#msgAssistOverlay .ma-state-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:10px; }
-#msgAssistOverlay #maCartText{ min-height: 96px; }
+  /* === 通訊軟體點餐輔助：品項 BAR 置於 boxbar，產品清單可捲動 === */
+  #maPane_order .ma-order-grid .ma-box:first-child .ma-boxbody{
+    max-height: calc(100vh - 260px);
+    overflow-y: auto;
+  }
+  #maPane_order .ma-order-grid .ma-box:first-child .ma-boxbar{
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  #maPane_order .ma-order-grid .ma-box:first-child .ma-boxbar .ma-itembar{
+    margin: 2px 0;
+  }
+  .ma-itembtn{
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid rgba(244,241,233,.35);
+    background: rgba(0,0,0,.12);
+    cursor:pointer;
+    font-size:13px;
+    user-select:none;
+  }
+  .ma-itembtn.active{
+    background: rgba(244,241,233,.18);
+    border-color: rgba(244,241,233,.60);
+  }
+  .ma-prodbtn{
+    border:1px solid rgba(244,241,233,.20);
+    border-radius:12px;
+    padding:10px 12px;
+    cursor:pointer;
+    background: rgba(0,0,0,.10);
+  }
+  .ma-prodbtn:hover{ background: rgba(0,0,0,.16); }
+  .ma-prodbtn .sub{ display:block; opacity:.85; font-size:12px; margin-top:4px; }
+
+  /* === 購物車列表 === */
+  .ma-cart-body{ display:flex; flex-direction:column; gap:10px; }
+  .ma-cartlist{ display:flex; flex-direction:column; gap:8px; }
+  .ma-cartitem{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 10px;
+    border:1px solid rgba(244,241,233,.20);
+    border-radius:12px;
+    background: rgba(0,0,0,.10);
+  }
+  .ma-cartitem .txt{ flex:1; font-size:13px; }
+  .ma-cartitem .btn{ padding:6px 10px; border-radius:10px; border:1px solid rgba(244,241,233,.30); background: rgba(244,241,233,.10); cursor:pointer; font-size:12px; }
+  .ma-cartitem .btn:hover{ background: rgba(244,241,233,.16); }
+  .ma-cartitem .btn.danger{ border-color: rgba(255,90,90,.55); }
+  #maCartText{ min-height: 120px; resize: vertical; width:100%; }
+
+  /* === 狀態選擇 Modal === */
+  #maStateModal{ position:fixed; inset:0; display:none; z-index:1000010; }
+  #maStateModal.show{ display:block; }
+  #maStateModal .ma-modal-backdrop{ position:absolute; inset:0; background: rgba(0,0,0,.55); }
+  #maStateModal .ma-modal-card{
+    position:relative;
+    width:min(640px, calc(100% - 24px));
+    margin: 48px auto;
+    background: var(--board);
+    border:1px solid rgba(244,241,233,.25);
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  .ma-modal-bar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 12px;
+    border-bottom:1px solid rgba(244,241,233,.18);
+    background: rgba(0,0,0,.10);
+  }
+  #maStateModal .ma-modal-title{ font-weight:700; }
+  .ma-mini-btn.primary{ border-color: rgba(120,220,180,.55); }
+  #maStateModal .ma-modal-body{ padding:12px; display:flex; flex-direction:column; gap:10px; max-height: 55vh; overflow:auto; }
+  #maStateModal .ma-modal-hint{ padding:0 12px 12px; opacity:.85; font-size:12px; }
+  .ma-state-group{ border:1px solid rgba(244,241,233,.18); border-radius:12px; padding:10px; }
+  .ma-state-group .gtitle{ font-weight:700; font-size:13px; margin-bottom:8px; opacity:.95; }
+  .ma-state-row{ display:flex; align-items:center; gap:8px; padding:6px 0; }
+  .ma-state-row label{ cursor:pointer; }
 
 </style>
 
@@ -1004,7 +1099,7 @@ html.board-mode #boardQR .qr{
           max-width: 340px;
           white-space: normal;
         }
-      </style><script id="wsPublicOrderPayload">window.__WS_PUBLIC_ORDER_PAYLOAD__ = {"generated_at":"2026-02-26T08:07:40.993Z","catalog":[{"id":"fp_19c7a45ebb7_8b50b5c0_1","name":"不織布提網","short":"提網","item":"包裝","price":5,"tags":["fp_19c7a45ebb7_8b50b5c0_1"],"states":[]},{"id":"fp_19c7a45ebb7_4480d6d6_2","name":"冬瓜茶_內用","short":"冬_內","item":"飲品","price":10,"tags":["fp_19c7a45ebb7_4480d6d6_2","集點","12份折1份","滿60元1點","飲品滿500折50","飲品滿1000七折"],"states":[{"name":"加冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_3be5defa_3","name":"冬瓜茶_外帶","short":"冬_外","item":"飲品","price":25,"tags":["fp_19c7a45ebb7_3be5defa_3","集點","12份折1份","滿60元1點"],"states":[{"name":"去冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_058ca7d4_4","name":"冬瓜茶_外帶自杯","short":"冬_自","item":"飲品","price":15,"tags":["fp_19c7a45ebb7_058ca7d4_4","12份折1份","滿60元1點"],"states":[{"name":"去冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_665b32b8_5","name":"冬瓜紫蘇梅_內用","short":"冬梅_內","item":"飲品","price":20,"tags":["fp_19c7a45ebb7_665b32b8_5","集點","12份折1份","滿60元1點"],"states":[{"name":"去冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_20add37f_6","name":"冬瓜紫蘇梅_外帶","short":"冬梅_外","item":"飲品","price":35,"tags":["fp_19c7a45ebb7_20add37f_6","集點","12份折1份","滿60元1點"],"states":[{"name":"去冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_214267b1_7","name":"冬瓜紫蘇梅_外帶自杯","short":"冬梅_自","item":"飲品","price":25,"tags":["fp_19c7a45ebb7_214267b1_7","集點","12份折1份","滿60元1點"],"states":[{"name":"去冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_4dc5535a_8","name":"冬瓜鮮奶_內用","short":"冬鮮_內","item":"飲品","price":25,"tags":["fp_19c7a45ebb7_4dc5535a_8","集點","12份折1份","滿60元1點"],"states":[{"name":"加冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_430dd58d_9","name":"冬瓜鮮奶_外帶","short":"冬鮮_外","item":"飲品","price":45,"tags":["fp_19c7a45ebb7_430dd58d_9","集點","12份折1份","滿60元1點"],"states":[{"name":"去冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_5872c045_a","name":"冬瓜鮮奶_外帶自杯","short":"冬鮮_自","item":"飲品","price":35,"tags":["fp_19c7a45ebb7_5872c045_a","集點","12份折1份","滿60元1點"],"states":[{"name":"去冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_016fcde8_b","name":"冬瓜檸檬_內用","short":"冬檸_內","item":"飲品","price":15,"tags":["fp_19c7a45ebb7_016fcde8_b","集點","12份折1份","滿60元1點"],"states":[{"name":"加冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_20088b0d_c","name":"冬瓜檸檬_外帶","short":"冬檸_外","item":"飲品","price":30,"tags":["fp_19c7a45ebb7_20088b0d_c","集點","12份折1份","滿60元1點"],"states":[{"name":"去冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_c1af0339_d","name":"冬瓜檸檬_外帶自杯","short":"冬檸_自","item":"飲品","price":20,"tags":["fp_19c7a45ebb7_c1af0339_d","集點","12份折1份","滿60元1點"],"states":[{"name":"去冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_f3ab4a63_e","name":"燒仙草_內用","short":"燒_內","item":"飲品","price":20,"tags":["fp_19c7a45ebb7_f3ab4a63_e","集點","12份折1份","滿60元1點"],"states":[]},{"id":"fp_19c7a45ebb7_d77a6533_f","name":"燒仙草_外帶","short":"燒_外","item":"飲品","price":40,"tags":["fp_19c7a45ebb7_d77a6533_f","集點","12份折1份","滿60元1點"],"states":[]},{"id":"fp_19c7a45ebb7_e9920412_10","name":"燒仙草_外帶自杯","short":"燒_自","item":"飲品","price":30,"tags":["fp_19c7a45ebb7_e9920412_10","集點","12份折1份","滿60元1點"],"states":[]},{"id":"fp_19c7a45ebb7_f49f66c1_11","name":"純雞蛋糕","short":"純","item":"雞蛋糕","price":10,"tags":["fp_19c7a45ebb7_f49f66c1_11","集點","12份折1份","滿60元1點","10元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_0050d633_12","name":"巧克力","short":"巧","item":"雞蛋糕","price":15,"tags":["fp_19c7a45ebb7_0050d633_12","集點","12份折1份","滿60元1點","15元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_1f8761d7_13","name":"奶油","short":"奶","item":"雞蛋糕","price":15,"tags":["fp_19c7a45ebb7_1f8761d7_13","集點","12份折1份","滿60元1點","15元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_275e966f_14","name":"鹹蛋黃","short":"鹹","item":"雞蛋糕","price":15,"tags":["fp_19c7a45ebb7_275e966f_14","集點","12份折1份","滿60元1點","15元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_186b7c21_15","name":"抹茶","short":"抹","item":"雞蛋糕","price":15,"tags":["fp_19c7a45ebb7_186b7c21_15","集點","12份折1份","滿60元1點","15元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_423df2dd_16","name":"紅豆","short":"紅","item":"雞蛋糕","price":15,"tags":["fp_19c7a45ebb7_423df2dd_16","集點","12份折1份","滿60元1點","15元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_ed76997a_17","name":"芝麻","short":"芝","item":"雞蛋糕","price":15,"tags":["fp_19c7a45ebb7_ed76997a_17","集點","12份折1份","滿60元1點","15元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_af2931c7_18","name":"蒜香","short":"蒜","item":"雞蛋糕","price":15,"tags":["fp_19c7a45ebb7_af2931c7_18","集點","12份折1份","滿60元1點","15元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_60cde13d_19","name":"梅子花生","short":"花","item":"雞蛋糕","price":15,"tags":["fp_19c7a45ebb7_60cde13d_19","集點","12份折1份","滿60元1點","15元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_97beb9cb_1a","name":"草莓","short":"莓","item":"雞蛋糕","price":15,"tags":["fp_19c7a45ebb7_97beb9cb_1a","集點","12份折1份","滿60元1點","15元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_f9154957_1c","name":"奶油鹹蛋","short":"奶鹹","item":"雞蛋糕","price":20,"tags":["fp_19c7a45ebb7_f9154957_1c","集點","12份折1份","滿60元1點","20元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_b7abecf7_1d","name":"雙色乳酪","short":"酪","item":"雞蛋糕","price":20,"tags":["fp_19c7a45ebb7_b7abecf7_1d","集點","12份折1份","滿60元1點","20元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_7599c171_1e","name":"抹茶紅豆","short":"抹紅","item":"雞蛋糕","price":20,"tags":["fp_19c7a45ebb7_7599c171_1e","集點","12份折1份","滿60元1點","20元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_2df4cae0_1f","name":"抹茶巧克力","short":"抹巧","item":"雞蛋糕","price":20,"tags":["fp_19c7a45ebb7_2df4cae0_1f","集點","12份折1份","滿60元1點","20元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_58c50b40_20","name":"芝麻巧克力","short":"芝巧","item":"雞蛋糕","price":20,"tags":["fp_19c7a45ebb7_58c50b40_20","集點","12份折1份","滿60元1點","20元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_f2df5b90_21","name":"花生巧克力","short":"花巧","item":"雞蛋糕","price":20,"tags":["fp_19c7a45ebb7_f2df5b90_21","集點","12份折1份","滿60元1點","20元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_c2871fef_22","name":"玉米濃湯","short":"濃","item":"雞蛋糕","price":20,"tags":["fp_19c7a45ebb7_c2871fef_22","集點","12份折1份","滿60元1點","20元雞蛋糕"],"states":[]},{"id":"fp_19c7a45ebb7_5795c186_24","name":"美式_內用","short":"美內","item":"咖啡","price":35,"tags":["fp_19c7a45ebb7_5795c186_24","集點"],"states":[{"name":"經典","xor":true,"delta":0,"qty":1},{"name":"低因","xor":true,"delta":0,"qty":1},{"name":"花果","xor":true,"delta":0,"qty":1},{"name":"香草","xor":true,"delta":0,"qty":1},{"name":"木質辛香","xor":true,"delta":0,"qty":1},{"name":"冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_badcbb6c_25","name":"美式_外帶","short":"美外","item":"咖啡","price":60,"tags":["fp_19c7a45ebb7_badcbb6c_25","集點"],"states":[{"name":"經典","xor":true,"delta":0,"qty":1},{"name":"低因","xor":true,"delta":0,"qty":1},{"name":"花果","xor":true,"delta":0,"qty":1},{"name":"香草","xor":true,"delta":0,"qty":1},{"name":"木質辛香","xor":true,"delta":0,"qty":1},{"name":"冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_050b9ebd_26","name":"美式_外帶自杯","short":"美自","item":"咖啡","price":50,"tags":["fp_19c7a45ebb7_050b9ebd_26","集點"],"states":[{"name":"經典","xor":true,"delta":0,"qty":1},{"name":"低因","xor":true,"delta":0,"qty":1},{"name":"花果","xor":true,"delta":0,"qty":1},{"name":"香草","xor":true,"delta":0,"qty":1},{"name":"木質辛香","xor":true,"delta":0,"qty":1},{"name":"冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_116acc71_27","name":"拿鐵_內用","short":"拿內","item":"咖啡","price":55,"tags":["fp_19c7a45ebb7_116acc71_27","集點"],"states":[{"name":"經典","xor":true,"delta":0,"qty":1},{"name":"低因","xor":true,"delta":0,"qty":1},{"name":"花果","xor":true,"delta":0,"qty":1},{"name":"香草","xor":true,"delta":0,"qty":1},{"name":"木質辛香","xor":true,"delta":0,"qty":1},{"name":"冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_0bfaa202_28","name":"萌翻拿鐵","short":"萌翻","item":"咖啡","price":65,"tags":["fp_19c7a45ebb7_0bfaa202_28","集點"],"states":[{"name":"經典","xor":true,"delta":0,"qty":1},{"name":"低因","xor":true,"delta":0,"qty":1},{"name":"花果","xor":true,"delta":0,"qty":1},{"name":"香草","xor":true,"delta":0,"qty":1},{"name":"木質辛香","xor":true,"delta":0,"qty":1},{"name":"冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_edb4d269_29","name":"拿鐵_外帶","short":"拿外","item":"咖啡","price":95,"tags":["fp_19c7a45ebb7_edb4d269_29","集點"],"states":[{"name":"經典","xor":true,"delta":0,"qty":1},{"name":"低因","xor":true,"delta":0,"qty":1},{"name":"花果","xor":true,"delta":0,"qty":1},{"name":"香草","xor":true,"delta":0,"qty":1},{"name":"木質辛香","xor":true,"delta":0,"qty":1},{"name":"冰","xor":true,"delta":0,"qty":1}]},{"id":"fp_19c7a45ebb7_74b5eb25_2a","name":"拿鐵_外帶自杯","short":"拿自","item":"咖啡","price":85,"tags":["fp_19c7a45ebb7_74b5eb25_2a","集點"],"states":[{"name":"經典","xor":true,"delta":0,"qty":1},{"name":"低因","xor":true,"delta":0,"qty":1},{"name":"花果","xor":true,"delta":0,"qty":1},{"name":"香草","xor":true,"delta":0,"qty":1},{"name":"木質辛香","xor":true,"delta":0,"qty":1},{"name":"冰","xor":true,"delta":0,"qty":1}]}],"discounts":[{"id":"d_mlue9iqr_r5pnk6","name":"點卡","type":"coupon","note1_targets":["10元雞蛋糕","15元雞蛋糕","20元雞蛋糕"],"amount_threshold":0,"qty_threshold":0,"bundle_price":0,"coupon_mode":"full","coupon_amount":0},{"id":"d_mlue9iqr_n3m385","name":"12折1","type":"qty","note1_targets":["12份折1份"],"amount_threshold":0,"qty_threshold":12,"bundle_price":0,"coupon_mode":"full","coupon_amount":0},{"id":"d_mlue9iqr_xhbv97","name":"純","type":"bundle_qty","note1_targets":[],"amount_threshold":0,"qty_threshold":0,"bundle_price":20,"coupon_mode":"full","coupon_amount":0},{"id":"d_mlue9iqr_1vqenp","name":"純+單","type":"bundle_qty","note1_targets":[],"amount_threshold":0,"qty_threshold":0,"bundle_price":25,"coupon_mode":"full","coupon_amount":0},{"id":"d_mlue9iqr_vgj7wj","name":"單","type":"bundle_qty","note1_targets":[],"amount_threshold":0,"qty_threshold":0,"bundle_price":30,"coupon_mode":"full","coupon_amount":0},{"id":"d_mlue9iqr_tjfngb","name":"雙","type":"bundle_qty","note1_targets":[],"amount_threshold":0,"qty_threshold":0,"bundle_price":35,"coupon_mode":"full","coupon_amount":0},{"id":"d_mlue9iqr_171wcz","name":"純+雙","type":"bundle_qty","note1_targets":[],"amount_threshold":0,"qty_threshold":0,"bundle_price":30,"coupon_mode":"full","coupon_amount":0},{"id":"d_mlue9iqr_mnkdtt","name":"單+雙","type":"bundle_qty","note1_targets":[],"amount_threshold":0,"qty_threshold":0,"bundle_price":35,"coupon_mode":"full","coupon_amount":0},{"id":"d_mlue9iqr_em3cim","name":"餅","type":"bundle_qty","note1_targets":[],"amount_threshold":0,"qty_threshold":0,"bundle_price":15,"coupon_mode":"full","coupon_amount":0},{"id":"d_mlue9iqr_xfkmff","name":"集點","type":"points","note1_targets":["集點"],"amount_threshold":0,"qty_threshold":0,"bundle_price":0,"coupon_mode":"full","coupon_amount":0}],"discountApplyOrder":["d_mlue9iqr_tjfngb","d_mlue9iqr_vgj7wj","d_mlue9iqr_xhbv97","d_mlue9iqr_mnkdtt","d_mlue9iqr_171wcz","d_mlue9iqr_1vqenp","d_mlue9iqr_em3cim","d_mlue9iqr_r5pnk6","d_mlue9iqr_n3m385","d_mlue9iqr_xfkmff"]};</script></head>
+      </style></head>
 
 <body>
 
@@ -1076,10 +1171,14 @@ html.board-mode #boardQR .qr{
         <button class="ma-tab" data-tab="order">點餐</button>
         <button class="ma-tab" data-tab="bundle">訂單組合</button>
       </div>
-      <div class="ma-totals" id="maTotals" aria-label="結帳試算">
-        <span>訂單金額 <b id="maOrderAmt">0</b></span>
-        <span>總折扣 <b id="maDiscountAmt">0</b></span>
-        <span>集點 <b id="maPointsAmt">0</b></span>
+      <div class="ma-amtbar" id="maAmtBar">
+        <span class="k">訂單金額</span><span class="v" id="maAmtOrder">0</span>
+        <span class="sep">｜</span>
+        <span class="k">優惠金額</span><span class="v" id="maAmtDiscount">0</span>
+        <span class="sep">｜</span>
+        <span class="k">結帳金額</span><span class="v" id="maAmtCheckout">0</span>
+        <span class="sep">｜</span>
+        <span class="k">集點</span><span class="v" id="maAmtPoints">0點</span>
       </div>
       <button class="ma-close" id="msgAssistClose" aria-label="close">✕</button>
     </div>
@@ -1116,7 +1215,7 @@ html.board-mode #boardQR .qr{
           <div></div>
 
           <label style="grid-column: 1 / span 1;">
-            外送地址（苗栗市門牌滿300原可送）
+            外送地址（苗栗市門牌滿300元可送）
             <input id="maAddr" type="text" placeholder="例如：苗栗市xxx路xx號">
           </label>
 
@@ -1134,23 +1233,19 @@ html.board-mode #boardQR .qr{
           </label>
         </div>
 
-        <div class="ma-hint">
-          ＊瀏覽器會記錄上一次輸入的資訊（只存在你的裝置上）。<br>
-          ＊若「外送地址」有值，視為外送：上方標示外送必填的欄位請填好。
-        </div>
+      
       </div>
 
-      <!-- 點餐 -->
+      <!-- 點餐（先畫位置，邏輯後續） -->
       <div class="ma-pane" id="maPane_order">
         <div class="ma-order-grid">
           <div class="ma-box">
             <div class="ma-boxbar">
-              <div>品項</div>
+              <div id="maItemBar" class="ma-itembar"></div>
               <div class="spacer"></div>
             </div>
             <div class="ma-boxbody">
-              <div class="ma-chips" id="maItemChips"></div>
-              <div class="ma-list" id="maProductList"></div>
+<div class="ma-prodlist" id="maProdList"></div>
             </div>
           </div>
 
@@ -1160,43 +1255,32 @@ html.board-mode #boardQR .qr{
               <div class="spacer"></div>
               <button class="ma-mini-btn" id="maCartBoss">找老闆</button>
               <button class="ma-mini-btn" id="maCartCopy">複製</button>
+              <button class="ma-mini-btn" id="maCartClear">清空</button>
             </div>
-            <div class="ma-boxbody">
-              <div class="ma-cart" id="maCartList"></div>
-              <textarea id="maCartText" placeholder="（會自動生成可貼到通訊軟體的文字）"></textarea>
-            </div>
-          </div>
-        </div>
-
-        <!-- 狀態選擇 Modal -->
-        <div class="ma-state-ov" id="maStateOv" aria-hidden="true">
-          <div class="ma-state-card" role="dialog" aria-modal="true" aria-label="選擇狀態">
-            <div class="ma-state-title" id="maStateTitle">選擇狀態</div>
-            <div class="ma-state-list" id="maStateList"></div>
-            <div class="ma-state-actions">
-              <button class="ma-mini-btn" id="maStateCancel" type="button">取消</button>
-              <button class="ma-mini-btn" id="maStateOk" type="button">確定</button>
+            <div class="ma-boxbody ma-cart-body">
+              <div id="maCartList" class="ma-cartlist"></div>
+              <textarea id="maCartText" placeholder="（這裡會自動生成可貼到通訊軟體的文字）"></textarea>
             </div>
           </div>
         </div>
 
         <div class="ma-hint">
-          ＊點選產品後若有狀態，會先跳出狀態選擇；選妥後自動加入購物車。<br>
-          ＊若「外送地址」有值，複製/找老闆會自動用外送格式。
+          ＊目前先把版位與「複製」按鈕放好；點餐細節邏輯後續再接。
         </div>
       </div>
 
       <!-- 訂單組合（先畫位置 + 可增刪列） -->
       <div class="ma-pane" id="maPane_bundle">
         <div class="ma-box" style="min-height:auto;">
-          <div class="ma-boxbar">
-            <div>訂單組合（待建置）</div>
+          <div class="ma-boxbar ma-stickybar">
+            <div>訂單組合</div>
             <div class="spacer"></div>
             <button class="ma-mini-btn" id="maBundleBoss">找老闆</button>
             <button class="ma-mini-btn" id="maBundleBtn">組合</button>
+            <button class="ma-mini-btn" id="maBundleClear">清空</button>
           </div>
           <div class="ma-boxbody" style="min-height:auto;">
-            <div>下方預設三列，可自行增加或刪除（組合邏輯後續處理）。</div>
+            <div>多人合購可將自己購物車內容複製給承辦人，於此逐一貼入後再按組合。</div>
             <div class="ma-rows" id="maBundleRows"></div>
             <button class="ma-add" id="maAddRow" type="button">＋ 增加一列</button>
           </div>
@@ -2844,6 +2928,21 @@ function showPanel(){
   const btn = $('msgAssistBtn');
   if(!overlay || !btn) return;
 
+  // prevent outside-click handlers from interfering (but DO NOT block clicks inside modal)
+  (function(){
+    const shield = (e)=>{
+      try{
+        if(e && e.target === overlay){
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }catch(_){ }
+    };
+    overlay.addEventListener('mousedown', shield, true);
+    overlay.addEventListener('touchstart', shield, true);
+    overlay.addEventListener('click', shield, true);
+  })();
+
   const LS_KEY = 'mh_msgassist_info_v1';
   const tabs = Array.from(overlay.querySelectorAll('.ma-tab'));
   const panes = {
@@ -2852,7 +2951,1403 @@ function showPanel(){
     bundle: $('maPane_bundle')
   };
 
-  function pad(n){ return String(n).padStart(2,'0'); }
+  // cache products for eggcake 2nd flavor picker
+  let __maProdsCache = [];
+
+
+
+  // (moved) load persisted cart when opening overlay; early call would run before function is defined
+  // ===== 產品清單來源：由工作系統「官網編輯器」在存回/下載時注入 (#wsCartData) =====
+  function __maLoadCartData(){
+    try{
+      const el = document.getElementById('wsCartData');
+      if(!el) return { final_item_order: [], products: [] };
+      const json = (el.textContent||'').trim();
+      if(!json) return { final_item_order: [], products: [] };
+      const data = JSON.parse(json);
+      if(!data || !Array.isArray(data.products)) return { final_item_order: [], products: [] };
+      return data;
+    }catch(_){
+      return { final_item_order: [], products: [] };
+    }
+  }
+
+  function __maRenderItemBar(){
+    const bar = $('maItemBar');
+    const list = $('maProdList');
+    if(!bar || !list) return;
+
+    const data = __maLoadCartData();
+    const prods = (data.products||[]).filter(p=>p && p.name);
+    __maProdsCache = prods;
+    const itemOrder = Array.isArray(data.final_item_order) ? data.final_item_order.slice() : [];
+    const itemsSet = new Set(prods.map(p=>String(p.item||'').trim()).filter(Boolean));
+    const items = [];
+    itemOrder.forEach(it=>{ const k=String(it||'').trim(); if(k && itemsSet.has(k) && !items.includes(k)) items.push(k); });
+    Array.from(itemsSet).forEach(it=>{ if(!items.includes(it)) items.push(it); });
+
+    bar.innerHTML = '';
+    list.innerHTML = '';
+
+    if(items.length===0){
+      const div = document.createElement('div');
+      div.style.opacity = '.85';
+      div.style.fontSize = '13px';
+      div.textContent = '（尚未注入可點餐清單：請回到工作系統→官網編輯器→存回 GitHub 或另存本地一次）';
+      list.appendChild(div);
+      return;
+    }
+
+    let activeItem = items[0];
+
+    function renderProducts(){
+      list.innerHTML = '';
+      const cur = String(activeItem||'').trim();
+      const arr = prods.filter(p=>String(p.item||'').trim()===cur);
+
+      if(arr.length===0){
+        const div = document.createElement('div');
+        div.style.opacity = '.85';
+        div.style.fontSize = '13px';
+        div.textContent = '（此品項目前沒有可點餐產品）';
+        list.appendChild(div);
+        return;
+      }
+
+      arr.forEach(p=>{
+        const btn = document.createElement('div');
+        btn.className = 'ma-prodbtn';
+        const nm = String(p.name||'').trim();
+        const states = Array.isArray(p.states) ? p.states : [];
+        const stNames = states.map(s=>String(s&&s.name||'').trim()).filter(Boolean);
+        btn.innerHTML = `<div>${nm}</div>` + (stNames.length ? `<span class="sub">可選：${stNames.map(x=>String(x).trim()).filter(Boolean).join('、')}</span>` : '');
+        btn.addEventListener('click', ()=>{
+          if(states.length){
+            __maOpenStateModal(p, {
+              mode: 'add',
+              onOk: (picked)=>{
+                __maAddToCart(p, picked||[]);
+              }
+            });
+          }else{
+            __maAddToCart(p, []);
+          }
+        });
+        list.appendChild(btn);
+      });
+    }
+
+    function setActive(it){
+      activeItem = it;
+      Array.from(bar.querySelectorAll('.ma-itembtn')).forEach(b=>{
+        b.classList.toggle('active', b.dataset.item===String(activeItem));
+      });
+      renderProducts();
+    }
+
+    items.forEach(it=>{
+      const b = document.createElement('div');
+      b.className = 'ma-itembtn';
+      b.dataset.item = String(it);
+      b.textContent = it;
+      b.addEventListener('click', ()=>setActive(it));
+      bar.appendChild(b);
+    });
+
+    setActive(activeItem);
+  }
+
+
+
+  
+  // ===== 購物車（點餐輔助） =====
+  const __maCart = {
+    items: [] // {id, name, short, item, isEgg, flavor1, flavor2, states[], qty, text}
+  };
+
+  const MA_LS_CART = 'mh_msgassist_cart_v1';
+  const MA_LS_BUNDLE = 'mh_msgassist_bundle_v1';
+  // ===== 金流（金額/優惠/結帳）— 套用 work_system 的算法（現金；優惠全自動生效） =====
+  const __maMoney = { mode:'cart', last:{order:0, discount:0, checkout:0} };
+
+  function __maFmtMoney(n){
+    const v = Number(n||0);
+    if(!Number.isFinite(v)) return '0';
+    const iv = Math.round(v);
+    if(Math.abs(v - iv) < 1e-9) return String(iv);
+    return v.toFixed(2);
+  }
+
+  function __maReadJsonScript(id){
+    try{
+      const el = document.getElementById(id);
+      if(!el) return null;
+      const t = (el.textContent||'').trim();
+      if(!t) return null;
+      return JSON.parse(t);
+    }catch(_){
+      return null;
+    }
+  }
+
+
+  function __maGetFinalProductsList(){
+    // 允許外部注入（官網編輯器存回/下載時也可注入）
+    let arr =
+      (Array.isArray(window.finalProducts) ? window.finalProducts :
+      (Array.isArray(window.final_products) ? window.final_products :
+      (Array.isArray(window.__wsFinalProducts) ? window.__wsFinalProducts : null)));
+    if(!Array.isArray(arr) || arr.length===0){
+      const j = __maReadJsonScript('wsFinalProductsData');
+      if(Array.isArray(j)) arr = j;
+    }
+    if(!Array.isArray(arr) || arr.length===0){
+      const j2 = __maReadJsonScript('wsMoneyData_finalProducts');
+      if(Array.isArray(j2)) arr = j2;
+    }
+    return Array.isArray(arr) ? arr : [];
+  }
+
+  function __maGetDiscountsList(){
+    let arr =
+      (Array.isArray(window.discounts) ? window.discounts :
+      (Array.isArray(window.__wsDiscounts) ? window.__wsDiscounts : null));
+    if(!Array.isArray(arr) || arr.length===0){
+      const j = __maReadJsonScript('wsDiscountsData');
+      if(Array.isArray(j)) arr = j;
+    }
+    if(!Array.isArray(arr) || arr.length===0){
+      const j2 = __maReadJsonScript('wsMoneyData_discounts');
+      if(Array.isArray(j2)) arr = j2;
+    }
+    return Array.isArray(arr) ? arr : [];
+  }
+
+  function __maGetDiscountApplyOrder(){
+    let arr =
+      (Array.isArray(window.discountApplyOrder) ? window.discountApplyOrder :
+      (Array.isArray(window.__wsDiscountApplyOrder) ? window.__wsDiscountApplyOrder : null));
+    if(!Array.isArray(arr) || arr.length===0){
+      const j = __maReadJsonScript('wsDiscountApplyOrderData');
+      if(Array.isArray(j)) arr = j;
+    }
+    if(!Array.isArray(arr) || arr.length===0){
+      const j2 = __maReadJsonScript('wsMoneyData_discountApplyOrder');
+      if(Array.isArray(j2)) arr = j2;
+    }
+    return Array.isArray(arr) ? arr : [];
+  }
+
+  function __maGetFpById(id){
+    const key = String(id||'').trim();
+    if(!key) return null;
+    const fps = __maGetFinalProductsList();
+    return (fps||[]).find(x=>x && String(x.id||'').trim()===key) || null;
+  }
+
+  function __maGetLatestFinalPrice(fp){
+    // work_system：會依今天/分時段等取最新；官網只需要可用價格
+    if(!fp || typeof fp!=='object') return 0;
+    const v =
+      (fp.price_today!=null ? fp.price_today :
+      (fp.price!=null ? fp.price :
+      (fp.price_default!=null ? fp.price_default : fp.sell_price)));
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function __maSplitTags(raw){
+    if(raw==null) return [];
+    if(Array.isArray(raw)) return raw.map(x=>String(x||'').trim()).filter(Boolean);
+    const s = String(raw||'').trim();
+    if(!s) return [];
+    return s.split(/[\s,，;；、|]+/g).map(x=>String(x||'').trim()).filter(Boolean);
+  }
+
+  function __maGetFinalProductTags(fp){
+    const raw = fp && (fp.tags_csv || fp.tags || fp.tag || '');
+    return __maSplitTags(raw);
+  }
+
+  function __maBuildUnitsFromCartItems(items){
+    const units = [];
+    (items||[]).forEach(it=>{
+      if(!it) return;
+      const q = __maClampQty(it.qty||1);
+      const fp = __maGetFpById(it.id);
+      const price = __maGetLatestFinalPrice(fp);
+      const tags = fp ? __maGetFinalProductTags(fp) : [];
+      if(it.isEgg){
+        // 「純+奶」視為 2 份；沒有第二顆口味也視為 1 份
+        const k = (it.flavor2 && String(it.flavor2).trim()) ? 2 : 1;
+        for(let i=0;i<q*k;i++) units.push({ price:+price||0, tags: tags.slice() });
+      }else{
+        for(let i=0;i<q;i++) units.push({ price:+price||0, tags: tags.slice() });
+      }
+    });
+    return units;
+  }
+
+  function __maParseCartToken(tok){
+    // 例：純+奶X2 / 冬_外(去冰)X1 / 提網X3
+    const s0 = String(tok||'').trim();
+    if(!s0) return null;
+    const m = s0.match(/^(.*?)(?:X(\d+))\s*$/);
+    const core = (m ? String(m[1]||'') : s0).trim();
+    const qty = __maClampQty(m ? parseInt(m[2]||'1',10) : 1);
+
+    // states: (...) 先去掉
+    const core2 = core.replace(/\([^)]*\)/g,'').trim();
+
+    // egg second: a+b
+    const parts = core2.split('+').map(x=>String(x||'').trim()).filter(Boolean);
+    if(parts.length>=2){
+      return { shorts: [parts[0], parts[1]], qty };
+    }
+    return { shorts: [core2], qty };
+  }
+
+  function __maBuildShortToIdMap(){
+    const data = __maLoadCartData();
+    const prods = (data && Array.isArray(data.products)) ? data.products : [];
+    const map = new Map();
+    prods.forEach(p=>{
+      const sh = String(p && (p.short||p.name) || '').trim();
+      const id = String(p && p.id || '').trim();
+      if(sh && id && !map.has(sh)) map.set(sh, id);
+    });
+    return map;
+  }
+
+  function __maBuildUnitsFromCartString(cartStr){
+    const s = String(cartStr||'').trim();
+    if(!s) return [];
+    const tokens = s.split('；').map(x=>String(x||'').trim()).filter(Boolean);
+    const shortMap = __maBuildShortToIdMap();
+    const units = [];
+    tokens.forEach(tok=>{
+      const parsed = __maParseCartToken(tok);
+      if(!parsed) return;
+      const qty = parsed.qty;
+      const shorts = parsed.shorts || [];
+      const ids = shorts.map(sh=> shortMap.get(String(sh||'').trim()) || '').filter(Boolean);
+
+      if(ids.length>=2){
+        for(let i=0;i<qty;i++){
+          ids.slice(0,2).forEach(id=>{
+            const fp = __maGetFpById(id);
+            const price = __maGetLatestFinalPrice(fp);
+            const tags = fp ? __maGetFinalProductTags(fp) : [];
+            units.push({ price:+price||0, tags: tags.slice() });
+          });
+        }
+      }else if(ids.length===1){
+        const id = ids[0];
+        const fp = __maGetFpById(id);
+        const price = __maGetLatestFinalPrice(fp);
+        const tags = fp ? __maGetFinalProductTags(fp) : [];
+        for(let i=0;i<qty;i++) units.push({ price:+price||0, tags: tags.slice() });
+      }
+    });
+    return units;
+  }
+
+  function __maGetApplicableDiscounts(){
+    const out = [];
+    const discounts = __maGetDiscountsList();
+    (discounts||[]).forEach((d, idx)=>{
+      if(!d) return;
+      const applicable = !!(d.applicable ?? d.is_applicable ?? false);
+      if(!applicable) return;
+
+      // === work_system 規則對齊 ===
+      // - 被動優惠：is_active=false（或 isActive=false）=> 直接生效
+      // - 主動優惠：is_active=true（或 isActive=true）=> 官網不提供選擇，故不套用
+      // - 強制約束：bundle_qty 一律視為被動；coupon 一律視為主動
+      try{
+        const t = __maNormDiscountType(d && d.type);
+        if(t==='bundle_qty') d.is_active = false;
+        if(t==='coupon') d.is_active = true;
+        if(t==='points') d.is_active = false;
+      }catch(_){}
+      const isActive = !!(d.is_active ?? d.isActive);
+      if(isActive) return; // 只套用被動優惠
+
+      out.push({d, idx});
+    });
+
+    // 依 work_system 的套用排序
+    const order = __maGetDiscountApplyOrder();
+    const pos = new Map();
+    (order||[]).forEach((x,i)=>{ const k=String(x||''); if(k) pos.set(k, i); });
+
+    out.sort((a,b)=>{
+      const ai = pos.has(String(a.d && a.d.id || '')) ? pos.get(String(a.d && a.d.id || '')) : 999999;
+      const bi = pos.has(String(b.d && b.d.id || '')) ? pos.get(String(b.d && b.d.id || '')) : 999999;
+      if(ai!==bi) return ai-bi;
+      return (a.idx||0)-(b.idx||0);
+    });
+    return out;
+  }
+
+  function __maPickTaggedUnits(units, tags){
+    const set = new Set((tags||[]).map(x=>String(x||'').trim()).filter(Boolean));
+    if(set.size===0) return [];
+    return (units||[]).filter(u=>{
+      const ut = Array.isArray(u.tags) ? u.tags : [];
+      for(const t of ut){ if(set.has(String(t||'').trim())) return true; }
+      return false;
+    });
+  }
+
+  
+  
+function __maUnitHasAnyTag(unit, tags){
+  const ut = Array.isArray(unit && unit.tags) ? unit.tags.map(t=>String(t||'').trim()).filter(Boolean) : [];
+  const tg = (tags||[]).map(t=>String(t||'').trim()).filter(Boolean);
+  if(!ut.length || !tg.length) return false;
+  const set = new Set(tg);
+  for(const t of ut){ if(set.has(t)) return true; }
+  return false;
+}
+
+function __maCalcPointsEarned(picked, units){
+  // 對齊 work_system V26：points 不影響金額，只回傳本單「得點」
+  const breakdown = [];
+  let total = 0;
+
+  const pickedIdxSet = new Set((picked||[]).map(x=>x && x.idx).filter(x=>x!=null));
+  const pickedByIdx = {};
+  (picked||[]).forEach(x=>{ if(x && x.idx!=null) pickedByIdx[x.idx]=x.d; });
+
+  const discountsAll = __maGetDiscountsList();
+
+  (picked||[]).forEach(({d, idx})=>{
+    if(!d || __maNormDiscountType(d.type) !== 'points') return;
+
+    const fullCount = Math.max(0, Math.floor(Number(d.pt_full_count||0)));
+    const cap = Math.max(0, fullCount - 1);
+
+    const s1Type = (d.pt_stage1_type || 'amount');
+    const s1Thr = Number(d.pt_stage1_threshold||0);
+    const s1Give = Math.max(0, Math.floor(Number(d.pt_stage1_give||0)));
+
+    const s2Type = (d.pt_stage2_type || 'amount');
+    const s2Thr = Number(d.pt_stage2_threshold||0);
+    const s2Mul = Number(d.pt_stage2_multiplier||1);
+
+    const tags = (d.note1_targets || []).map(x=>String(x||'').trim()).filter(Boolean);
+
+    // 若未設定註1標籤：代表「任何有標籤的產品/份」都能集點
+    let eligible = (units||[]).filter(u=>{
+      const utags = Array.isArray(u && u.tags) ? u.tags.map(t=>String(t||'').trim()).filter(Boolean) : [];
+      if(tags.length===0) return utags.length>0;
+      return __maUnitHasAnyTag({tags:utags}, tags);
+    }).map(u=>({ price:+u.price||0, tags:(Array.isArray(u.tags)?u.tags:[]) }));
+    if(eligible.length===0) return;
+
+    let synergyPoints = 0;
+
+    const synergyList = Array.isArray(d.pt_synergy) ? d.pt_synergy : [];
+    let chosenSy = null;
+
+    for(const sy of synergyList){
+      if(!sy || sy.discount_index==null) continue;
+      const sidx = Number(sy.discount_index);
+      if(!pickedIdxSet.has(sidx)) continue;
+      const sd = pickedByIdx[sidx] || (discountsAll||[])[sidx];
+      if(!sd) continue;
+      const sdType = __maNormDiscountType(sd.type);
+      if(sdType !== 'qty' && sdType !== 'amount') continue;
+
+      const givePts = Math.max(0, Math.floor(Number(sy.give_points||0)));
+      if(givePts<=0) continue;
+
+      // 協動不要求標籤交集：只要指定的協動優惠本身達成條件即可。
+      if(sdType === 'qty'){
+        const thr = Math.max(0, Math.floor(Number(sd.qty_threshold||0)));
+        if(thr<=0) continue;
+        const cycles = Math.floor(eligible.length / thr);
+        if(cycles<=0) continue;
+        chosenSy = { mode:'qty', thr, cycles, givePts };
+        break;
+      } else {
+        const thr = Number(sd.amount_threshold||0);
+        if(!Number.isFinite(thr) || thr<=0) continue;
+        const sum0 = eligible.reduce((s,u)=>s+(+u.price||0),0);
+        const cycles = Math.floor(sum0 / thr);
+        if(cycles<=0) continue;
+        chosenSy = { mode:'amount', thr, cycles, givePts };
+        break;
+      }
+    }
+
+    if(chosenSy){
+      synergyPoints = chosenSy.cycles * chosenSy.givePts;
+
+      eligible.sort((a,b)=>((b.price||0)-(a.price||0)));
+
+      if(chosenSy.mode === 'qty'){
+        const removeN = Math.min(eligible.length, chosenSy.cycles * chosenSy.thr);
+        eligible = eligible.slice(removeN);
+      } else {
+        let need = chosenSy.cycles * chosenSy.thr;
+        let i=0;
+        while(i<eligible.length && need>0){
+          need -= (+eligible[i].price||0);
+          i++;
+        }
+        eligible = eligible.slice(i);
+      }
+    }
+
+    const cnt = eligible.length;
+    const sum = Math.max(0, eligible.reduce((s,u)=>s+(+u.price||0),0));
+
+    let base = 0;
+    if(s1Type === 'qty'){
+      if(Number.isFinite(s1Thr) && s1Thr>0 && s1Give>0){
+        base = Math.floor(cnt / s1Thr) * s1Give;
+      }
+    }else{
+      if(Number.isFinite(s1Thr) && s1Thr>0 && s1Give>0){
+        base = Math.floor(sum / s1Thr) * s1Give;
+      }
+    }
+
+    let hit2 = false;
+    if(s2Type === 'qty'){
+      hit2 = (Number.isFinite(s2Thr) && s2Thr>0) ? (cnt >= s2Thr) : false;
+    }else{
+      hit2 = (Number.isFinite(s2Thr) && s2Thr>0) ? (sum >= s2Thr) : false;
+    }
+    if(hit2 && Number.isFinite(s2Mul) && s2Mul>0){
+      base = base * s2Mul;
+    }
+
+    base = Math.floor(base || 0);
+    if(cap>0) base = Math.min(base, cap);
+
+    const pts = Math.max(0, Math.floor((synergyPoints + base) || 0));
+    if(pts>0){
+      breakdown.push({ idx, points: pts });
+      total += pts;
+    }
+  });
+
+  // 預留：未來若要顯示明細可用 breakdown
+  __maMoney.lastPointsBreakdown = breakdown;
+  __maMoney.lastPointsTotal = Math.max(0, Math.floor(total||0));
+  return __maMoney.lastPointsTotal;
+}
+
+function __maCalcPointsTotal(rawUnits){
+  const picked = __maGetApplicableDiscounts();
+
+  // points 計算：先套 bundle_qty（它會改變「哪些份」存在），其餘折扣不影響 points 的基礎金額/數量
+  const u2 = (rawUnits||[]).map(u=>({
+    price:+(u && u.price || 0),
+    basePrice:+(u && (u.basePrice ?? u.price) || 0),
+    tags:Array.isArray(u && u.tags)?(u.tags.slice()):[],
+    used:false
+  }));
+  (picked||[]).forEach(({d})=>{
+    const type = __maNormDiscountType(d && d.type);
+    if(type==='bundle_qty') __maApplyBundleQtyDiscount(u2, d);
+  });
+
+  const units = (u2||[]).filter(u=>u && !u.used).map(u=>({ price:+u.price||0, tags:Array.isArray(u.tags)?u.tags:[] }));
+  return __maCalcPointsEarned(picked, units);
+}
+
+function __maNormDiscountType(t){
+    const s = String(t||'').trim();
+    const map = {
+      '購滿金額(元)': 'amount',
+      '購滿金額': 'amount',
+      'amount': 'amount',
+      '購滿數量(份)': 'qty',
+      '購滿數量': 'qty',
+      'qty': 'qty',
+      '組合特價(變成份)': 'bundle_qty',
+      '組合特價': 'bundle_qty',
+      'bundle_qty': 'bundle_qty',
+      '折價券': 'coupon',
+      'coupon': 'coupon',
+      '集點': 'points',
+      'points': 'points'
+    };
+    return map[s] || s;
+  }
+
+function __maApplyAmountDiscount(units, d){
+    // 對齊 work_system V26:
+    // - 只針對 note1_targets 命中的份
+    // - 需滿 amount_threshold
+    // - amount_discount_type: 'percent' | 'amount'
+    // - amount_discount_value / amount_discount
+    const tags = __maSplitTags(d && (d.note1_targets ?? d.targets));
+    if(tags.length===0) return;
+
+    const thr = Number(d && (d.amount_threshold ?? d.threshold_amount ?? d.threshold) || 0);
+    if(!Number.isFinite(thr) || thr<=0) return;
+
+    const eligible = __maPickTaggedUnits(units, tags).filter(u=>u && !u.used);
+    if(eligible.length===0) return;
+
+    const eligibleSum = eligible.reduce((s,u)=> s + (+u.price||0), 0);
+    if(!Number.isFinite(eligibleSum) || eligibleSum < thr) return;
+
+    const t = String(d && (d.amount_discount_type ?? d.discount_type) || 'amount').trim();
+    const v = +((d && (d.amount_discount_value ?? d.amount_discount ?? d.amount_off ?? d.amount) ) || 0);
+    if(!Number.isFinite(v) || v<=0) return;
+
+    if(t === 'percent'){
+      const f = 1 - (v/100);
+      eligible.forEach(u=>{ u.price = Math.max(0, (+u.price||0) * f); });
+      return;
+    }
+
+    // 固定金額：按比例分攤到 eligible（順序疊加時會影響後續優惠）
+    const disc = Math.min(v, eligibleSum);
+    eligible.forEach(u=>{
+      const p = (+u.price||0);
+      if(p<=0) return;
+      const share = disc * (p / eligibleSum);
+      u.price = Math.max(0, p - share);
+    });
+  }
+
+  function __maApplyQtyDiscount(units, d){
+    // 對齊 work_system V26：每滿 thr 份，折掉該組中最便宜的 discN 份（折為 0）
+    const tags = __maSplitTags(d && (d.note1_targets ?? d.targets));
+    if(tags.length===0) return;
+
+    const thr = Math.max(0, Math.floor(Number(d && (d.qty_threshold ?? d.qty_need ?? d.need_qty ?? d.threshold_qty) || 0)));
+    const discN = Math.max(0, Math.floor(Number(d && (d.qty_discount ?? d.qty_off ?? d.off_qty ?? d.off_count) || 0)));
+    if(!Number.isFinite(thr) || thr<=0 || !Number.isFinite(discN) || discN<=0) return;
+
+    const eligibleAll = __maPickTaggedUnits(units, tags).filter(u=>u && !u.used);
+    // 只以「仍有金額的份」計算門檻與折扣，避免被其他折扣先折成 0 佔名額
+    const eligiblePaid = eligibleAll.filter(u=> (+u.price||0) > 0.000001);
+
+    const cnt = eligiblePaid.length;
+    if(cnt < thr) return;
+
+    // 依單價由高到低排序（以 basePrice 優先，避免先被折扣改價影響排序）
+    eligiblePaid.sort((a,b)=>((+(b.basePrice ?? b.price)||0) - (+(a.basePrice ?? a.price)||0)));
+
+    const groups = Math.floor(cnt / thr);
+    const perGroup = Math.min(discN, thr);
+
+    for(let g=1; g<=groups; g++){
+      const base = (g-1)*thr;
+      for(let k=thr - perGroup; k<thr; k++){
+        const idx2 = base + k;
+        if(idx2>=cnt) break;
+        eligiblePaid[idx2].price = 0;
+      }
+    }
+  }
+
+  function __maApplyBundleQtyDiscount(units, d){
+    // 對齊 work_system V26：
+    // note2_targets: [tag...]；bundle_count=k；bundle_price=price
+    // ⚠️ 修正：避免把「已組合出的 bundle unit」再次拿去組合造成無限迴圈；並將被組合的原 unit 價格歸零（等同被 bundle 取代）
+    const tags = __maSplitTags(d && (d.note2_targets ?? d.targets ?? d.note1_targets));
+    const k = Math.max(1, parseInt(d && (d.bundle_count ?? d.count ?? d.bundle_k) || 0, 10) || 0);
+    const bundlePrice = Number(d && (d.bundle_price ?? d.price ?? d.bundle_amount) || 0);
+    if(tags.length===0 || k<=0 || !Number.isFinite(bundlePrice) || bundlePrice<=0) return;
+
+    const hasTag = (u, tag)=>{
+      if(!u) return false;
+      if(u.from === 'bundle_qty') return false; // 不讓 bundle unit 再被同類型優惠重複組合
+      const t = String(tag||'').trim();
+      if(!t) return false;
+      const ut = Array.isArray(u.tags) ? u.tags : [];
+      return ut.some(x=>String(x||'').trim()===t);
+    };
+
+    const pickHighest = (arr, n)=>{
+      const list = (arr||[]).filter(it=>it && !it.used);
+      list.sort((a,b)=>(+b.price||0)-(+a.price||0));
+      return list.slice(0, n);
+    };
+
+    const makeBundleUnit = (chosen)=>{
+      const tset = new Set();
+      chosen.forEach(u=>{ (u.tags||[]).forEach(t=>tset.add(String(t||'').trim())); });
+      return { price: bundlePrice, basePrice: bundlePrice, tags: Array.from(tset).filter(Boolean), used:false, from:'bundle_qty' };
+    };
+
+    const consumeChosen = (chosen)=>{
+      chosen.forEach(u=>{
+        // 原 unit 被 bundle 取代：歸零並標記 used，避免同一輪與後續再次被套用
+        u.price = 0;
+        u.used = true;
+      });
+    };
+
+    // tags.length === 1: 同一 tag 取 k 份成一組
+    if(tags.length === 1){
+      const tag = tags[0];
+      while(true){
+        const eligible = (units||[]).filter(u=>u && !u.used && hasTag(u, tag));
+        if(eligible.length < k) break;
+        const chosen = pickHighest(eligible, k);
+        if(chosen.length < k) break;
+
+        consumeChosen(chosen);
+        units.push(makeBundleUnit(chosen));
+      }
+      return;
+    }
+
+    // tags.length === k: 每個 tag 各取 1 份湊成一組
+    if(tags.length === k && k > 1){
+      while(true){
+        const chosen = [];
+        for(const tag of tags){
+          const eligible = (units||[]).filter(u=>u && !u.used && hasTag(u, tag));
+          if(eligible.length===0){ chosen.length=0; break; }
+          const one = pickHighest(eligible, 1)[0];
+          if(!one){ chosen.length=0; break; }
+          chosen.push(one);
+        }
+        if(chosen.length !== k) break;
+
+        consumeChosen(chosen);
+        units.push(makeBundleUnit(chosen));
+      }
+    }
+  }
+
+  function __maApplyCouponDiscount(units, d){
+    // 官網端：消費者無法選擇；若 coupon 類型在資料庫中標記 applicable，就視為全自動（預設折高價）
+    const tags = __maSplitTags(d && (d.note1_targets || d.targets) || []);
+    if(tags.length===0) return;
+    const cand = __maPickTaggedUnits(units, tags);
+    if(cand.length===0) return;
+
+    const mode = String(d && (d.coupon_mode || d.couponMode) || 'full').trim();
+    if(mode === 'amount'){
+      const qty = Math.max(0, Math.floor(Number(d && (d.coupon_qty ?? 0) || 0)));
+      const amt = Number(d && (d.coupon_amount||0));
+      if(qty<=0 || !Number.isFinite(amt) || amt<=0) return;
+      cand.sort((a,b)=>(+b.price||0)-(+a.price||0));
+      let left = qty;
+      for(const u of cand){
+        if(left<=0) break;
+        const p = +u.price||0;
+        if(p<=0) continue;
+        u.price = Math.max(0, p - amt);
+        left--;
+      }
+      return;
+    }
+
+    // full: 折掉幾份
+    let n = Math.max(0, Math.floor(Number(d && (d.coupon_qty ?? d.qty_off ?? 0) || 0)));
+    if(n<=0) return;
+    const dir = (String(d && (d.coupon_dir||'high')).trim()==='low') ? 'low' : 'high';
+    cand.sort((a,b)=>(+b.price||0)-(+a.price||0));
+    n = Math.min(n, cand.length);
+    const picked = (dir==='high') ? cand.slice(0,n) : cand.slice(Math.max(0, cand.length-n));
+    picked.forEach(u=>{ u.price = 0; });
+  }
+
+  function __maCalcDiscountDelta(units){
+    const original = (units||[]).reduce((s,u)=>s+(+u.price||0),0);
+    const picked = __maGetApplicableDiscounts();
+
+    // 直接在副本上做 price 變更
+        const u2 = (units||[]).map(u=>({ price:+(u && u.price || 0), basePrice:+(u && (u.basePrice ?? u.price) || 0), tags:Array.isArray(u && u.tags)?(u.tags.slice()):[], used:false }));
+
+    picked.forEach(({d})=>{
+      const type = __maNormDiscountType(d && d.type);
+      if(type==='amount') return __maApplyAmountDiscount(u2, d);
+      if(type==='qty') return __maApplyQtyDiscount(u2, d);
+      if(type==='bundle_qty') return __maApplyBundleQtyDiscount(u2, d);
+      if(type==='coupon') return __maApplyCouponDiscount(u2, d);
+    });
+
+    const finalTotal = (u2||[]).reduce((s,u)=>s+(+u.price||0),0);
+    const delta = Math.max(0, original - finalTotal);
+    return +delta.toFixed(2);
+  }
+
+  function __maCalcAmounts(mode){
+    const m = (mode==='bundle') ? 'bundle' : 'cart';
+    if(m==='bundle'){
+      const host = $('maBundleRows');
+      const rows = host ? Array.from(host.querySelectorAll('input')) : [];
+      let units = [];
+      rows.forEach(inp=>{
+        const raw = String(inp && inp.value || '').trim();
+        if(!raw) return;
+        const cart = __maExtractCartFromText(raw);
+        if(!cart) return;
+        units = units.concat(__maBuildUnitsFromCartString(cart));
+      });
+      const order = (units||[]).reduce((s,u)=>s+(+u.price||0),0);
+      const discount = __maCalcDiscountDelta(units);
+      const checkout = Math.max(0, order - discount);
+      const points = __maCalcPointsTotal(units);
+      return { order:+order.toFixed(2), discount:+discount.toFixed(2), checkout:+checkout.toFixed(2), points: Math.max(0, Math.floor(points||0)) };
+    }
+
+    const units = __maBuildUnitsFromCartItems(__maCart.items||[]);
+    const order = (units||[]).reduce((s,u)=>s+(+u.price||0),0);
+    const discount = __maCalcDiscountDelta(units);
+    const checkout = Math.max(0, order - discount);
+    const points = __maCalcPointsTotal(units);
+    return { order:+order.toFixed(2), discount:+discount.toFixed(2), checkout:+checkout.toFixed(2), points: Math.max(0, Math.floor(points||0)) };
+  }
+
+  function __maRenderAmounts(mode){
+    const bar = $('maAmtBar');
+    if(!bar) return;
+    const m = (mode==='bundle') ? 'bundle' : 'cart';
+    __maMoney.mode = m;
+    const a = __maCalcAmounts(m);
+    __maMoney.last = a;
+
+    const o = $('maAmtOrder'); const d = $('maAmtDiscount'); const c = $('maAmtCheckout'); const p = $('maAmtPoints');
+    if(o) o.textContent = __maFmtMoney(a.order);
+    if(d) d.textContent = __maFmtMoney(a.discount);
+    if(c) c.textContent = __maFmtMoney(a.checkout);
+    if(p) p.textContent = `${Math.max(0, Math.floor(a.points||0))}點`;
+  }
+
+  function __maRecalcAmounts(){
+    // info/order 顯示購物車；bundle 顯示組合
+    const activeTab = (tabs||[]).find(t=>t.classList.contains('active'));
+    const name = String(activeTab && activeTab.dataset && activeTab.dataset.tab || 'info');
+    if(name==='bundle') __maRenderAmounts('bundle');
+    else __maRenderAmounts('cart');
+  }
+
+
+  function __maClampQty(n){
+    const x = Number(n);
+    if(!Number.isFinite(x)) return 1;
+    return Math.max(1, Math.floor(x));
+  }
+
+  function __maInferQtyFromText(txt){
+    const m = String(txt||'').trim().match(/X(\d+)\s*$/);
+    if(m) return __maClampQty(parseInt(m[1],10));
+    return 1;
+  }
+
+  function __maStripQtySuffix(txt){
+    return String(txt||'').trim().replace(/X\d+\s*$/,'').trim();
+  }
+
+  function __maUpdateCartItemText(it){
+    if(!it) return;
+    const qty = __maClampQty(it.qty || 1);
+    it.qty = qty;
+
+    if(it.isEgg){
+      const base = __maShort(it.flavor1, __maShort(it.short, it.name));
+      if(it.flavor2){
+        it.text = `${base}+${it.flavor2}X${qty}`;
+      }else{
+        it.text = `${base}X${qty}`;
+      }
+      return;
+    }
+
+    const pshort = __maShort(it.short, it.name);
+    const st = Array.isArray(it.states) ? it.states.map(x=>String(x||'').trim()).filter(Boolean) : [];
+    if(st.length){
+      it.text = `${pshort}(${st.join('、')})X${qty}`;
+    }else{
+      it.text = `${pshort}X${qty}`;
+    }
+  }
+
+
+  function __maGetCurrentProdKeySet(){
+    // build a tolerant key set to match persisted cart items against current page's injected products
+    const set = new Set();
+    (__maProdsCache||[]).forEach(p=>{
+      if(!p) return;
+      const id = String(p.id||'').trim(); if(id) set.add('id:'+id);
+      const name = String(p.name||'').trim(); if(name) set.add('name:'+name);
+      const short = String(p.short||'').trim(); if(short) set.add('short:'+short);
+    });
+    return set;
+  }
+
+  function __maPersistCart(){
+    try{
+      const payload = __maCart.items.map(it=>({
+        id: String(it.id||''),
+        name: String(it.name||''),
+        short: String(it.short||''),
+        isEgg: !!it.isEgg,
+        flavor1: String(it.flavor1||''),
+        flavor2: String(it.flavor2||''),
+        states: Array.isArray(it.states)?it.states.map(v=>String(v||'').trim()).filter(Boolean):[],
+        qty: __maClampQty(it.qty||1),
+        text: String(it.text||'')
+      }));
+      if(payload.length){ localStorage.setItem(MA_LS_CART, JSON.stringify(payload)); }else{ localStorage.removeItem(MA_LS_CART); }
+    }catch(_){}
+  }
+
+  function __maLoadCartFromLS(){
+    try{
+      const raw = localStorage.getItem(MA_LS_CART);
+      if(!raw) return;
+      const arr = JSON.parse(raw);
+      if(!Array.isArray(arr)) return;
+      __maCart.items = arr.map(x=>({
+        id: String(x.id||''),
+        name: String(x.name||''),
+        short: String(x.short||''),
+        isEgg: !!x.isEgg,
+        flavor1: String(x.flavor1||''),
+        flavor2: String(x.flavor2||''),
+        states: Array.isArray(x.states)?x.states.map(v=>String(v||'').trim()).filter(Boolean):[],
+        qty: __maClampQty((x.qty!=null)?x.qty:__maInferQtyFromText(x.text)),
+        text: String(x.text||'')
+      })).filter(it=>it.text);
+       __maCart.items.forEach(it=>{ try{ __maUpdateCartItemText(it); }catch(_){ } });
+    }catch(_){}
+  }
+
+  function __maPruneCartByCurrentProducts(){
+    // Remove persisted items that no longer exist in the current injected products.
+    try{
+      const keys = __maGetCurrentProdKeySet();
+      __maCart.items = (__maCart.items||[]).filter(it=>{
+        const id = String(it.id||'').trim();
+        const name = String(it.name||'').trim();
+        const short = String(it.short||'').trim();
+        if(id && keys.has('id:'+id)) return true;
+        if(name && keys.has('name:'+name)) return true;
+        if(short && keys.has('short:'+short)) return true;
+        // egg items may have no id/short in old records; use name fallback only
+        return false;
+      });
+      __maPersistCart();
+    }catch(_){}
+  }
+
+  function __maPersistBundle(){
+    try{
+      const rowsHost = document.getElementById('maBundleRows');
+      if(!rowsHost) return;
+      const vals = Array.from(rowsHost.querySelectorAll('input')).map(i=>String(i.value||'')).filter(v=>v.trim().length);
+      localStorage.setItem(MA_LS_BUNDLE, JSON.stringify(vals));
+    }catch(_){}
+  }
+
+  function __maLoadBundleFromLS(){
+    try{
+      const raw = localStorage.getItem(MA_LS_BUNDLE);
+      if(!raw) return null;
+      const arr = JSON.parse(raw);
+      if(!Array.isArray(arr)) return null;
+      return arr.map(v=>String(v||''));
+    }catch(_){ return null; }
+  }
+
+
+  function __maIsEggcake(p){
+    const nm = String(p && p.name || '');
+    const it = String(p && p.item || '');
+    return nm.includes('雞蛋糕') || it.includes('雞蛋糕');
+  }
+
+  function __maShort(v, fallback){
+    const s = String(v||'').trim();
+    return s ? s : String(fallback||'').trim();
+  }
+
+  
+  function __maIsDelivery(){
+    const addr = String($('maAddr')?.value || '').trim();
+    return !!addr;
+  }
+
+  function __maCheckDeliveryRequired(){
+    if(!__maIsDelivery()) return { ok: true, msg: '' };
+    const pickup = String($('maPickup')?.value || '').trim();
+    const name = String($('maName')?.value || '').trim();
+    const phone = String($('maPhone')?.value || '').trim();
+    if(!pickup || !name || !phone){
+      return { ok: false, msg: '外送請將必填資訊填妥' };
+    }
+    return { ok: true, msg: '' };
+  }
+
+  async function __maCopyText(txt){
+    const text = String(txt||'');
+    try{
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    }catch(_){}
+    try{
+      const tmp = document.createElement('textarea');
+      tmp.value = text;
+      tmp.style.position='fixed'; tmp.style.left='-9999px'; tmp.style.top='-9999px';
+      document.body.appendChild(tmp);
+      tmp.focus(); tmp.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(tmp);
+      return !!ok;
+    }catch(_){
+      return false;
+    }
+  }
+
+  function __maOpenBossLink(){
+    const app = String($('maApp')?.value || 'line').trim();
+    const url = (app === 'fb') ? 'https://m.me/menghushao' : 'https://reurl.cc/qZAE2y';
+    try{ window.open(url, '_blank'); }catch(_){ location.href = url; }
+  }
+
+  function __maExtractCartFromText(t){
+    const s = String(t||'');
+    const m = s.match(/【([\s\S]*?)】/);
+    return m ? String(m[1]||'').trim() : '';
+  }
+
+  function __maExtractNameFromText(t){
+    const s = String(t||'');
+    // Name is after the last "取餐，" or "送達，" in our copy template.
+    let tail = '';
+    const idx1 = s.lastIndexOf('取餐，');
+    const idx2 = s.lastIndexOf('送達，');
+    const idx = Math.max(idx1, idx2);
+    if(idx >= 0){
+      tail = s.slice(idx + 3); // after "取餐，"/"送達，"
+    }else{
+      const ci = s.lastIndexOf('，');
+      tail = (ci>=0) ? s.slice(ci+1) : '';
+    }
+    tail = String(tail||'').trim();
+    tail = tail.replace(/謝謝.*$/,'').trim();
+    tail = tail.replace(/[0-9\-\s]{6,}$/,'').trim();
+    return tail || '無名';
+  }
+
+
+  function __maBuildBundleText(){
+    const rows = Array.from(($('maBundleRows')||{}).querySelectorAll('input'));
+    const parts = [];
+    rows.forEach(inp=>{
+      const raw = String(inp && inp.value || '').trim();
+      if(!raw) return;
+      const cart = __maExtractCartFromText(raw);
+      if(!cart) return;
+      const nm = String(__maExtractNameFromText(raw)||'').trim() || '無名';
+      parts.push(`/${nm}/【${cart}】`);
+    });
+
+    const combined = parts.join('');
+    const addr = String($('maAddr')?.value || '').trim();
+    const shop = String($('maShop')?.value || '').trim();
+    const pickup = String($('maPickup')?.value || '').trim();
+    const name = String($('maName')?.value || '').trim();
+    const phone = String($('maPhone')?.value || '').trim();
+
+    if(addr){
+      return `老闆您好，我要外送${addr}${shop}${combined}預計${pickup}送達，${name}${phone}謝謝。`;
+    }
+    return `老闆您好，我要自取${combined?(' '+combined):''}預計${pickup}取餐，${name}${phone}謝謝。`;
+  }
+
+function __maBuildCartText(){
+    const ta = $('maCartText');
+    if(!ta) return;
+
+    const cartItems = __maCart.items.map(it=>String(it.text||'').trim()).filter(Boolean);
+    const cartText = cartItems.join('；'); // 放在【】內，避免多行破版
+
+    const addr = String($('maAddr')?.value || '').trim();
+    const shop = String($('maShop')?.value || '').trim();
+    const pickup = String($('maPickup')?.value || '').trim();
+    const name = String($('maName')?.value || '').trim();
+    const phone = String($('maPhone')?.value || '').trim();
+
+    const bracket = `【${cartText}】`;
+
+    if(addr){
+      // 外送（地址有值）
+      ta.value = `老闆您好，我要外送${addr}${shop}${bracket}預計${pickup}送達，${name}${phone}謝謝。`;
+    }else{
+      // 自取
+      ta.value = `老闆您好，我要自取${bracket}預計${pickup}取餐，${name}${phone}謝謝。`;
+    }
+  }
+
+  function __maRenderCartList(){
+    const box = $('maCartList');
+    if(!box) return;
+    box.innerHTML = '';
+    __maCart.items.forEach((it, idx)=>{
+      const row = document.createElement('div');
+      row.className = 'ma-cartitem';
+      const t = document.createElement('div');
+      t.className = 'txt';
+      t.textContent = it.text || '';
+      row.appendChild(t);
+
+
+      const minus = document.createElement('button');
+      minus.className = 'btn';
+      minus.textContent = '－';
+      minus.title = '減少數量';
+      minus.addEventListener('click', ()=>{
+        it.qty = __maClampQty(it.qty||1) - 1;
+        if(it.qty <= 0){
+          __maCart.items.splice(idx,1);
+        }else{
+          __maUpdateCartItemText(it);
+        }
+        __maRenderCartList(); __maBuildCartText(); try{ __maPersistCart(); }catch(_){}; try{ __maRecalcAmounts(); }catch(_){ }
+      });
+      row.appendChild(minus);
+
+      const plus = document.createElement('button');
+      plus.className = 'btn';
+      plus.textContent = '＋';
+      plus.title = '增加數量';
+      plus.addEventListener('click', ()=>{
+        it.qty = __maClampQty(it.qty||1) + 1;
+        __maUpdateCartItemText(it);
+        __maRenderCartList(); __maBuildCartText(); try{ __maPersistCart(); }catch(_){}; try{ __maRecalcAmounts(); }catch(_){ }
+      });
+      row.appendChild(plus);
+
+      if(it.isEgg){
+        const b2 = document.createElement('button');
+        b2.className = 'btn';
+        b2.textContent = '第二顆口味';
+        b2.addEventListener('click', ()=>{
+          __maOpenStateModal(it._productRef, {
+            mode: 'egg_second',
+            preset: it.flavor2,
+            onOk: (picked)=> {
+              if(picked && picked.length){
+                it.flavor2 = picked[0];
+                const base = __maShort(it.flavor1, __maShort(it.short, it.name));
+                it.qty = __maClampQty(it.qty||1);
+                __maUpdateCartItemText(it);
+                __maRenderCartList(); __maBuildCartText(); try{ __maPersistCart(); }catch(_){}
+              }
+            }
+          });
+        });
+        row.appendChild(b2);
+      }
+
+      const del = document.createElement('button');
+      del.className = 'btn danger';
+      del.textContent = '刪除';
+      del.addEventListener('click', ()=>{
+        __maCart.items.splice(idx,1);
+        __maRenderCartList(); __maBuildCartText(); try{ __maPersistCart(); }catch(_){}; try{ __maRecalcAmounts(); }catch(_){ }
+      });
+      row.appendChild(del);
+
+      box.appendChild(row);
+    });
+  }
+
+  function __maAddToCart(prod, pickedStates){
+    const pshort = __maShort(prod.short, prod.name);
+    const isEgg = __maIsEggcake(prod);
+    const qty1 = 1;
+
+    if(isEgg){
+      const s1 = (pickedStates && pickedStates[0]) ? pickedStates[0] : '';
+      const flavor1 = __maShort(s1, pshort);
+      if(!flavor1){
+        // 理論上不會發生；仍保底避免空白
+        return;
+      }
+      // 先以同款（id/short/name + 口味1/口味2）合併數量
+      const keyId = String(prod.id||'').trim();
+      const keyName = String(prod.name||'').trim();
+      const keyShort = String(pshort||'').trim();
+      const found = (__maCart.items||[]).find(it=>{
+        if(!it || !it.isEgg) return false;
+        if(String(it.flavor1||'') !== String(flavor1||'')) return false;
+        // 預設第二顆口味一樣；之後可改
+        const f2 = String(it.flavor2||'');
+        if(f2 !== String(flavor1||'')) return false;
+
+        const id = String(it.id||'').trim();
+        const nm = String(it.name||'').trim();
+        const sh = String(it.short||'').trim();
+        if(keyId && id) return keyId === id;
+        if(keyShort && sh) return keyShort === sh;
+        return keyName && nm ? keyName === nm : false;
+      });
+
+      if(found){
+        found.qty = __maClampQty(found.qty||1) + qty1;
+        __maUpdateCartItemText(found);
+      }else{
+        const item = {
+          id: String(prod.id||''),
+          name: prod.name||'',
+          short: pshort,
+          item: prod.item||'',
+          isEgg: true,
+          flavor1,
+          flavor2: flavor1,
+          qty: qty1,
+          text: '',
+          _productRef: prod
+        };
+        __maUpdateCartItemText(item);
+        __maCart.items.push(item);
+      }
+    }else{
+      // 一般產品：以產品簡稱為主，若有狀態則用「產品簡稱(狀態...)Xn」
+      const st = (pickedStates||[]).map(s=>__maShort(s,'')).filter(Boolean);
+      const keyId = String(prod.id||'').trim();
+      const keyName = String(prod.name||'').trim();
+      const keyShort = String(pshort||'').trim();
+      const stKey = st.join('、');
+
+      const found = (__maCart.items||[]).find(it=>{
+        if(!it || it.isEgg) return false;
+        const id = String(it.id||'').trim();
+        const nm = String(it.name||'').trim();
+        const sh = String(it.short||'').trim();
+        const its = (Array.isArray(it.states)?it.states:[]).map(x=>String(x||'').trim()).filter(Boolean).join('、');
+        if(its !== stKey) return false;
+        if(keyId && id) return keyId === id;
+        if(keyShort && sh) return keyShort === sh;
+        return keyName && nm ? keyName === nm : false;
+      });
+
+      if(found){
+        found.qty = __maClampQty(found.qty||1) + qty1;
+        __maUpdateCartItemText(found);
+      }else{
+        const item = {
+          id: String(prod.id||''),
+          name: prod.name||'',
+          short: pshort,
+          item: prod.item||'',
+          isEgg: false,
+          states: st,
+          qty: qty1,
+          text: '',
+          _productRef: prod
+        };
+        __maUpdateCartItemText(item);
+        __maCart.items.push(item);
+      }
+    }
+
+    try{ __maPersistCart(); }catch(_){ }
+    __maRenderCartList();
+    __maBuildCartText();
+    try{ __maRecalcAmounts(); }catch(_){ }
+  }
+
+  // ===== 狀態選擇 Modal（支援擇一 xor） =====
+  const __maModal = {
+    el: null,
+    title: null,
+    body: null,
+    hint: null,
+    btnOk: null,
+    btnCancel: null,
+    onOk: null,
+    ctx: null
+  };
+
+  function __maInitModal(){
+    if(__maModal.el) return;
+    __maModal.el = $('maStateModal');
+    __maModal.title = $('maStateModalTitle');
+    __maModal.body = $('maStateModalBody');
+    __maModal.hint = $('maStateModalHint');
+    __maModal.btnOk = $('maStateModalOk');
+    __maModal.btnCancel = $('maStateModalCancel');
+
+    const close = ()=>__maCloseStateModal();
+    __maModal.el && __maModal.el.addEventListener('click', (e)=>{
+      const t = e.target;
+      if(t && t.getAttribute && t.getAttribute('data-close')==='1') close();
+    });
+    __maModal.btnCancel && __maModal.btnCancel.addEventListener('click', close);
+    
+    // xor group behavior: single-select but allow uncheck (checkbox)
+    (function(){
+      const root = __maModal.el;
+      if(!root) return;
+      root.querySelectorAll('input[type="checkbox"][data-xor-group]').forEach(inp=>{
+        inp.addEventListener('change', ()=>{
+          if(!inp.checked) return;
+          const g = inp.getAttribute('data-xor-group');
+          root.querySelectorAll(`input[type="checkbox"][data-xor-group="${g}"]`).forEach(o=>{
+            if(o!==inp) o.checked = false;
+          });
+        });
+      });
+    })();
+
+__maModal.btnOk && __maModal.btnOk.addEventListener('click', ()=>{
+      if(typeof __maModal.onOk === 'function'){
+        const picked = __maCollectModalPicked();
+        __maModal.onOk(picked);
+      }
+      __maCloseStateModal();
+    });
+  }
+
+  function __maOpenStateModal(prod, opt){
+    __maInitModal();
+    const p = prod || {};
+    const mode = (opt && opt.mode) || 'add';
+    let states = Array.isArray(p.states) ? p.states : [];
+    const title = (mode==='egg_second') ? '選擇第二顆口味' : '選擇狀態';
+    if(mode==='egg_second'){
+      const eggs = Array.isArray(__maProdsCache) ? __maProdsCache.filter(pp=>pp && __maIsEggcake(pp)) : [];
+      // use product shorts as flavor options
+      states = eggs.map(pp=>({ name: String(pp.name||'').trim(), label: String((pp.full||pp.fullName||pp.name)||'').trim(), short: __maShort(pp.short, pp.name), xor: '__eggflavor' }));
+    }
+    if(__maModal.title){
+      __maModal.title.textContent = (mode==='egg_second') ? title : `${title}：${String(p.name||'').trim()}`;
+    }
+
+    // group by xor
+    const xorGroups = new Map(); // key -> [state]
+    const normals = [];
+    states.forEach(s=>{
+      const name = String(s && s.name || '').trim();
+      if(!name) return;
+      const xor = String(s && s.xor || '').trim();
+      const short = __maShort(s && s.short, name);
+      const label = String((s && (s.label||s.full||s.fullName)) || name).trim();
+      if(xor){
+        if(!xorGroups.has(xor)) xorGroups.set(xor, []);
+        xorGroups.get(xor).push({name, short, label, xor});
+      }else{
+        normals.push({name, short, label});
+      }
+    });
+
+    // render body
+    if(__maModal.body) __maModal.body.innerHTML = '';
+    const body = __maModal.body;
+    const preset = (opt && opt.preset) ? String(opt.preset) : '';
+
+    // xor groups => radios
+    xorGroups.forEach((arr, key)=>{
+      const g = document.createElement('div');
+      g.className = 'ma-state-group';
+      const gt = document.createElement('div');
+      gt.className = 'gtitle';
+      gt.textContent = ``;
+      g.appendChild(gt);
+
+      const groupName = `ma_xor_${key}`;
+      arr.forEach(s=>{
+        const row = document.createElement('div');
+        row.className = 'ma-state-row';
+        const inp = document.createElement('input');
+        inp.type = 'checkbox';
+        inp.dataset.xorGroup = groupName;
+        inp.value = s.short;
+        inp.id = `${groupName}_${s.short}`;
+        if(preset && preset===s.short) inp.checked = true;
+        inp.addEventListener('change', ()=>{
+          // XOR group (single-select but optional): checking one unchecks others; unchecking leaves none selected
+          if(inp.checked){
+            body.querySelectorAll(`input[type="checkbox"][data-xor-group="${groupName}"]`).forEach(other=>{ if(other!==inp) other.checked=false; });
+          }
+        });
+        row.appendChild(inp);
+        const lab = document.createElement('label');
+        lab.setAttribute('for', inp.id);
+        lab.textContent = (s.label || s.short);
+        row.appendChild(lab);
+        g.appendChild(row);
+      });
+      body && body.appendChild(g);
+    });
+
+    // normals => checkboxes (mode egg_second: only allow one, so render as radios if there is no xor group)
+    if(normals.length){
+      const g = document.createElement('div');
+      g.className = 'ma-state-group';
+      const gt = document.createElement('div');
+      gt.className = 'gtitle';
+      gt.textContent = '';
+      g.appendChild(gt);
+
+      normals.forEach((s,i)=>{
+        const row = document.createElement('div');
+        row.className = 'ma-state-row';
+        const inp = document.createElement('input');
+        if(mode==='egg_second'){
+          inp.type = 'radio';
+          inp.name = 'ma_norm_one';
+        }else{
+          inp.type = 'checkbox';
+        }
+        inp.value = s.short;
+        inp.id = `ma_norm_${i}_${s.short}`;
+        if(preset && preset===s.short) inp.checked = true;
+        inp.addEventListener('change', ()=>{
+          if(inp.checked){
+            body.querySelectorAll(`input[type="checkbox"][data-xor-group="${groupName}"]`).forEach(other=>{ if(other!==inp) other.checked=false; });
+          }
+        });
+        row.appendChild(inp);
+        const lab = document.createElement('label');
+        lab.setAttribute('for', inp.id);
+        lab.textContent = (s.label || s.short);
+        row.appendChild(lab);
+        g.appendChild(row);
+      });
+      body && body.appendChild(g);
+    }
+
+    if(__maModal.hint){
+      __maModal.hint.textContent = (states.length===0) ? '（此產品沒有可選狀態）' : '';
+    }
+
+    __maModal.onOk = (opt && opt.onOk) ? opt.onOk : null;
+
+    __maModal.el.classList.add('show');
+    __maModal.el.setAttribute('aria-hidden','false');
+  }
+
+  function __maCollectModalPicked(){
+    const picked = [];
+    const el = __maModal.el;
+    if(!el) return picked;
+    // checked radios / checkboxes
+    el.querySelectorAll('input[type="radio"]:checked, input[type="checkbox"]:checked').forEach(inp=>{
+      const v = String(inp.value||'').trim();
+      if(v) picked.push(v);
+    });
+    return picked;
+  }
+
+  function __maCloseStateModal(){
+    if(!__maModal.el) return;
+    __maModal.el.classList.remove('show');
+    __maModal.el.setAttribute('aria-hidden','true');
+    __maModal.onOk = null;
+  }
+function pad(n){ return String(n).padStart(2,'0'); }
   function fmt(dt){
     const y = dt.getFullYear();
     const m = pad(dt.getMonth()+1);
@@ -2886,6 +4381,7 @@ function showPanel(){
     const dt = parseMaybe(data.pickup);
     const base = dt || new Date(Date.now() + 15*60000);
     if(pickup) pickup.value = fmt(base);
+    try{ __maBuildCartText(); }catch(_){ }
   }
 
   function saveInfo(){
@@ -2897,7 +4393,8 @@ function showPanel(){
       addr: $('maAddr')?.value || '',
       shop: $('maShop')?.value || ''
     };
-    try{ localStorage.setItem(LS_KEY, JSON.stringify(data)); }catch(_){}
+    try{ localStorage.setItem(LS_KEY, JSON.stringify(data)); }catch(_){ }
+    try{ __maBuildCartText(); }catch(_){ }
   }
 
   function show(){
@@ -2906,6 +4403,10 @@ function showPanel(){
     // 每次打開都先載入（保證「上一次紀錄」）
     loadInfo();
     bindInfoOnce();
+    // 每次打開都載入購物車/組合（修正：原本早於函式定義，導致讀不到但又被 try/catch 吃掉）
+    try{ __maLoadCartFromLS(); }catch(_){ }
+    try{ __maRenderCartList(); __maBuildCartText(); }catch(_){ }
+    try{ __maRecalcAmounts(); }catch(_){ }
     switchTab('info');
   }
   function hide(){
@@ -2919,6 +4420,8 @@ function showPanel(){
       const el = panes[k];
       if(el) el.classList.toggle('active', k===name);
     });
+    if(name==='order'){ try{ __maRenderItemBar(); __maPruneCartByCurrentProducts(); __maRenderCartList(); __maBuildCartText(); }catch(_){ } }
+    try{ __maRecalcAmounts(); }catch(_){ }
   }
 
   btn.addEventListener('click', ()=>{
@@ -2928,12 +4431,6 @@ function showPanel(){
   });
 
   $('msgAssistClose')?.addEventListener('click', hide);
-  overlay.addEventListener('click', (ev)=>{
-    if(ev.target === overlay) hide();
-  });
-  document.addEventListener('keydown', (ev)=>{
-    if(ev.key === 'Escape' && overlay.classList.contains('show')) hide();
-  });
 
   tabs.forEach(t=>{
     t.addEventListener('click', ()=> switchTab(t.dataset.tab || 'info'));
@@ -2941,43 +4438,87 @@ function showPanel(){
 
   // 點餐頁：複製（目前先複製文字框）
   $('maCartCopy')?.addEventListener('click', async ()=>{
+    const chk = __maCheckDeliveryRequired();
+    if(!chk.ok){
+      $('maCartText') && ($('maCartText').value = chk.msg);
+      alert(chk.msg);
+      return;
+    }
     const ta = $('maCartText');
     const txt = (ta && ta.value) ? ta.value : '';
-    try{
-      if(navigator.clipboard && navigator.clipboard.writeText){
-        await navigator.clipboard.writeText(txt);
-        alert('已複製');
-        return;
-      }
-    }catch(_){}
-    try{
-      const tmp = document.createElement('textarea');
-      tmp.value = txt;
-      tmp.style.position='fixed'; tmp.style.left='-9999px'; tmp.style.top='-9999px';
-      document.body.appendChild(tmp);
-      tmp.focus(); tmp.select();
-      const ok = document.execCommand('copy');
-      document.body.removeChild(tmp);
-      alert(ok ? '已複製' : '複製失敗');
-    }catch(_){
-      alert('複製失敗');
+    const ok = await __maCopyText(txt);
+    alert(ok ? '已複製' : '複製失敗');
+  })
+  // 點餐購物車：清空
+  $('maCartClear')?.addEventListener('click', ()=>{
+    if(!confirm('確定要清空購物車？')) return;
+    __maCart.items = [];
+    try{ __maPersistCart(); }catch(_){ }
+    __maRenderCartList();
+    __maBuildCartText();
+    try{ __maRecalcAmounts(); }catch(_){ }
+    try{ localStorage.removeItem(MA_LS_CART); }catch(_){ }
+  });
+
+;
+
+// 點餐頁：找老闆（複製 + 開啟通訊連結）
+  $('maCartBoss')?.addEventListener('click', async ()=>{
+    const chk = __maCheckDeliveryRequired();
+    if(!chk.ok){
+      $('maCartText') && ($('maCartText').value = chk.msg);
+      alert(chk.msg);
+      return;
     }
+    const ta = $('maCartText');
+    const txt = (ta && ta.value) ? ta.value : '';
+    const ok = await __maCopyText(txt);
+    if(!ok){ alert('複製失敗'); return; }
+    __maOpenBossLink();
   });
 
-  // 點餐頁：找老闆（待建置）
-  $('maCartBoss')?.addEventListener('click', ()=>{
-    alert('找老闆（待建置）');
-  });
-
-
-  // 訂單組合頁：三列起始 + 可增刪
+// 訂單組合頁：三列起始 + 可增刪
   const rowsHost = $('maBundleRows');
-  // 訂單組合頁：找老闆（待建置）
-  $('maBundleBoss')?.addEventListener('click', ()=>{
-    alert('找老闆（待建置）');
+  // 訂單組合頁：找老闆（組合 + 複製 + 開啟通訊連結）
+  $('maBundleBoss')?.addEventListener('click', async ()=>{
+    const chk = __maCheckDeliveryRequired();
+    if(!chk.ok){
+      alert(chk.msg);
+      return;
+    }
+    const txt = __maBuildBundleText();
+    const ok = await __maCopyText(txt);
+    if(!ok){ alert('複製失敗'); return; }
+    __maOpenBossLink();
   });
 
-  function makeRow(val){
+  // 訂單組合頁：組合（只複製）
+  $('maBundleBtn')?.addEventListener('click', async ()=>{
+    const chk = __maCheckDeliveryRequired();
+    if(!chk.ok){
+      alert(chk.msg);
+      return;
+    }
+    const txt = __maBuildBundleText();
+    const ok = await __maCopyText(txt);
+    alert(ok ? '已複製' : '複製失敗');
+  });
+
+  // 訂單組合：清空
+  $('maBundleClear')?.addEventListener('click', ()=>{
+    if(!confirm('確定要清空組合清單？')) return;
+    const host = $('maBundleRows');
+    if(host){
+      host.innerHTML = '';
+    }
+    try{ localStorage.removeItem(MA_LS_BUNDLE); }catch(_){}
+    // restore default rows
+    try{ ensure3Rows();
+  try{ __maRecalcAmounts(); }catch(_){ } __maPersistBundle(); }catch(_){}
+  });
+
+
+function makeRow(val){
     const row = document.createElement('div');
     row.className = 'ma-row';
     row.innerHTML = `
@@ -2986,20 +4527,33 @@ function showPanel(){
     `;
     const inp = row.querySelector('input');
     const del = row.querySelector('button.ma-del');
-    if(inp) inp.addEventListener('input', ()=>{ /* 先不記錄，後續再接邏輯 */ });
-    if(del) del.addEventListener('click', ()=> row.remove());
+    if(inp) inp.addEventListener('input', ()=>{ try{ __maPersistBundle(); }catch(_){}; try{ __maRecalcAmounts(); }catch(_){ } });
+    if(del) del.addEventListener('click', ()=>{ row.remove(); try{ __maPersistBundle(); }catch(_){ } try{ __maRecalcAmounts(); }catch(_){ } });
     return row;
   }
   function ensure3Rows(){
     if(!rowsHost) return;
     if(rowsHost.children.length) return;
-    rowsHost.appendChild(makeRow(''));
-    rowsHost.appendChild(makeRow(''));
-    rowsHost.appendChild(makeRow(''));
+    const saved = __maLoadBundleFromLS();
+    if(saved && saved.length){
+      saved.forEach(v=>rowsHost.appendChild(makeRow(v)));
+    }else{
+      rowsHost.appendChild(makeRow(''));
+    try{ __maPersistBundle(); }catch(_){ }
+    try{ __maRecalcAmounts(); }catch(_){ }
+      rowsHost.appendChild(makeRow(''));
+    try{ __maPersistBundle(); }catch(_){ }
+    try{ __maRecalcAmounts(); }catch(_){ }
+      rowsHost.appendChild(makeRow(''));
+    try{ __maPersistBundle(); }catch(_){ }
+    try{ __maRecalcAmounts(); }catch(_){ }
+    }
   }
   $('maAddRow')?.addEventListener('click', ()=>{
     if(!rowsHost) return;
     rowsHost.appendChild(makeRow(''));
+    try{ __maPersistBundle(); }catch(_){ }
+    try{ __maRecalcAmounts(); }catch(_){ }
   });
   ensure3Rows();
 
@@ -3015,851 +4569,26 @@ function showPanel(){
       el.addEventListener('input', saveInfo);
     });
   }
-
-
-  // ===================== 點餐：資料來源（由工作系統注入；若沒有就退回掃描頁面 data-uid） =====================
-  function __maGetPayload(){
-    try{
-      const p = window.__WS_PUBLIC_ORDER_PAYLOAD__;
-      if(p && Array.isArray(p.catalog)) return p;
-    }catch(_){}
-    // fallback：掃描官網上有 data-uid 的產品（只取 name/uid，price=0；折扣/集點不可用）
-    const nodes = Array.from(document.querySelectorAll('[data-uid]'));
-    const catalog = nodes.map(el=>{
-      const id = (el.getAttribute('data-uid')||'').trim();
-      const name = (el.textContent||'').trim().split(/\s+/).slice(0,6).join(' ');
-      return { id, name, short:'', item:'', price:0, tags:[id], states:[] };
-    }).filter(x=>x.id && x.name);
-    return { generated_at: new Date().toISOString(), catalog, discounts:[], discountApplyOrder:[] };
-  }
-
-  const __ma = {
-    payload: null,
-    item: '',
-    cart: [], // { id,name,price,qty,states:[name], stateDelta, isEgg, egg2 }
-    pendingPick: null
-  };
-
-  function __maMoney(n){
-    const v = Number(n||0) || 0;
-    // 官網顯示不用小數
-    return String(Math.round(v));
-  }
-
-  function __maIsEgg(prod){
-    const nm = String(prod?.name||'');
-    const it = String(prod?.item||'');
-    return (nm.includes('雞蛋糕') || it.includes('雞蛋糕'));
-  }
-
-  function __maInitOrderUI(){
-    __ma.payload = __maGetPayload();
-    const chipsEl = $('maItemChips');
-    const listEl = $('maProductList');
-    const cartEl = $('maCartList');
-
-    if(!chipsEl || !listEl || !cartEl) return;
-
-    // build item chips
-    const items = Array.from(new Set((__ma.payload.catalog||[]).map(p=>String(p.item||'').trim()).filter(Boolean)));
-    items.sort((a,b)=>a.localeCompare(b,'zh-Hant'));
-    if(items.length===0) items.push('全部');
-
-    chipsEl.innerHTML = '';
-    const mkChip = (label)=>{
-      const b = document.createElement('button');
-      b.type='button';
-      b.className='ma-chip';
-      b.textContent=label;
-      b.onclick=()=>{
-        __ma.item = (label==='全部') ? '' : label;
-        Array.from(chipsEl.querySelectorAll('.ma-chip')).forEach(x=>x.classList.toggle('active', x===b));
-        __maRenderProducts();
-      };
-      return b;
-    };
-
-    const allFirst = items.includes('全部') ? items : ['全部'].concat(items);
-    allFirst.forEach((it, i)=>{
-      const c = mkChip(it);
-      if(i===0){ c.classList.add('active'); __ma.item=''; }
-      chipsEl.appendChild(c);
-    });
-
-    // bind cart buttons
-    $('maCartCopy')?.addEventListener('click', ()=>{ __maCopyOrBoss(false); });
-    $('maCartBoss')?.addEventListener('click', ()=>{ __maCopyOrBoss(true); });
-
-    // state modal binds
-    $('maStateCancel')?.addEventListener('click', __maCloseStateModal);
-    $('maStateOk')?.addEventListener('click', __maConfirmStateModal);
-    $('maStateOv')?.addEventListener('click', (e)=>{
-      if(e && e.target && e.target.id==='maStateOv') __maCloseStateModal();
-    });
-
-    __maRenderProducts();
-    __maRenderCart();
-  }
-
-  function __maRenderProducts(){
-    const listEl = $('maProductList');
-    if(!listEl) return;
-    const item = String(__ma.item||'').trim();
-    const arr = (__ma.payload.catalog||[])
-      .filter(p=> p && (!item || String(p.item||'').trim()===item))
-      .slice()
-      .sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'zh-Hant'));
-
-    listEl.innerHTML = '';
-    arr.forEach(p=>{
-      const row = document.createElement('div');
-      row.className='ma-prod';
-      const left = document.createElement('div');
-      const nm = document.createElement('div');
-      nm.className='nm';
-      nm.textContent = p.name || '';
-      const meta = document.createElement('div');
-      meta.className='meta';
-      meta.textContent = (p.price>0) ? (`$${__maMoney(p.price)}`) : '';
-      left.appendChild(nm);
-      left.appendChild(meta);
-
-      const btn = document.createElement('button');
-      btn.type='button';
-      btn.className='ma-mini-btn';
-      btn.textContent='加入';
-      btn.onclick=()=>__maPickProduct(p);
-
-      row.appendChild(left);
-      row.appendChild(btn);
-      listEl.appendChild(row);
-    });
-  }
-
-  function __maPickProduct(prod){
-    const states = Array.isArray(prod.states) ? prod.states : [];
-    if(states.length>0){
-      __ma.pendingPick = { prod, picked: [] }; // picked state names
-      __maOpenStateModal(prod, states);
-      return;
-    }
-    __maAddToCart(prod, []);
-  }
-
-  function __maOpenStateModal(prod, states){
-    const ov = $('maStateOv');
-    const ttl = $('maStateTitle');
-    const list = $('maStateList');
-    if(!ov || !list) return;
-    if(ttl) ttl.textContent = `選擇狀態：${prod.name||''}`;
-
-    list.innerHTML='';
-    const opts = states.map(s=>({
-      name: String(s.name||'').trim(),
-      xor: !!s.xor,
-      delta: Number(s.delta||0)||0
-    })).filter(x=>x.name);
-
-    // 同一產品的狀態：依需求「擇一」；若你未來需要多組 xor，可再擴充
-    let picked = null;
-    opts.forEach(o=>{
-      const div = document.createElement('div');
-      div.className='ma-state-opt';
-      div.textContent = (o.delta ? `${o.name} (${o.delta>0?'+':''}${__maMoney(o.delta)})` : o.name);
-      div.onclick=()=>{
-        picked = o;
-        Array.from(list.children).forEach(x=>x.classList.remove('active'));
-        div.classList.add('active');
-      };
-      list.appendChild(div);
-    });
-
-    // default pick first
-    if(list.firstElementChild){
-      list.firstElementChild.classList.add('active');
-      picked = opts[0] || null;
-    }
-
-    __ma.pendingPick = { prod, pickedObj: picked, opts };
-    ov.classList.add('show');
-    ov.setAttribute('aria-hidden','false');
-  }
-
-  function __maCloseStateModal(){
-    const ov = $('maStateOv');
-    if(!ov) return;
-    ov.classList.remove('show');
-    ov.setAttribute('aria-hidden','true');
-    __ma.pendingPick = null;
-  }
-
-  function __maConfirmStateModalBase(){
-    const p = __ma.pendingPick;
-    if(!p || !p.prod){
-      __maCloseStateModal();
-      return;
-    }
-    const picked = p.pickedObj ? [p.pickedObj] : [];
-    __maCloseStateModal();
-    __maAddToCart(p.prod, picked);
-  }
-
-  function __maAddToCart(prod, pickedStates){
-    const id = String(prod.id||'').trim();
-    if(!id) return;
-    const isEgg = __maIsEgg(prod);
-    const basePrice = Number(prod.price||0)||0;
-
-    // 同產品 + 同狀態（含第二顆口味資訊）算同一行：這裡先做「同產品同狀態就合併」
-    const stateKey = (pickedStates||[]).map(x=>x.name).join('|');
-    const key = id + '::' + stateKey;
-
-    const exist = __ma.cart.find(x=>x && x.__key===key);
-    if(exist){
-      exist.qty = Math.max(1, (exist.qty||1) + 1);
-    }else{
-      const stateNames = (pickedStates||[]).map(x=>x.name);
-      const delta = (pickedStates||[]).reduce((s,x)=>s+(Number(x.delta||0)||0),0);
-      __ma.cart.push({
-        __key: key,
-        id,
-        name: prod.name||'',
-        price: basePrice,
-        stateNames,
-        stateDelta: delta,
-        qty: 1,
-        isEgg,
-        egg2: '' // 第二顆口味（雞蛋糕）
-      });
-    }
-    __maRenderCart();
-  }
-
-  function __maRenderCart(){
-    const cartEl = $('maCartList');
-    const txtEl = $('maCartText');
-    if(!cartEl || !txtEl) return;
-
-    cartEl.innerHTML='';
-    (__ma.cart||[]).forEach((ln, idx)=>{
-      const div = document.createElement('div');
-      div.className='ma-line';
-
-      const row1 = document.createElement('div');
-      row1.className='row1';
-
-      const title = document.createElement('div');
-      title.style.fontWeight='900';
-
-      const st = (ln.stateNames && ln.stateNames.length) ? `(${ln.stateNames.join('、')})` : '';
-      title.textContent = `${ln.name}${st}`;
-
-      const qty = document.createElement('div');
-      qty.className='ma-qty';
-      const bMinus = document.createElement('button'); bMinus.type='button'; bMinus.textContent='-';
-      const bPlus = document.createElement('button'); bPlus.type='button'; bPlus.textContent='+';
-      const ip = document.createElement('input'); ip.type='number'; ip.min='0'; ip.step='1'; ip.value=String(ln.qty||1);
-
-      bMinus.onclick=()=>{
-        const q = Math.max(0, (ln.qty||1) - 1);
-        if(q<=0){ __ma.cart.splice(idx,1); }
-        else ln.qty=q;
-        __maRenderCart();
-      };
-      bPlus.onclick=()=>{ ln.qty = Math.max(1, (ln.qty||1) + 1); __maRenderCart(); };
-      ip.onchange=()=>{
-        const q = Math.max(0, Math.floor(Number(ip.value)||0));
-        if(q<=0){ __ma.cart.splice(idx,1); }
-        else ln.qty=q;
-        __maRenderCart();
-      };
-
-      qty.appendChild(bMinus);
-      qty.appendChild(ip);
-      qty.appendChild(bPlus);
-
-      row1.appendChild(title);
-      row1.appendChild(qty);
-
-      const row2 = document.createElement('div');
-      row2.className='row2';
-
-      const price = document.createElement('div');
-      const unit = (Number(ln.price||0) + Number(ln.stateDelta||0)) || 0;
-      const unitStr = unit>0 ? `$${__maMoney(unit)}` : '';
-      const eggHint = ln.isEgg ? '（一份=兩顆）' : '';
-      price.textContent = unitStr ? `${unitStr} ${eggHint}` : eggHint;
-
-      row2.appendChild(price);
-
-      if(ln.isEgg){
-        const btn2 = document.createElement('button');
-        btn2.type='button';
-        btn2.className='ma-mini-btn';
-        btn2.textContent = ln.egg2 ? `第二顆：${ln.egg2}` : '第二顆口味';
-        btn2.onclick=()=>__maPickEggSecond(idx);
-        row2.appendChild(btn2);
-      }
-
-      div.appendChild(row1);
-      div.appendChild(row2);
-      cartEl.appendChild(div);
-    });
-
-    // 更新文字 + 試算
-    txtEl.value = __maBuildCopyText(false);
-    __maUpdateTotals();
-  }
-
-  function __maPickEggSecond(lineIdx){
-    const ln = __ma.cart[lineIdx];
-    if(!ln) return;
-    // 用同一品項的所有雞蛋糕口味當作候選：這裡用「同 item=雞蛋糕」的產品名
-    const payload = __ma.payload || { catalog:[] };
-    const candidates = (payload.catalog||[]).filter(p=>__maIsEgg(p)).map(p=>p.name).filter(Boolean);
-    const uniq = Array.from(new Set(candidates));
-
-    // 用 state modal 當作簡易 picker
-    const fakeProd = { name: '第二顆口味', states: uniq.map(n=>({ name:n, xor:true, delta:0 })) };
-    __ma.pendingPick = { prod: fakeProd, pickedObj: null, opts: [] , __isEgg2:true, lineIdx };
-    __maOpenStateModal(fakeProd, fakeProd.states);
-    // 覆蓋 confirm：在 confirm 裡用 pendingPick.__isEgg2 判斷
-  }
-
-  // 狀態確認：第二顆口味也共用同一個 modal
-  function __maConfirmStateModal(){
-    const p = __ma.pendingPick;
-    if(p && p.__isEgg2){
-      const pickedName = p.pickedObj ? String(p.pickedObj.name||'').trim() : '';
-      const li = p.lineIdx;
-      __maCloseStateModal();
-      if(Number.isFinite(li) && __ma.cart[li]){
-        __ma.cart[li].egg2 = pickedName;
-        __maRenderCart();
-      }
-      return;
-    }
-    return __maConfirmStateModalBase();
-  }
-
-  function __maBuildCartContent(){
-    // 依需求：雞蛋糕一次就是兩顆；如果沒選第二顆口味，視為同口味
-    const parts = [];
-    (__ma.cart||[]).forEach(ln=>{
-      if(!ln || !ln.name) return;
-      const q = Math.max(1, Math.floor(Number(ln.qty)||1));
-      const st = (ln.stateNames && ln.stateNames.length) ? `(${ln.stateNames.join('、')})` : '';
-      if(ln.isEgg){
-        const f1 = ln.name; // 第一顆口味（即產品名）
-        const f2 = ln.egg2 ? ln.egg2 : f1;
-        parts.push(`${f1}${st}×${q}份(共${q*2}顆：${f1}、${f2})`);
-      }else{
-        parts.push(`${ln.name}${st}×${q}`);
-      }
-    });
-    return parts.join('、');
-  }
-
-  function __maBuildCopyText(forBundle){
-    const name = ($('maName')?.value||'').trim();
-    const phone = ($('maPhone')?.value||'').trim();
-    const pickup = ($('maPickup')?.value||'').trim();
-    const addr = ($('maAddr')?.value||'').trim();
-    const shop = ($('maShop')?.value||'').trim();
-
-    const cartContent = __maBuildCartContent();
-    if(forBundle){
-      return `【${cartContent}】`;
-    }
-
-    const isDelivery = !!addr;
-    if(isDelivery){
-      return `老闆您好，我要外送${addr}${shop?(' '+shop):''}【${cartContent}】預計${pickup}送達，${name}${phone}謝謝。`;
-    }
-    return `老闆您好，我要自取【${cartContent}】預計${pickup}取餐，${name}${phone}謝謝。`;
-  }
-
-  function __maCopyOrBoss(openLink){
-    const text = __maBuildCopyText(false);
-    try{ navigator.clipboard && navigator.clipboard.writeText(text); }catch(_){
-      try{
-        const ta = $('maCartText');
-        if(ta){ ta.focus(); ta.select(); document.execCommand('copy'); }
-      }catch(_){}
-    }
-    if(openLink){
-      const app = ($('maApp')?.value||'line').trim();
-      const url = (app==='fb') ? 'https://m.me/menghushao' : 'https://reurl.cc/qZAE2y';
-      try{ window.open(url, '_blank'); }catch(_){ location.href=url; }
-    }
-  }
-
-  function __maUpdateTotals(){
-    const elOrder = $('maOrderAmt');
-    const elDis = $('maDiscountAmt');
-    const elPts = $('maPointsAmt');
-
-    // order amount
-    let orderAmt = 0;
-    const units = []; // for points calc
-    (__ma.cart||[]).forEach(ln=>{
-      const q = Math.max(1, Math.floor(Number(ln.qty)||1));
-      const unitPrice = (Number(ln.price||0) + Number(ln.stateDelta||0)) || 0;
-      // 雞蛋糕一份兩顆，但價格仍然以「一份」計算（與工作系統一致）
-      orderAmt += unitPrice * q;
-      // points units：以「份」為單位
-      for(let i=0;i<q;i++){
-        units.push({ price: unitPrice, tags: [ln.id].concat(ln.stateNames||[]) });
-      }
-    });
-
-    // discount/points：若 payload 有折扣規則就試算；沒有就都 0
-    let discount = 0;
-    let points = 0;
-
-    try{
-      const p = __ma.payload || {};
-      const picked = __maGetPickedApplicableDiscounts(p);
-      const bundleUnits = [];
-      picked.forEach(({d})=>{
-        if(d && d.type==='bundle_qty'){
-          __maApplyBundleQtyDiscount(units, d, bundleUnits);
-        }
-      });
-
-      const units2 = [];
-      (bundleUnits||[]).forEach(u=>{ if(u && isFinite(+u.price)) units2.push({ price:+u.price||0, tags: u.tags||[] }); });
-      (units||[]).forEach(u=> units2.push({ price:+u.price||0, tags: u.tags||[] }));
-
-      discount = __maCalcDiscountDelta(picked, units2);
-      points = __maCalcPointsEarned(picked, units2);
-    }catch(_){}
-
-    if(elOrder) elOrder.textContent = __maMoney(orderAmt);
-    if(elDis) elDis.textContent = __maMoney(discount);
-    if(elPts) elPts.textContent = __maMoney(points);
-  }
-
-  // ====== 折扣/集點：把工作系統的「通用」算法做成官網版（只依 tags + price，不依任何成本欄位） ======
-  function __maNormalizeDiscounts(payload){
-    const ds = Array.isArray(payload.discounts) ? payload.discounts.slice() : [];
-    const ord = Array.isArray(payload.discountApplyOrder) ? payload.discountApplyOrder.slice() : [];
-    // assign apply_order by order list
-    ds.forEach(d=>{
-      if(!d) return;
-      const id = String(d.id||'').trim();
-      const idx = id ? ord.indexOf(id) : -1;
-      d.apply_order = (idx>=0) ? idx : (Number(d.apply_order)||0);
-    });
-    ds.sort((a,b)=>(+a.apply_order||0) - (+b.apply_order||0));
-    return ds.filter(d=>d && (d.enabled!==false) && (d.disabled!==true));
-  }
-
-  function __maGetPickedApplicableDiscounts(payload){
-    // 官網：全部都「被動生效」，所以 picked=所有 enabled 規則
-    const ds = __maNormalizeDiscounts(payload);
-    return ds.map((d, idx)=>({ idx, d }));
-  }
-
-  function __maPickTaggedUnits(units, tags){
-    const tset = new Set((tags||[]).map(x=>String(x||'').trim()).filter(Boolean));
-    return (units||[]).filter(u=>{
-      const ut = Array.isArray(u.tags) ? u.tags : [];
-      return ut.some(x=>tset.has(String(x||'').trim()));
-    });
-  }
-
-  function __maCalcDiscountDelta(picked, units){
-    // 依工作系統概念：originalTotal - finalTotal
-    const originalTotal = (units||[]).reduce((s,u)=>s+(+u.price||0),0);
-
-    // clone working units
-    const work = (units||[]).map(u=>({ price:+u.price||0, tags: Array.isArray(u.tags)?u.tags.slice():[] }));
-
-    const currentUnits = ()=>work;
-
-    picked.forEach(({d, idx})=>{
-      if(!d || !d.type) return;
-      const type = String(d.type||'').trim();
-
-      if(type==='coupon'){
-        // 官網不提供客選 coupon；仍可能用於被動（qty=0 時不生效）
-        return;
-      }
-
-      // amount_off / amount_percent（購滿金額）
-      if(type==='amount'){
-        const thr = Number(d.amount_threshold||0)||0;
-        if(thr<=0) return;
-        const total = currentUnits().reduce((s,u)=>s+(+u.price||0),0);
-        if(total < thr) return;
-
-        if(isFinite(Number(d.amount_off)) && Number(d.amount_off)>0){
-          let left = Number(d.amount_off)||0;
-          // 從高價份開始扣
-          currentUnits().sort((a,b)=>(+b.price||0)-(+a.price||0));
-          for(const u of currentUnits()){
-            if(left<=0) break;
-            const p = +u.price||0;
-            if(p<=0) continue;
-            const cut = Math.min(left, p);
-            u.price = p - cut;
-            left -= cut;
-          }
-          return;
-        }
-        const pct = Number(d.amount_percent||0)||0;
-        if(pct>0 && pct<1){
-          currentUnits().forEach(u=>{ u.price = Math.max(0, (+u.price||0) * (1-pct)); });
-        }
-        return;
-      }
-
-      // qty（購滿數量）
-      if(type==='qty'){
-        const thr = Math.max(0, Math.floor(Number(d.qty_threshold||0)||0));
-        if(thr<=0) return;
-        const cnt = currentUnits().filter(u=>(+u.price||0)>0).length;
-        if(cnt < thr) return;
-
-        if(isFinite(Number(d.qty_off)) && Number(d.qty_off)>0){
-          let left = Number(d.qty_off)||0;
-          currentUnits().sort((a,b)=>(+b.price||0)-(+a.price||0));
-          for(const u of currentUnits()){
-            if(left<=0) break;
-            const p = +u.price||0;
-            if(p<=0) continue;
-            const cut = Math.min(left, p);
-            u.price = p - cut;
-            left -= cut;
-          }
-          return;
-        }
-        const pct = Number(d.qty_percent||0)||0;
-        if(pct>0 && pct<1){
-          currentUnits().forEach(u=>{ u.price = Math.max(0, (+u.price||0) * (1-pct)); });
-        }
-        return;
-      }
-
-      // bundle_qty（組合特價：變成份）
-      if(type==='bundle_qty'){
-        // 已在外層先用 __maApplyBundleQtyDiscount 轉成 bundleUnits；這裡不直接扣
-        return;
-      }
-    });
-
-    const finalTotal = currentUnits().reduce((s,u)=>s+(+u.price||0),0);
-    const delta = Math.max(0, (originalTotal - finalTotal));
-    return +delta.toFixed(2);
-  }
-
-  function __maApplyBundleQtyDiscount(items, d, outUnits){
-    try{
-      const targets = Array.isArray(d.bundle_targets) ? d.bundle_targets : [];
-      const thr = Math.max(0, Math.floor(Number(d.bundle_qty||0)||0));
-      const price = Number(d.bundle_price||0)||0;
-      if(thr<=0 || price<=0 || targets.length===0) return;
-
-      const cand = __maPickTaggedUnits(items, targets);
-      if(cand.length < thr) return;
-
-      // 按價格高->低組成 bundle（較直覺：先把貴的組掉）
-      cand.sort((a,b)=>(+b.price||0)-(+a.price||0));
-      const take = cand.slice(0, thr);
-      take.forEach(u=>{ u.__used = true; });
-
-      outUnits.push({ price, tags: targets.slice() });
-    }catch(_){}
-  }
-
-  function __maCalcPointsEarned(picked, units){
-    // points 規則：沿用工作系統概念（stage1/2 + synergy_points）；僅依 tags + price
-    let total = 0;
-    picked.forEach(({d, idx})=>{
-      if(!d) return;
-      if(String(d.type||'')!=='points') return;
-
-      const tags = Array.isArray(d.note1_targets) ? d.note1_targets : [];
-      if(tags.length===0) return;
-
-      const eligible = __maPickTaggedUnits(units, tags).filter(u=>!u.__used);
-      if(eligible.length===0) return;
-
-      const s1Type = String(d.stage1_type||'amount');
-      const s1Thr = Number(d.stage1_thr||0)||0;
-      const s1Give = Number(d.stage1_give||0)||0;
-
-      const s2Type = String(d.stage2_type||'amount');
-      const s2Thr = Number(d.stage2_thr||0)||0;
-      const s2Mul = Number(d.stage2_mul||0)||0;
-      const cap = Math.max(0, Math.floor(Number(d.cap||0)||0));
-
-      const synergyPoints = Math.max(0, Math.floor(Number(d.synergy_points||0)||0));
-
-      const cnt = eligible.length;
-      const sum = Math.max(0, eligible.reduce((s,u)=>s+(+u.price||0),0));
-
-      let base = 0;
-      if(s1Type === 'qty'){
-        if(isFinite(s1Thr) && s1Thr>0 && s1Give>0) base = Math.floor(cnt / s1Thr) * s1Give;
-      }else{
-        if(isFinite(s1Thr) && s1Thr>0 && s1Give>0) base = Math.floor(sum / s1Thr) * s1Give;
-      }
-
-      let hit2 = false;
-      if(s2Type === 'qty'){
-        hit2 = (isFinite(s2Thr) && s2Thr>0) ? (cnt >= s2Thr) : false;
-      }else{
-        hit2 = (isFinite(s2Thr) && s2Thr>0) ? (sum >= s2Thr) : false;
-      }
-      if(hit2 && isFinite(s2Mul) && s2Mul>0) base = base * s2Mul;
-
-      base = Math.floor(base || 0);
-      if(cap>0) base = Math.min(base, cap);
-
-      const pts = Math.max(0, Math.floor((synergyPoints + base) || 0));
-      total += pts;
-    });
-    return Math.max(0, Math.floor(total||0));
-  }
-
-  // ===================== 訂單組合：解析 + 組合 + 找老闆 =====================
-  function __maInitBundleUI(){
-    const rowsWrap = $('maBundleRows');
-    if(!rowsWrap) return;
-
-    function addRow(val){
-      const row = document.createElement('div');
-      row.className='ma-row';
-      row.innerHTML = `
-        <textarea class="ma-ta" placeholder="貼上每一位的訂單內容（可留空）"></textarea>
-        <button class="ma-mini-btn ma-del" type="button">刪除</button>
-      `;
-      const ta = row.querySelector('textarea');
-      const del = row.querySelector('button');
-      if(ta && val) ta.value = val;
-      del.onclick=()=>{ row.remove(); __maUpdateBundleTotals(); };
-      ta.oninput=()=>__maUpdateBundleTotals();
-      rowsWrap.appendChild(row);
-    }
-
-    // 初次 3 列
-    if(rowsWrap.children.length===0){
-      addRow(''); addRow(''); addRow('');
-    }
-
-    $('maAddRow')?.addEventListener('click', ()=>addRow(''));
-    $('maBundleBtn')?.addEventListener('click', ()=>__maBundle(false));
-    $('maBundleBoss')?.addEventListener('click', ()=>__maBundle(true));
-
-    __maUpdateBundleTotals();
-  }
-
-  function __maParseOneOrderText(text){
-    const s = String(text||'').trim();
-    if(!s) return null;
-    const name = (s.match(/，([^，]{1,12})\d{6,}/) || [])[1] || (s.match(/，([^，]{1,12})謝謝/)||[])[1] || '';
-    const m = s.match(/【([\s\S]*?)】/);
-    const cart = m ? String(m[1]||'').trim() : '';
-    return { name: (name||'').trim() || '無名', cart };
-  }
-
-  function __maBundle(openLink){
-    const rowsWrap = $('maBundleRows');
-    if(!rowsWrap) return;
-
-    const parts = [];
-    Array.from(rowsWrap.querySelectorAll('textarea')).forEach(ta=>{
-      const parsed = __maParseOneOrderText(ta.value);
-      if(!parsed) return;
-      if(!parsed.cart) return;
-      parts.push(`${parsed.name}【${parsed.cart}】`);
-    });
-
-    const combinedCart = parts.join('');
-    const name = ($('maName')?.value||'').trim();
-    const phone = ($('maPhone')?.value||'').trim();
-    const pickup = ($('maPickup')?.value||'').trim();
-    const addr = ($('maAddr')?.value||'').trim();
-    const shop = ($('maShop')?.value||'').trim();
-
-    const isDelivery = !!addr;
-    const text = isDelivery
-      ? `老闆您好，我要外送${addr}${shop?(' '+shop):''}【${combinedCart}】預計${pickup}送達，${name}${phone}謝謝。`
-      : `老闆您好，我要自取【${combinedCart}】預計${pickup}取餐，${name}${phone}謝謝。`;
-
-    try{ navigator.clipboard && navigator.clipboard.writeText(text); }catch(_){
-      try{
-        // fallback：臨時 textarea
-        const tmp=document.createElement('textarea');
-        tmp.value=text; document.body.appendChild(tmp);
-        tmp.select(); document.execCommand('copy'); tmp.remove();
-      }catch(_){}
-    }
-
-    if(openLink){
-      const app = ($('maApp')?.value||'line').trim();
-      const url = (app==='fb') ? 'https://m.me/menghushao' : 'https://reurl.cc/qZAE2y';
-      try{ window.open(url, '_blank'); }catch(_){ location.href=url; }
-    }
-  }
-
-  
-  function __maSplitTopLevel(str){
-    const out=[]; let cur=''; let depth=0;
-    const s=String(str||'');
-    for(let i=0;i<s.length;i++){
-      const ch=s[i];
-      if(ch==='(' || ch==='（') depth++;
-      if(ch===')' || ch==='）') depth=Math.max(0, depth-1);
-      if(ch==='、' && depth===0){
-        if(cur.trim()) out.push(cur.trim());
-        cur='';
-        continue;
-      }
-      cur+=ch;
-    }
-    if(cur.trim()) out.push(cur.trim());
-    return out;
-  }
-
-  function __maParseCartString(cartStr){
-    const payload = __ma.payload || { catalog:[] };
-    const catalog = Array.isArray(payload.catalog) ? payload.catalog : [];
-    const byName = new Map(catalog.map(p=>[String(p.name||'').trim(), p]));
-    const items = [];
-
-    const parts = __maSplitTopLevel(String(cartStr||''));
-    parts.forEach(seg=>{
-      // seg examples:
-      // "紅豆雞蛋糕(焦)×2份(共4顆：紅豆雞蛋糕、奶油雞蛋糕)"
-      // "卡士達(焦)×1"
-      const m = seg.match(/^(.+?)×\s*(\d+)\s*(份)?/);
-      if(!m) return;
-      const left = String(m[1]||'').trim();
-      const qty = Math.max(1, Math.floor(Number(m[2]||1)||1));
-
-      // states: name(states)
-      let name = left;
-      let states = [];
-      const ms = left.match(/^(.+?)\((.+)\)$/);
-      const ms2 = left.match(/^(.+?)（(.+)）$/);
-      const mm = ms || ms2;
-      if(mm){
-        name = String(mm[1]||'').trim();
-        states = String(mm[2]||'').split('、').map(x=>String(x||'').trim()).filter(Boolean);
-      }
-
-      const prod = byName.get(name);
-      if(!prod){
-        // 找不到就跳過（避免亂算）
-        return;
-      }
-
-      // state delta
-      let delta = 0;
-      try{
-        const stArr = Array.isArray(prod.states) ? prod.states : [];
-        states.forEach(sn=>{
-          const st = stArr.find(x=>x && String(x.name||'').trim()===sn);
-          if(st) delta += (Number(st.delta||0)||0);
-        });
-      }catch(_){}
-
-      items.push({
-        id: String(prod.id||'').trim(),
-        name: String(prod.name||'').trim(),
-        qty,
-        unitPrice: (Number(prod.price||0)||0) + delta,
-        stateNames: states
-      });
-    });
-
-    return items;
-  }
-
-  function __maUpdateBundleTotals(){
-    // 訂單組合頁：把所有貼入的 cart 當作同一筆訂單去算折扣/集點（被動生效）
-    const elOrder = $('maOrderAmt');
-    const elDis = $('maDiscountAmt');
-    const elPts = $('maPointsAmt');
-
-    try{
-      const rowsWrap = $('maBundleRows');
-      if(!rowsWrap) return;
-
-      const allItems = [];
-      Array.from(rowsWrap.querySelectorAll('textarea')).forEach(ta=>{
-        const parsed = __maParseOneOrderText(ta.value);
-        if(parsed && parsed.cart){
-          const arr = __maParseCartString(parsed.cart);
-          arr.forEach(x=>allItems.push(x));
-        }
-      });
-
-      // build units
-      let orderAmt=0;
-      const units=[];
-      allItems.forEach(it=>{
-        const q = Math.max(1, Math.floor(Number(it.qty)||1));
-        const unit = Number(it.unitPrice||0)||0;
-        orderAmt += unit*q;
-        for(let i=0;i<q;i++){
-          units.push({ price: unit, tags: [it.id].concat(it.stateNames||[]) });
-        }
-      });
-
-      let discount=0, points=0;
-      try{
-        const p = __ma.payload || {};
-        const picked = __maGetPickedApplicableDiscounts(p);
-        const bundleUnits = [];
-        picked.forEach(({d})=>{
-          if(d && d.type==='bundle_qty'){
-            __maApplyBundleQtyDiscount(units, d, bundleUnits);
-          }
-        });
-        const units2 = [];
-        (bundleUnits||[]).forEach(u=>{ if(u && isFinite(+u.price)) units2.push({ price:+u.price||0, tags: u.tags||[] }); });
-        (units||[]).forEach(u=> units2.push({ price:+u.price||0, tags: u.tags||[] }));
-
-        discount = __maCalcDiscountDelta(picked, units2);
-        points = __maCalcPointsEarned(picked, units2);
-      }catch(_){}
-
-      if(elOrder) elOrder.textContent = __maMoney(orderAmt);
-      if(elDis) elDis.textContent = __maMoney(discount);
-      if(elPts) elPts.textContent = __maMoney(points);
-    }catch(_){
-      if(elOrder) elOrder.textContent = '0';
-      if(elDis) elDis.textContent = '0';
-      if(elPts) elPts.textContent = '0';
-    }
-  }
-
-
-  // tab 切換時更新試算（資訊->點餐->訂單組合）
-  tabs.forEach(t=>{
-    t.addEventListener('click', ()=>{
-      const name = t.dataset.tab;
-      if(name==='order'){ __maInitOrderUI(); }
-      if(name==='bundle'){ __maInitBundleUI(); }
-      setTimeout(()=>{
-        if(name==='order'){ __maUpdateTotals(); }
-      }, 0);
-    });
-  });
-
-  // 彈窗打開時先初始化一次（避免第一次切 tab 才載）
-  try{ __maInitOrderUI(); }catch(_){}
-  try{ __maInitBundleUI(); }catch(_){}
-
-
 })();
 </script>
 
-<script id="wsFpEnhanceScript">
+
+  <!-- 點餐狀態選擇 Modal -->
+  <div class="ma-modal" id="maStateModal" aria-hidden="true">
+    <div class="ma-modal-backdrop" data-close="1"></div>
+    <div class="ma-modal-card" role="dialog" aria-modal="true">
+      <div class="ma-modal-bar">
+        <div class="ma-modal-title" id="maStateModalTitle">選擇狀態</div>
+        <div class="spacer"></div>
+        <button class="ma-mini-btn" id="maStateModalCancel">取消</button>
+        <button class="ma-mini-btn primary" id="maStateModalOk">確定</button>
+      </div>
+      <div class="ma-modal-body" id="maStateModalBody"></div>
+      <div class="ma-modal-hint" id="maStateModalHint"></div>
+    </div>
+  </div>
+
+<script id="wsCartData" type="application/json">{"version":1,"generated_at":1772192877233,"final_item_order":["雞蛋糕","飲品","咖啡","霜淇淋","包裝","UBER雞蛋糕","UBER飲品","UBER咖啡","UBER包裝"],"products":[{"id":"fp_19c7a45ebb7_8b50b5c0_1","name":"不織布提網","item":"包裝","short":"提網","cart_enabled":true,"states":[]},{"id":"fp_19c7a45ebb7_4480d6d6_2","name":"冬瓜茶_內用","item":"飲品","short":"冬_內","cart_enabled":true,"states":[{"name":"加冰","short":"","delta":0,"qty":1,"xor":"溫度","cart":true}]},{"id":"fp_19c7a45ebb7_3be5defa_3","name":"冬瓜茶_外帶","item":"飲品","short":"冬_外","cart_enabled":true,"states":[{"name":"去冰","short":"","delta":0,"qty":1,"xor":"溫度","cart":true}]},{"id":"fp_19c7a45ebb7_058ca7d4_4","name":"冬瓜茶_外帶自杯","item":"飲品","short":"冬_自","cart_enabled":true,"states":[{"name":"去冰","short":"","delta":0,"qty":1,"xor":"溫度","cart":true}]},{"id":"fp_19c7a45ebb7_665b32b8_5","name":"冬瓜紫蘇梅_內用","item":"飲品","short":"冬梅_內","cart_enabled":true,"states":[{"name":"去冰","short":"","delta":0,"qty":1,"xor":"溫度","cart":true}]},{"id":"fp_19c7a45ebb7_20add37f_6","name":"冬瓜紫蘇梅_外帶","item":"飲品","short":"冬梅_外","cart_enabled":true,"states":[{"name":"去冰","short":"","delta":0,"qty":1,"xor":"溫度","cart":true}]},{"id":"fp_19c7a45ebb7_214267b1_7","name":"冬瓜紫蘇梅_外帶自杯","item":"飲品","short":"冬梅_自","cart_enabled":true,"states":[{"name":"去冰","short":"","delta":0,"qty":1,"xor":"溫度","cart":true}]},{"id":"fp_19c7a45ebb7_4dc5535a_8","name":"冬瓜鮮奶_內用","item":"飲品","short":"冬鮮_內","cart_enabled":true,"states":[{"name":"加冰","short":"","delta":0,"qty":1,"xor":"溫度","cart":true}]},{"id":"fp_19c7a45ebb7_430dd58d_9","name":"冬瓜鮮奶_外帶","item":"飲品","short":"冬鮮_外","cart_enabled":true,"states":[{"name":"去冰","short":"","delta":0,"qty":1,"xor":"溫度","cart":true}]},{"id":"fp_19c7a45ebb7_5872c045_a","name":"冬瓜鮮奶_外帶自杯","item":"飲品","short":"冬鮮_自","cart_enabled":true,"states":[{"name":"去冰","short":"","delta":0,"qty":1,"xor":"溫度","cart":true}]},{"id":"fp_19c7a45ebb7_016fcde8_b","name":"冬瓜檸檬_內用","item":"飲品","short":"冬檸_內","cart_enabled":true,"states":[{"name":"加冰","short":"","delta":0,"qty":1,"xor":"溫度","cart":true}]},{"id":"fp_19c7a45ebb7_20088b0d_c","name":"冬瓜檸檬_外帶","item":"飲品","short":"冬檸_外","cart_enabled":true,"states":[{"name":"去冰","short":"","delta":0,"qty":1,"xor":"溫度","cart":true}]},{"id":"fp_19c7a45ebb7_c1af0339_d","name":"冬瓜檸檬_外帶自杯","item":"飲品","short":"冬檸_自","cart_enabled":true,"states":[{"name":"去冰","short":"","delta":0,"qty":1,"xor":"溫度","cart":true}]},{"id":"fp_19c7a45ebb7_f3ab4a63_e","name":"燒仙草_內用","item":"飲品","short":"燒_內","cart_enabled":true,"states":[]},{"id":"fp_19c7a45ebb7_d77a6533_f","name":"燒仙草_外帶","item":"飲品","short":"燒_外","cart_enabled":true,"states":[]},{"id":"fp_19c7a45ebb7_e9920412_10","name":"燒仙草_外帶自杯","item":"飲品","short":"燒_自","cart_enabled":true,"states":[]},{"id":"fp_19c7a45ebb7_f49f66c1_11","name":"純雞蛋糕","item":"雞蛋糕","short":"純","cart_enabled":true,"states":[]},{"id":"fp_19c7a45ebb7_0050d633_12","name":"巧克力","item":"雞蛋糕","short":"巧","cart_enabled":true,"states":[]},{"id":"fp_19c7a45ebb7_1f8761d7_13","name":"奶油","item":"雞蛋糕","short":"奶","cart_enabled":true,"states":[]},{"id":"fp_19c7a45ebb7_275e966f_14","name":"鹹蛋黃","item":"雞蛋糕","short":"鹹","cart_enabled":true,"states":[]},{"id":"fp_19c7a45ebb7_186b7c21_15","name":"抹茶","item":"雞蛋糕","short":"抹","cart_enabled":true,"states":[]},{"id":"fp_19c7a45ebb7_423df2dd_16","name":"紅豆","item":"雞蛋糕","short":"紅","cart_enabled":true,"states":[]},{"id":"fp_19c7a45ebb7_ed76997a_17","name":"芝麻","item":"雞蛋糕","short":"芝","cart_enabled":true,"states":[]},{"id":"fp_19c7a45ebb7_af2931c7_18","name":"蒜香","item":"雞蛋糕","short":"蒜","cart_enabled":true,"states":[]},{"id":"fp_19c7a45ebb7_60cde13d_19","name":"梅子花生","item":"雞蛋糕","short":"花","cart_enabled":true,"states":[]},{"id":"fp_19c7a45ebb7_97beb9cb_1a","name":"草莓","item":"雞蛋糕","short":"莓","cart_enabled":true,"states":[]},{"id":"fp_19c7a45ebb7_f9154957_1c","name":"奶油鹹蛋","item":"雞蛋糕","short":"奶鹹","cart_enabled":true,"states":[]},{"id":"fp_19c7a45ebb7_b7abecf7_1d","name":"雙色乳酪","item":"雞蛋糕","short":"酪","cart_enabled":true,"states":[]},{"id":"fp_19c7a45ebb7_7599c171_1e","name":"抹茶紅豆","item":"雞蛋糕","short":"抹紅","cart_enabled":true,"states":[]},{"id":"fp_19c7a45ebb7_2df4cae0_1f","name":"抹茶巧克力","item":"雞蛋糕","short":"抹巧","cart_enabled":true,"states":[]},{"id":"fp_19c7a45ebb7_58c50b40_20","name":"芝麻巧克力","item":"雞蛋糕","short":"芝巧","cart_enabled":true,"states":[]},{"id":"fp_19c7a45ebb7_f2df5b90_21","name":"花生巧克力","item":"雞蛋糕","short":"花巧","cart_enabled":true,"states":[]},{"id":"fp_19c7a45ebb7_c2871fef_22","name":"玉米濃湯","item":"雞蛋糕","short":"濃","cart_enabled":true,"states":[]},{"id":"fp_19c7a45ebb7_5795c186_24","name":"美式_內用","item":"咖啡","short":"美內","cart_enabled":true,"states":[{"name":"經典","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"低因","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"花果","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"香草","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"木質辛香","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"冰","short":"","delta":0,"qty":1,"xor":"溫度","cart":true}]},{"id":"fp_19c7a45ebb7_badcbb6c_25","name":"美式_外帶","item":"咖啡","short":"美外","cart_enabled":true,"states":[{"name":"經典","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"低因","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"花果","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"香草","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"木質辛香","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"冰","short":"","delta":0,"qty":1,"xor":"溫度","cart":true}]},{"id":"fp_19c7a45ebb7_050b9ebd_26","name":"美式_外帶自杯","item":"咖啡","short":"美自","cart_enabled":true,"states":[{"name":"經典","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"低因","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"花果","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"香草","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"木質辛香","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"冰","short":"","delta":0,"qty":1,"xor":"溫度","cart":true}]},{"id":"fp_19c7a45ebb7_116acc71_27","name":"拿鐵_內用","item":"咖啡","short":"拿內","cart_enabled":true,"states":[{"name":"經典","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"低因","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"花果","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"香草","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"木質辛香","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"冰","short":"","delta":0,"qty":1,"xor":"溫度","cart":true}]},{"id":"fp_19c7a45ebb7_0bfaa202_28","name":"萌翻拿鐵","item":"咖啡","short":"萌翻","cart_enabled":true,"states":[{"name":"經典","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"低因","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"花果","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"香草","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"木質辛香","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"冰","short":"","delta":0,"qty":1,"xor":"溫度","cart":true}]},{"id":"fp_19c7a45ebb7_edb4d269_29","name":"拿鐵_外帶","item":"咖啡","short":"拿外","cart_enabled":true,"states":[{"name":"經典","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"低因","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"花果","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"香草","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"木質辛香","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"冰","short":"","delta":0,"qty":1,"xor":"溫度","cart":true}]},{"id":"fp_19c7a45ebb7_74b5eb25_2a","name":"拿鐵_外帶自杯","item":"咖啡","short":"拿自","cart_enabled":true,"states":[{"name":"經典","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"低因","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"花果","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"香草","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"木質辛香","short":"","delta":0,"qty":1,"xor":"風味","cart":true},{"name":"冰","short":"","delta":0,"qty":1,"xor":"溫度","cart":true}]}]}</script><script id="wsFinalProductsData" type="application/json">[{"id":"fp_19c7a45ebb7_8b50b5c0_1","name":"不織布提網","item":"包裝","short_name":"提網","price_today":null,"price":5,"price_default":null,"sell_price":null},{"id":"fp_19c7a45ebb7_4480d6d6_2","name":"冬瓜茶_內用","item":"飲品","short_name":"冬_內","price_today":null,"price":10,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點,飲品滿500折50,飲品滿1000七折"},{"id":"fp_19c7a45ebb7_3be5defa_3","name":"冬瓜茶_外帶","item":"飲品","short_name":"冬_外","price_today":null,"price":25,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點"},{"id":"fp_19c7a45ebb7_058ca7d4_4","name":"冬瓜茶_外帶自杯","item":"飲品","short_name":"冬_自","price_today":null,"price":15,"price_default":null,"sell_price":null,"tags_csv":"12份折1份,滿60元1點"},{"id":"fp_19c7a45ebb7_665b32b8_5","name":"冬瓜紫蘇梅_內用","item":"飲品","short_name":"冬梅_內","price_today":null,"price":20,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點"},{"id":"fp_19c7a45ebb7_20add37f_6","name":"冬瓜紫蘇梅_外帶","item":"飲品","short_name":"冬梅_外","price_today":null,"price":35,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點"},{"id":"fp_19c7a45ebb7_214267b1_7","name":"冬瓜紫蘇梅_外帶自杯","item":"飲品","short_name":"冬梅_自","price_today":null,"price":25,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點"},{"id":"fp_19c7a45ebb7_4dc5535a_8","name":"冬瓜鮮奶_內用","item":"飲品","short_name":"冬鮮_內","price_today":null,"price":25,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點"},{"id":"fp_19c7a45ebb7_430dd58d_9","name":"冬瓜鮮奶_外帶","item":"飲品","short_name":"冬鮮_外","price_today":null,"price":45,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點"},{"id":"fp_19c7a45ebb7_5872c045_a","name":"冬瓜鮮奶_外帶自杯","item":"飲品","short_name":"冬鮮_自","price_today":null,"price":35,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點"},{"id":"fp_19c7a45ebb7_016fcde8_b","name":"冬瓜檸檬_內用","item":"飲品","short_name":"冬檸_內","price_today":null,"price":15,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點"},{"id":"fp_19c7a45ebb7_20088b0d_c","name":"冬瓜檸檬_外帶","item":"飲品","short_name":"冬檸_外","price_today":null,"price":30,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點"},{"id":"fp_19c7a45ebb7_c1af0339_d","name":"冬瓜檸檬_外帶自杯","item":"飲品","short_name":"冬檸_自","price_today":null,"price":20,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點"},{"id":"fp_19c7a45ebb7_f3ab4a63_e","name":"燒仙草_內用","item":"飲品","short_name":"燒_內","price_today":null,"price":20,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點"},{"id":"fp_19c7a45ebb7_d77a6533_f","name":"燒仙草_外帶","item":"飲品","short_name":"燒_外","price_today":null,"price":40,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點"},{"id":"fp_19c7a45ebb7_e9920412_10","name":"燒仙草_外帶自杯","item":"飲品","short_name":"燒_自","price_today":null,"price":30,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點"},{"id":"fp_19c7a45ebb7_f49f66c1_11","name":"純雞蛋糕","item":"雞蛋糕","short_name":"純","price_today":null,"price":10,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點,10元雞蛋糕"},{"id":"fp_19c7a45ebb7_0050d633_12","name":"巧克力","item":"雞蛋糕","short_name":"巧","price_today":null,"price":15,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點,15元雞蛋糕"},{"id":"fp_19c7a45ebb7_1f8761d7_13","name":"奶油","item":"雞蛋糕","short_name":"奶","price_today":null,"price":15,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點,15元雞蛋糕"},{"id":"fp_19c7a45ebb7_275e966f_14","name":"鹹蛋黃","item":"雞蛋糕","short_name":"鹹","price_today":null,"price":15,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點,15元雞蛋糕"},{"id":"fp_19c7a45ebb7_186b7c21_15","name":"抹茶","item":"雞蛋糕","short_name":"抹","price_today":null,"price":15,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點,15元雞蛋糕"},{"id":"fp_19c7a45ebb7_423df2dd_16","name":"紅豆","item":"雞蛋糕","short_name":"紅","price_today":null,"price":15,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點,15元雞蛋糕"},{"id":"fp_19c7a45ebb7_ed76997a_17","name":"芝麻","item":"雞蛋糕","short_name":"芝","price_today":null,"price":15,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點,15元雞蛋糕"},{"id":"fp_19c7a45ebb7_af2931c7_18","name":"蒜香","item":"雞蛋糕","short_name":"蒜","price_today":null,"price":15,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點,15元雞蛋糕"},{"id":"fp_19c7a45ebb7_60cde13d_19","name":"梅子花生","item":"雞蛋糕","short_name":"花","price_today":null,"price":15,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點,15元雞蛋糕"},{"id":"fp_19c7a45ebb7_97beb9cb_1a","name":"草莓","item":"雞蛋糕","short_name":"莓","price_today":null,"price":15,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點,15元雞蛋糕"},{"id":"fp_19c7a45ebb7_c56368e1_1b","name":"檬香","item":"雞蛋糕","short_name":"檬","price_today":null,"price":15,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點,15元雞蛋糕"},{"id":"fp_19c7a45ebb7_f9154957_1c","name":"奶油鹹蛋","item":"雞蛋糕","short_name":"奶鹹","price_today":null,"price":20,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點,20元雞蛋糕"},{"id":"fp_19c7a45ebb7_b7abecf7_1d","name":"雙色乳酪","item":"雞蛋糕","short_name":"酪","price_today":null,"price":20,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點,20元雞蛋糕"},{"id":"fp_19c7a45ebb7_7599c171_1e","name":"抹茶紅豆","item":"雞蛋糕","short_name":"抹紅","price_today":null,"price":20,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點,20元雞蛋糕"},{"id":"fp_19c7a45ebb7_2df4cae0_1f","name":"抹茶巧克力","item":"雞蛋糕","short_name":"抹巧","price_today":null,"price":20,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點,20元雞蛋糕"},{"id":"fp_19c7a45ebb7_58c50b40_20","name":"芝麻巧克力","item":"雞蛋糕","short_name":"芝巧","price_today":null,"price":20,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點,20元雞蛋糕"},{"id":"fp_19c7a45ebb7_f2df5b90_21","name":"花生巧克力","item":"雞蛋糕","short_name":"花巧","price_today":null,"price":20,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點,20元雞蛋糕"},{"id":"fp_19c7a45ebb7_c2871fef_22","name":"玉米濃湯","item":"雞蛋糕","short_name":"濃","price_today":null,"price":20,"price_default":null,"sell_price":null,"tags_csv":"集點,12份折1份,滿60元1點,20元雞蛋糕"},{"id":"fp_19c7a45ebb7_56d940fd_23","name":"餅乾1顆","item":"霜淇淋","short_name":"餅","price_today":null,"price":5,"price_default":null,"sell_price":null,"tags_csv":"集點,滿60元1點,餅乾3顆一份"},{"id":"fp_19c7a45ebb7_5795c186_24","name":"美式_內用","item":"咖啡","short_name":"美內","price_today":null,"price":35,"price_default":null,"sell_price":null,"tags_csv":"集點"},{"id":"fp_19c7a45ebb7_badcbb6c_25","name":"美式_外帶","item":"咖啡","short_name":"美外","price_today":null,"price":60,"price_default":null,"sell_price":null,"tags_csv":"集點"},{"id":"fp_19c7a45ebb7_050b9ebd_26","name":"美式_外帶自杯","item":"咖啡","short_name":"美自","price_today":null,"price":50,"price_default":null,"sell_price":null,"tags_csv":"集點"},{"id":"fp_19c7a45ebb7_116acc71_27","name":"拿鐵_內用","item":"咖啡","short_name":"拿內","price_today":null,"price":55,"price_default":null,"sell_price":null,"tags_csv":"集點"},{"id":"fp_19c7a45ebb7_0bfaa202_28","name":"萌翻拿鐵","item":"咖啡","short_name":"萌翻","price_today":null,"price":65,"price_default":null,"sell_price":null,"tags_csv":"集點"},{"id":"fp_19c7a45ebb7_edb4d269_29","name":"拿鐵_外帶","item":"咖啡","short_name":"拿外","price_today":null,"price":95,"price_default":null,"sell_price":null,"tags_csv":"集點"},{"id":"fp_19c7a45ebb7_74b5eb25_2a","name":"拿鐵_外帶自杯","item":"咖啡","short_name":"拿自","price_today":null,"price":85,"price_default":null,"sell_price":null,"tags_csv":"集點"},{"id":"fp_19c7a45ebb7_5e0e3991_2b","name":"不織布提網","item":"UBER包裝","short_name":"提網","price_today":null,"price":6,"price_default":null,"sell_price":null,"tags_csv":""},{"id":"fp_19c7a45ebb8_4b881a43_2c","name":"冬瓜茶_外","item":"UBER飲品","short_name":"冬_外","price_today":null,"price":30,"price_default":null,"sell_price":null,"tags_csv":""},{"id":"fp_19c7a45ebb8_5bf15854_2d","name":"燒仙草_外","item":"UBER飲品","short_name":"燒_外","price_today":null,"price":45,"price_default":null,"sell_price":null},{"id":"fp_19c7a45ebb8_e85163b0_2e","name":"純雞蛋糕","item":"UBER雞蛋糕","short_name":"純","price_today":null,"price":11.5,"price_default":null,"sell_price":null},{"id":"fp_19c7a45ebb8_bf46da98_2f","name":"巧克力","item":"UBER雞蛋糕","short_name":"巧","price_today":null,"price":16.5,"price_default":null,"sell_price":null},{"id":"fp_19c7a45ebb8_72fec8c6_30","name":"奶油","item":"UBER雞蛋糕","short_name":"奶","price_today":null,"price":16.5,"price_default":null,"sell_price":null},{"id":"fp_19c7a45ebb8_70946a7a_31","name":"鹹蛋黃","item":"UBER雞蛋糕","short_name":"鹹","price_today":null,"price":16.5,"price_default":null,"sell_price":null},{"id":"fp_19c7a45ebb8_bed38a82_32","name":"抹茶","item":"UBER雞蛋糕","short_name":"抹","price_today":null,"price":16.5,"price_default":null,"sell_price":null},{"id":"fp_19c7a45ebb8_0966db95_33","name":"紅豆","item":"UBER雞蛋糕","short_name":"紅","price_today":null,"price":16.5,"price_default":null,"sell_price":null},{"id":"fp_19c7a45ebb8_e040f0b4_34","name":"芝麻","item":"UBER雞蛋糕","short_name":"芝","price_today":null,"price":16.5,"price_default":null,"sell_price":null},{"id":"fp_19c7a45ebb8_31ed6f4a_35","name":"蒜香","item":"UBER雞蛋糕","short_name":"蒜","price_today":null,"price":16.5,"price_default":null,"sell_price":null},{"id":"fp_19c7a45ebb8_124ab17f_36","name":"梅子花生","item":"UBER雞蛋糕","short_name":"花","price_today":null,"price":16.5,"price_default":null,"sell_price":null},{"id":"fp_19c7a45ebb8_93d50299_37","name":"草莓","item":"UBER雞蛋糕","short_name":"莓","price_today":null,"price":16.5,"price_default":null,"sell_price":null},{"id":"fp_19c7a45ebb8_6316b1bb_38","name":"檬香","item":"UBER雞蛋糕","short_name":"檬","price_today":null,"price":16.5,"price_default":null,"sell_price":null},{"id":"fp_19c7a45ebb8_a1cc349b_39","name":"奶油鹹蛋","item":"UBER雞蛋糕","short_name":"奶鹹","price_today":null,"price":16.5,"price_default":null,"sell_price":null,"tags_csv":""},{"id":"fp_19c7a45ebb8_3431460c_3a","name":"雙色乳酪","item":"UBER雞蛋糕","short_name":"酪","price_today":null,"price":19,"price_default":null,"sell_price":null},{"id":"fp_19c7a45ebb8_a6862047_3b","name":"抹茶紅豆","item":"UBER雞蛋糕","short_name":"抹紅","price_today":null,"price":19,"price_default":null,"sell_price":null,"tags_csv":""},{"id":"fp_19c7a45ebb8_1c66f155_3c","name":"抹茶巧克力","item":"UBER雞蛋糕","short_name":"抹巧","price_today":null,"price":19,"price_default":null,"sell_price":null,"tags_csv":""},{"id":"fp_19c7a45ebb8_6d4daa12_3d","name":"芝麻巧克力","item":"UBER雞蛋糕","short_name":"芝巧","price_today":null,"price":19,"price_default":null,"sell_price":null,"tags_csv":""},{"id":"fp_19c7a45ebb8_a4914546_3e","name":"花生巧克力","item":"UBER雞蛋糕","short_name":"花巧","price_today":null,"price":19,"price_default":null,"sell_price":null,"tags_csv":""},{"id":"fp_19c7a45ebb8_911cd52b_3f","name":"玉米濃湯","item":"UBER雞蛋糕","short_name":"濃","price_today":null,"price":19,"price_default":null,"sell_price":null},{"id":"fp_19c7a45ebb8_ea6f3003_40","name":"美式_外","item":"UBER咖啡","short_name":"美外","price_today":null,"price":85,"price_default":null,"sell_price":null,"tags_csv":""},{"id":"fp_19c7a45ebb8_944229df_41","name":"拿鐵_外","item":"UBER咖啡","short_name":"拿外","price_today":null,"price":125,"price_default":null,"sell_price":null,"tags_csv":""}]</script><script id="wsDiscountsData" type="application/json">[{"name":"點卡","type":"coupon","is_active":true,"amount_threshold":0,"amount_discount_type":"amount","amount_discount_value":0,"amount_discount_raw":"","amount_discount":0,"qty_threshold":0,"qty_discount":0,"bundle_count":0,"bundle_price":0,"coupon_mode":"full","coupon_max_qty":null,"coupon_amount":0,"note1_targets":["10元雞蛋糕","15元雞蛋糕","20元雞蛋糕"],"note2_targets":[],"pt_full_count":0,"pt_stage1_type":"amount","pt_stage1_threshold":0,"pt_stage1_give":0,"pt_stage2_type":"amount","pt_stage2_threshold":0,"pt_stage2_multiplier":0,"pt_synergy":[],"note":"滿點的集點卡可兌換雞蛋糕1份。","applicable":true,"id":"d_mlue9iqr_r5pnk6"},{"name":"12折1","type":"qty","is_active":false,"amount_threshold":0,"amount_discount_type":"amount","amount_discount_value":0,"amount_discount_raw":"","amount_discount":0,"qty_threshold":12,"qty_discount":1,"bundle_count":0,"bundle_price":0,"coupon_mode":"full","coupon_max_qty":null,"coupon_amount":0,"note1_targets":["12份折1份"],"note2_targets":[],"pt_full_count":0,"pt_stage1_type":"amount","pt_stage1_threshold":0,"pt_stage1_give":0,"pt_stage2_type":"amount","pt_stage2_threshold":0,"pt_stage2_multiplier":0,"pt_synergy":[],"note":"滿12份的折1份，不包含咖啡。","applicable":true,"id":"d_mlue9iqr_n3m385"},{"name":"純","type":"bundle_qty","is_active":false,"amount_threshold":0,"amount_discount_type":"amount","amount_discount_value":0,"amount_discount_raw":"","amount_discount":0,"qty_threshold":0,"qty_discount":0,"bundle_count":2,"bundle_price":20,"coupon_mode":"full","coupon_max_qty":null,"coupon_amount":0,"note1_targets":[],"note2_targets":["10元雞蛋糕"],"pt_full_count":0,"pt_stage1_type":"amount","pt_stage1_threshold":0,"pt_stage1_give":0,"pt_stage2_type":"amount","pt_stage2_threshold":0,"pt_stage2_multiplier":0,"pt_synergy":[],"note":"","applicable":true,"id":"d_mlue9iqr_xhbv97"},{"name":"純+單","type":"bundle_qty","is_active":false,"amount_threshold":0,"amount_discount_type":"amount","amount_discount_value":0,"amount_discount_raw":"","amount_discount":0,"qty_threshold":0,"qty_discount":0,"bundle_count":2,"bundle_price":25,"coupon_mode":"full","coupon_max_qty":null,"coupon_amount":0,"note1_targets":[],"note2_targets":["10元雞蛋糕","15元雞蛋糕"],"pt_full_count":0,"pt_stage1_type":"amount","pt_stage1_threshold":0,"pt_stage1_give":0,"pt_stage2_type":"amount","pt_stage2_threshold":0,"pt_stage2_multiplier":0,"pt_synergy":[],"note":"","applicable":true,"id":"d_mlue9iqr_1vqenp"},{"name":"單","type":"bundle_qty","is_active":false,"amount_threshold":0,"amount_discount_type":"amount","amount_discount_value":0,"amount_discount_raw":"","amount_discount":0,"qty_threshold":0,"qty_discount":0,"bundle_count":2,"bundle_price":30,"coupon_mode":"full","coupon_max_qty":null,"coupon_amount":0,"note1_targets":[],"note2_targets":["15元雞蛋糕"],"pt_full_count":0,"pt_stage1_type":"amount","pt_stage1_threshold":0,"pt_stage1_give":0,"pt_stage2_type":"amount","pt_stage2_threshold":0,"pt_stage2_multiplier":0,"pt_synergy":[],"note":"","applicable":true,"id":"d_mlue9iqr_vgj7wj"},{"name":"雙","type":"bundle_qty","is_active":false,"amount_threshold":0,"amount_discount_type":"amount","amount_discount_value":0,"amount_discount_raw":"","amount_discount":0,"qty_threshold":0,"qty_discount":0,"bundle_count":2,"bundle_price":35,"coupon_mode":"full","coupon_max_qty":null,"coupon_amount":0,"note1_targets":[],"note2_targets":["20元雞蛋糕"],"pt_full_count":0,"pt_stage1_type":"amount","pt_stage1_threshold":0,"pt_stage1_give":0,"pt_stage2_type":"amount","pt_stage2_threshold":0,"pt_stage2_multiplier":0,"pt_synergy":[],"note":"","applicable":true,"id":"d_mlue9iqr_tjfngb"},{"name":"純+雙","type":"bundle_qty","is_active":false,"amount_threshold":0,"amount_discount_type":"amount","amount_discount_value":0,"amount_discount_raw":"","amount_discount":0,"qty_threshold":0,"qty_discount":0,"bundle_count":2,"bundle_price":30,"coupon_mode":"full","coupon_max_qty":null,"coupon_amount":0,"note1_targets":[],"note2_targets":["10元雞蛋糕","20元雞蛋糕"],"pt_full_count":0,"pt_stage1_type":"amount","pt_stage1_threshold":0,"pt_stage1_give":0,"pt_stage2_type":"amount","pt_stage2_threshold":0,"pt_stage2_multiplier":0,"pt_synergy":[],"note":"","applicable":true,"id":"d_mlue9iqr_171wcz"},{"name":"單+雙","type":"bundle_qty","is_active":false,"amount_threshold":0,"amount_discount_type":"amount","amount_discount_value":0,"amount_discount_raw":"","amount_discount":0,"qty_threshold":0,"qty_discount":0,"bundle_count":2,"bundle_price":35,"coupon_mode":"full","coupon_max_qty":null,"coupon_amount":0,"note1_targets":[],"note2_targets":["15元雞蛋糕","20元雞蛋糕"],"pt_full_count":0,"pt_stage1_type":"amount","pt_stage1_threshold":0,"pt_stage1_give":0,"pt_stage2_type":"amount","pt_stage2_threshold":0,"pt_stage2_multiplier":0,"pt_synergy":[],"note":"","applicable":true,"id":"d_mlue9iqr_mnkdtt"},{"name":"餅","type":"bundle_qty","is_active":false,"amount_threshold":0,"amount_discount_type":"amount","amount_discount_value":0,"amount_discount_raw":"","amount_discount":0,"qty_threshold":0,"qty_discount":0,"bundle_count":3,"bundle_price":15,"coupon_mode":"full","coupon_max_qty":null,"coupon_amount":0,"note1_targets":[],"note2_targets":["餅乾3顆一份"],"pt_full_count":0,"pt_stage1_type":"amount","pt_stage1_threshold":0,"pt_stage1_give":0,"pt_stage2_type":"amount","pt_stage2_threshold":0,"pt_stage2_multiplier":0,"pt_synergy":[],"note":"","applicable":true,"id":"d_mlue9iqr_em3cim"},{"name":"集點","type":"points","is_active":false,"amount_threshold":0,"amount_discount_type":"amount","amount_discount_value":0,"amount_discount_raw":"","amount_discount":0,"qty_threshold":0,"qty_discount":0,"bundle_count":0,"bundle_price":0,"coupon_mode":"full","coupon_max_qty":null,"coupon_amount":0,"note1_targets":["集點"],"note2_targets":[],"pt_full_count":10,"pt_stage1_type":"amount","pt_stage1_threshold":60,"pt_stage1_give":1,"pt_stage2_type":"qty","pt_stage2_threshold":6,"pt_stage2_multiplier":2,"pt_synergy":[{"discount_index":1,"give_points":1}],"note":"滿60元1點；滿6份點數雙倍；滿12份折1份，點數1點。滿12份前點數最高9點。","applicable":true,"id":"d_mlue9iqr_xfkmff"}]</script><script id="wsDiscountApplyOrderData" type="application/json">["d_mlue9iqr_tjfngb","d_mlue9iqr_vgj7wj","d_mlue9iqr_xhbv97","d_mlue9iqr_mnkdtt","d_mlue9iqr_171wcz","d_mlue9iqr_1vqenp","d_mlue9iqr_em3cim","d_mlue9iqr_r5pnk6","d_mlue9iqr_n3m385","d_mlue9iqr_xfkmff"]</script><script id="wsFpEnhanceScript">
         (function(){
           let tip = null;
           function ensureTip(){
